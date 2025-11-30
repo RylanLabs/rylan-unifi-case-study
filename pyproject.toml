@@ -1,10 +1,6 @@
-[tool.pytest.ini_options]
-minversion = "7.4"
-addopts = "-ra --strict-markers"
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
+[build-system]
+requires = ["setuptools>=70.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "rylan-unifi-case-study"
@@ -17,6 +13,21 @@ dependencies = [
 	"pydantic>=2.6.0,<3",
 	"deepdiff>=6.0.0,<7"
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["shared*", "rylan_ai_helpdesk*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.json", "*.sh", "*.md"]
+
+[tool.pytest.ini_options]
+minversion = "7.4"
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
 
 [tool.ruff]
 line-length = 100
