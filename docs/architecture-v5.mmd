@@ -1,0 +1,175 @@
+# Mermaid Architecture Diagram - rylan-unifi-case-study v5.0
+# Production network with AI-augmented helpdesk (December 2025)
+#
+# Render with:
+#   - Mermaid Live Editor: https://mermaid.live
+#   - VSCode extension: Markdown Preview Mermaid Support
+#   - GitHub markdown (native support)
+#   - CLI: mmdc -i architecture-v5.mmd -o architecture-v5.png
+
+graph TB
+    %% Styling
+    classDef gateway fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    classDef server fill:#4c6ef5,stroke:#364fc7,color:#fff
+    classDef device fill:#51cf66,stroke:#2f9e44,color:#fff
+    classDef vlan fill:#ffd43b,stroke:#f59f00,color:#000
+    classDef external fill:#868e96,stroke:#495057,color:#fff
+    
+    %% External
+    Internet[Internet<br/>Cable Modem]
+    
+    %% Gateway
+    USG[USG-3P Gateway<br/>10.0.1.1<br/>UniFi 8.5.93<br/>Policy Table v5]
+    
+    %% Management VLAN 1
+    subgraph VLAN1[VLAN 1 - Management<br/>10.0.1.0/24]
+        Controller[UniFi Controller<br/>10.0.1.1:8443]
+        Switch[UniFi Switch<br/>10.0.1.2<br/>Trunk to all VLANs]
+    end
+    
+    %% Server VLAN 10
+    subgraph VLAN10[VLAN 10 - Servers<br/>10.0.10.0/24]
+        ADDS[Samba AD DC<br/>10.0.10.10<br/>i5 16GB<br/>---<br/>AD/DNS/NFS<br/>InfluxDB]
+        AIWork[AI Workstation<br/>10.0.10.60<br/>2-3x RX 6700 XT<br/>---<br/>Ollama Llama 3.3 70B<br/>Qdrant Vector DB<br/>Triage Engine :8000]
+    end
+    
+    %% Trusted Devices VLAN 30
+    subgraph VLAN30[VLAN 30 - Trusted Devices<br/>10.0.30.0/24]
+        RPi[Raspberry Pi 5 8GB<br/>10.0.30.40<br/>---<br/>osTicket<br/>MariaDB]
+        Workstations[User Workstations<br/>10.0.30.50+]
+    end
+    
+    %% VoIP VLAN 40
+    subgraph VLAN40[VLAN 40 - VoIP<br/>10.0.40.0/24]
+        Phones[IP Phones<br/>10.0.40.50+<br/>---<br/>DSCP EF/46<br/>QoS Priority]
+    end
+    
+    %% Guest/IoT VLAN 90
+    subgraph VLAN90[VLAN 90 - Guest/IoT<br/>10.0.90.0/24]
+        Guest[Guest Devices<br/>Internet Only<br/>Zero Trust]
+    end
+    
+    %% Connections
+    Internet -->|WAN| USG
+    USG -->|eth1 trunk| Switch
+    
+    Switch -.->|VLAN 1| Controller
+    Switch -.->|VLAN 10| ADDS
+    Switch -.->|VLAN 10| AIWork
+    Switch -.->|VLAN 30| RPi
+    Switch -.->|VLAN 30| Workstations
+    Switch -.->|VLAN 40| Phones
+    Switch -.->|VLAN 90| Guest
+    
+    %% Service Interactions
+    AIWork -->|HTTP API<br/>Triage requests| RPi
+    RPi -->|LDAP Auth<br/>389/636| ADDS
+    RPi -->|Ticket Events<br/>Webhook| AIWork
+    ADDS -->|Metrics<br/>InfluxDB| Controller
+    
+    %% Policy Table Rules (simplified)
+    USG -.->|Policy Table<br/>14 rules| VLAN10
+    USG -.->|Allow explicit<br/>paths| VLAN30
+    USG -.->|Deny Guest<br/>to RFC1918| VLAN90
+    
+    %% Apply styles
+    class USG gateway
+    class ADDS,AIWork server
+    class RPi,Workstations,Phones device
+    class Internet external
+    class VLAN1,VLAN10,VLAN30,VLAN40,VLAN90 vlan
+
+---
+
+# Alternative Detailed View: Data Flow
+
+graph LR
+    %% Ticket Flow
+    User[End User] -->|Submit Ticket| osTicket[osTicket<br/>10.0.30.40]
+    osTicket -->|Webhook Event| TriageAPI[Triage Engine<br/>10.0.10.60:8000]
+    TriageAPI -->|1. Redact PII| Presidio[Presidio<br/>Analyzer]
+    Presidio -->|2. Redacted Text| Ollama[Ollama<br/>Llama 3.3 70B]
+    Ollama -->|3. Classification<br/>Confidence Score| Decision{Confidence<br/>≥ 0.93?}
+    Decision -->|Yes| AutoClose[Auto-Close<br/>Ticket]
+    Decision -->|No| HumanReview[Assign to<br/>Human Agent]
+    AutoClose -->|Update Status| osTicket
+    HumanReview -->|Queue| osTicket
+    
+    %% Auth Flow
+    osTicket -->|LDAP Query| AD[Samba AD DC<br/>10.0.10.10:389]
+    AD -->|User Info| osTicket
+    
+    %% Monitoring Flow
+    TriageAPI -->|Metrics| Prometheus[Prometheus<br/>/metrics endpoint]
+    AD -->|Network Stats| InfluxDB[InfluxDB<br/>10.0.10.10:8086]
+    InfluxDB -->|Dashboards| Grafana[Grafana<br/>Visualization]
+
+---
+
+# Network Topology (Physical)
+
+graph TB
+    subgraph Physical[Physical Layer]
+        Modem[Cable Modem<br/>ISP Connection]
+        USGDevice[USG-3P<br/>eth0: WAN<br/>eth1: LAN Trunk]
+        SwitchDevice[UniFi Switch<br/>24-port PoE]
+        
+        Server1[Samba AD DC<br/>Physical Server<br/>i5 16GB]
+        Server2[AI Workstation<br/>Physical Server<br/>2-3x RX 6700 XT]
+        Device1[Raspberry Pi 5<br/>8GB RAM]
+        
+        Modem --> USGDevice
+        USGDevice -->|Trunk<br/>802.1Q| SwitchDevice
+        
+        SwitchDevice -->|Port 1<br/>VLAN 10| Server1
+        SwitchDevice -->|Port 2<br/>VLAN 10| Server2
+        SwitchDevice -->|Port 3<br/>VLAN 30| Device1
+        SwitchDevice -->|Ports 4-12<br/>Access Ports| AccessPorts[VLANs 30/40/90]
+    end
+
+---
+
+# Security Model (Zero Trust)
+
+graph TD
+    subgraph PolicyTable[Policy Table v5 - Zero Trust Model]
+        Rule1[Rule 1: Mgmt → All<br/>ACCEPT]
+        Rule2[Rule 2: Servers → Mgmt<br/>ACCEPT :8443,8080]
+        Rule3[Rule 3: Servers → Trusted<br/>ACCEPT :80,443,3306]
+        Rule4[Rule 4: Trusted → Servers<br/>ACCEPT :389,636,445,8086]
+        Rule9[Rule 9: All → DNS<br/>ACCEPT 10.0.10.10:53]
+        Rule11[Rule 11: Guest → RFC1918<br/>DROP + LOG]
+        Rule14[Rule 14: Inter-VLAN<br/>Implicit DENY + LOG]
+    end
+    
+    Rule1 -->|Admin Access| AllVLANs[All VLANs]
+    Rule11 -->|Isolation| GuestVLAN[VLAN 90]
+    Rule14 -->|Default Deny| InterVLAN[Inter-VLAN Traffic]
+    
+    Rule3 -.->|AI Triage API| osTicket
+    Rule4 -.->|LDAP Auth| ADDS
+    Rule9 -.->|DNS Resolution| ADDS
+
+---
+
+# Deployment Pipeline
+
+graph LR
+    Dev[Developer] -->|Git Push| GitHub[GitHub Repo<br/>rylan-unifi-case-study]
+    GitHub -->|Trigger| CI[GitHub Actions<br/>ci-validate.yaml]
+    CI -->|Validate| Checks{Checks}
+    Checks -->|Rule Count| RuleCheck[<15 rules?]
+    Checks -->|Schema| SchemaCheck[Valid JSON/YAML?]
+    Checks -->|Syntax| SyntaxCheck[Python syntax OK?]
+    
+    RuleCheck -->|Pass| Deploy[Deploy Stage]
+    SchemaCheck -->|Pass| Deploy
+    SyntaxCheck -->|Pass| Deploy
+    
+    Deploy -->|Dry-Run| DryRun[apply.py --dry-run]
+    DryRun -->|Manual Review| Approve{Approve?}
+    Approve -->|Yes| Apply[apply.py --apply]
+    Approve -->|No| Rollback[Git Revert]
+    
+    Apply -->|Update| UniFiController[UniFi Controller<br/>10.0.1.1]
+    UniFiController -->|Provision| NetworkDevices[USG + Switches]

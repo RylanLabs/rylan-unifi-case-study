@@ -1,0 +1,28 @@
+# AI Helpdesk Triage Engine Dependencies
+# Production versions for December 2025 deployment
+
+# FastAPI framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+httpx==0.28.1
+
+# PII Redaction (Microsoft Presidio)
+presidio-analyzer==2.2.355
+presidio-anonymizer==2.2.355
+spacy==3.8.2
+
+# NLP model for Presidio (must be downloaded separately)
+# python -m spacy download en_core_web_lg
+
+# HTTP client for Ollama
+aiohttp==3.11.10
+
+# Optional: Qdrant vector DB client (for semantic search)
+qdrant-client==1.12.1
+
+# Logging and monitoring
+python-json-logger==3.2.1
+
+# Type hints
+typing-extensions==4.12.2

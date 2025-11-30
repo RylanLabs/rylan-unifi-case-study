@@ -1,0 +1,142 @@
+# Hardware and Service Inventory
+# Single source of truth for rylan-unifi-case-study production network
+# December 2025 deployment
+
+# UniFi Controller
+unifi_controller:
+  url: "https://10.0.1.1:8443"
+  username: "admin"  # UPDATE: Replace with actual admin username
+  password: ""       # UPDATE: Replace with actual password (no 2FA)
+  site: "default"
+  version: "8.5.93"
+
+# Network Hardware
+network_devices:
+  - name: "USG-3P"
+    type: "gateway"
+    model: "USG-3P"
+    ip: "10.0.1.1"
+    mac: ""  # UPDATE: Replace with actual MAC
+    vlan: 1
+    role: "Router/Firewall"
+    notes: "UniFi 8.5.93, hardware offload enabled, Policy Table v5"
+    
+  - name: "UniFi-Switch-Main"
+    type: "switch"
+    model: "US-24-250W"  # UPDATE: Replace with actual model
+    ip: "10.0.1.2"
+    mac: ""  # UPDATE: Replace with actual MAC
+    vlan: 1
+    role: "Core Switch"
+    notes: "Trunk port to USG, access ports to all VLANs"
+
+# Servers (VLAN 10)
+servers:
+  - name: "samba-ad-dc"
+    ip: "10.0.10.10"
+    mac: ""  # UPDATE: Replace with actual MAC
+    vlan: 10
+    hardware:
+      cpu: "Intel Core i5"
+      ram: "16GB"
+      storage: "500GB SSD"
+      notes: "No HyperThreading"
+    services:
+      - "Samba Active Directory Domain Controller"
+      - "DNS (primary for all VLANs)"
+      - "NFS file server"
+      - "InfluxDB metrics database"
+    os: "Ubuntu Server 22.04 LTS"
+    
+  - name: "ai-workstation"
+    ip: "10.0.10.60"
+    mac: ""  # UPDATE: Replace with actual MAC
+    vlan: 10
+    hardware:
+      cpu: "AMD Ryzen 9"
+      ram: "64GB"
+      gpu: "2-3x AMD Radeon RX 6700 XT (12GB each)"
+      storage: "2TB NVMe SSD"
+    services:
+      - "Ollama (Llama 3.3 70B)"
+      - "Qdrant vector database"
+      - "AI Triage Engine (FastAPI, port 8000)"
+    os: "Ubuntu Server 22.04 LTS"
+    docker: true
+
+# Trusted Devices (VLAN 30)
+trusted_devices:
+  - name: "rpi5-osticket"
+    ip: "10.0.30.40"
+    mac: ""  # UPDATE: Replace with actual MAC
+    vlan: 30
+    hardware:
+      model: "Raspberry Pi 5"
+      ram: "8GB"
+      storage: "256GB microSD"
+    services:
+      - "osTicket helpdesk (HTTP/HTTPS)"
+      - "MariaDB 10.x"
+    os: "Raspberry Pi OS (64-bit)"
+    notes: "osTicket sends events to AI triage engine on 10.0.10.60:8000"
+
+# VLANs
+vlans:
+  - id: 1
+    name: "Management"
+    subnet: "10.0.1.0/24"
+    gateway: "10.0.1.1"
+    purpose: "UniFi devices, network management"
+    
+  - id: 10
+    name: "Servers"
+    subnet: "10.0.10.0/24"
+    gateway: "10.0.10.1"
+    purpose: "Samba AD, AI workstation, InfluxDB"
+    
+  - id: 30
+    name: "Trusted-Devices"
+    subnet: "10.0.30.0/24"
+    gateway: "10.0.30.1"
+    purpose: "osTicket, workstations, trusted endpoints"
+    
+  - id: 40
+    name: "VoIP"
+    subnet: "10.0.40.0/24"
+    gateway: "10.0.40.1"
+    purpose: "IP phones with QoS (DSCP EF/46)"
+    
+  - id: 90
+    name: "Guest-IoT"
+    subnet: "10.0.90.0/24"
+    gateway: "10.0.90.1"
+    purpose: "Guest devices and untrusted IoT (internet-only)"
+
+# DNS Configuration
+dns:
+  primary: "10.0.10.10"  # Samba AD DC
+  secondary: "1.1.1.1"   # Cloudflare
+  domain: "rylan.local"
+
+# Service Endpoints
+service_endpoints:
+  unifi_controller: "https://10.0.1.1:8443"
+  osticket: "http://10.0.30.40"
+  ai_triage_engine: "http://10.0.10.60:8000"
+  influxdb: "http://10.0.10.10:8086"
+  ollama: "http://10.0.10.60:11434"
+  qdrant: "http://10.0.10.60:6333"
+
+# Credentials (for automation scripts)
+# SECURITY: Store sensitive credentials in environment variables or secrets management
+credentials:
+  osticket_api_key: ""  # UPDATE: Replace with actual API key
+  influxdb_token: ""    # UPDATE: Replace with actual token
+  
+# Notes
+notes:
+  - "Update all MAC addresses with actual hardware MACs"
+  - "Update credentials before running automation scripts"
+  - "Store this file securely (contains network topology)"
+  - "Policy Table v5 controls inter-VLAN routing (see policy-table-rylan-v5.json)"
+  - "Hardware offload preserved on USG-3P (verified via mca-dump)"
