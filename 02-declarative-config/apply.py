@@ -178,11 +178,69 @@ def reconcile(desired: VLANState, client: UniFiClient, dry_run: bool) -> None:
     print("Apply complete. Proceed to configure policy routes & QoS via UI.")
 
 
+def load_yaml(path: Path) -> Dict[str, Any]:
+    with path.open('r', encoding='utf-8') as f:
+        return yaml.safe_load(f) or {}
+
+
+def apply_policy_table(client: UniFiClient, dry_run: bool, site: str) -> None:
+    path = BASE_DIR / 'policy-table.yaml'
+    data = load_yaml(path)
+    rules = data.get('rules', [])
+    if len(rules) > 15:
+        raise ValueError('USG-3P offload limit: policy rules must be <= 15')
+
+    current = client.get_policy_table()
+    desired = {"rules": rules}
+    if DeepDiff:
+        diff = DeepDiff(current, desired, ignore_order=True)
+    else:
+        diff = {} if current == desired else {"changed": "Install deepdiff for detailed diff"}
+
+    print("Policy Table Plan:")
+    if diff:
+        print(json.dumps(diff, indent=2))
+    else:
+        print("  No changes detected")
+
+    if dry_run:
+        print("Dry-run: policy not applied")
+        return
+
+    client.update_policy_table(desired)
+    print("  ✅ Policy table applied")
+
+
+def apply_qos(client: UniFiClient, dry_run: bool, site: str) -> None:
+    path = BASE_DIR / 'qos-smartqueue.yaml'
+    data = load_yaml(path)
+    current = client.get_traffic_mgmt()
+    desired = data
+    if DeepDiff:
+        diff = DeepDiff(current, desired, ignore_order=True)
+    else:
+        diff = {} if current == desired else {"changed": "Install deepdiff for detailed diff"}
+
+    print("QoS Plan:")
+    if diff:
+        print(json.dumps(diff, indent=2))
+    else:
+        print("  No changes detected")
+
+    if dry_run:
+        print("Dry-run: QoS not applied")
+        return
+
+    client.update_traffic_mgmt(desired)
+    print("  ✅ QoS Smart Queue applied")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="UniFi VLAN reconciler")
     ap.add_argument('--config', default='vlans.yaml', help='Path to vlans YAML')
     ap.add_argument('--site', default='default', help='UniFi site name')
     ap.add_argument('--dry-run', action='store_true', help='Show plan only')
+    ap.add_argument('--apply', action='store_true', help='Apply changes')
     args = ap.parse_args()
 
     path = BASE_DIR / args.config
@@ -199,7 +257,10 @@ def main() -> None:
         print(f"❌ Authentication failed: {e}")
         sys.exit(1)
 
-    reconcile(state, client, args.dry_run)
+    dry = args.dry_run and not args.apply
+    reconcile(state, client, dry)
+    apply_policy_table(client, dry, args.site)
+    apply_qos(client, dry, args.site)
 
 
 if __name__ == '__main__':

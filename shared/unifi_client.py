@@ -38,5 +38,40 @@ class UniFiClient:
         r.raise_for_status()
         return r.json()
 
+    # Policy table endpoints (community-documented)
+    def get_policy_table(self) -> Dict[str, Any]:
+        r = self.session.get(self._url('rest/routingpolicy'), verify=False)
+        r.raise_for_status()
+        data = r.json().get('data', [])
+        return data[0] if data else {"rules": []}
+
+    def update_policy_table(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        # Some controllers require PUT to existing policy id; fall back to POST when none
+        current = self.get_policy_table()
+        policy_id = current.get('_id')
+        if policy_id:
+            r = self.session.put(self._url(f"rest/routingpolicy/{policy_id}"), json=payload, verify=False)
+        else:
+            r = self.session.post(self._url('rest/routingpolicy'), json=payload, verify=False)
+        r.raise_for_status()
+        return r.json()
+
+    # Traffic management / QoS endpoints (community-documented)
+    def get_traffic_mgmt(self) -> Dict[str, Any]:
+        r = self.session.get(self._url('rest/trafficmgmt'), verify=False)
+        r.raise_for_status()
+        data = r.json().get('data', [])
+        return data[0] if data else {}
+
+    def update_traffic_mgmt(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        current = self.get_traffic_mgmt()
+        tm_id = current.get('_id')
+        if tm_id:
+            r = self.session.put(self._url(f"rest/trafficmgmt/{tm_id}"), json=payload, verify=False)
+        else:
+            r = self.session.post(self._url('rest/trafficmgmt'), json=payload, verify=False)
+        r.raise_for_status()
+        return r.json()
+
 
 __all__ = ["UniFiClient"]

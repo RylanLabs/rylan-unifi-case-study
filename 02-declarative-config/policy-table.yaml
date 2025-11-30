@@ -1,45 +1,43 @@
-# policy-table.yaml - Zero-trust 7 rule set
 rules:
   - id: 1
-    description: "Management → Everywhere (controller + SSH)"
-    source: { network: "Management" }
-    destination: { type: "any" }
-    action: accept
-    ports: ["22","443","8443","161"]
+    name: allow-management-to-all
+    source: Management
+    destination: any
+    action: allow
+    ports: [22, 80, 443]
   - id: 2
-    description: "trusted-devices → servers (DNS, AD, NFS, Influx)"
-    source: { network: "trusted-devices" }
-    destination: { network: "servers" }
-    action: accept
-    ports: ["53","88","389","636","2049","8086"]
+    name: allow-trusted-to-servers
+    source: TrustedDevices
+    destination: Servers
+    action: allow
+    ports: [22, 80, 443]
   - id: 3
-    description: "trusted-devices → voip (SIP + RTP)"
-    source: { network: "trusted-devices" }
-    destination: { network: "voip" }
-    action: accept
-    ports: ["5060-5061","10000-20000"]
+    name: allow-voip-signaling
+    source: VoIP
+    destination: any
+    action: allow
+    ports: [5060, 5061]
   - id: 4
-    description: "servers → osTicket (AI triage polling)"
-    source: { network: "servers", address: "10.0.10.60" }
-    destination: { address: "10.0.30.40", ports: ["80","443"] }
-    action: accept
+    name: allow-voip-rtp
+    source: VoIP
+    destination: any
+    action: allow
+    ports_range:
+      start: 10000
+      end: 20000
   - id: 5
-    description: "voip → servers (FreePBX → AD auth)"
-    source: { network: "voip" }
-    destination: { network: "servers", ports: ["389","636"] }
-    action: accept
-  - id: 6
-    description: "guest-iot → WAN only (block local)"
-    source: { network: "guest-iot" }
-    destination: { type: "internet" }
-    action: accept
-  - id: 7
-    description: "guest-iot → local (drop everything else)"
-    source: { network: "guest-iot" }
-    destination: { type: "local" }
+    name: block-guestiot-to-lan
+    source: GuestIoT
+    destination: [Management, Servers, TrustedDevices]
     action: drop
-metadata:
-  version: "v5.0"
-  max_rules: 15
-  rule_count: 7
-  hardware_offload: true
+  - id: 6
+    name: allow-guestiot-to-internet
+    source: GuestIoT
+    destination: internet
+    action: allow
+    ports: [80, 443]
+  - id: 7
+    name: default-drop-local
+    source: any
+    destination: local
+    action: drop

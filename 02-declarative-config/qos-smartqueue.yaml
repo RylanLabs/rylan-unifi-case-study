@@ -1,21 +1,15 @@
-# qos-smartqueue.yaml - VoIP EF (DSCP 46) Smart Queue profile
-smartqueue:
-  name: voip-priority
+smart_queue:
   wan_interface: eth0
-  upload_rate: 100m
-  dscp_mark: 46
-  priority: 7
-  match:
-    - description: "RTP media"
-      protocol: udp
-      source_subnet: 10.0.40.0/27
-      dest_port_range: 10000-20000
-      dscp: 46
-    - description: "SIP signalling"
-      protocol: udp
-      source_subnet: 10.0.40.0/27
-      dest_port_range: 5060-5061
-      dscp: 46
-metadata:
-  version: v5.0
-  qos_strategy: "EF for VoIP packets, AF41 fallback not used"
+  enabled: true
+  uplink_mbps: 100
+  downlink_mbps: 100
+  scheduler: fq_codel
+  dscp_marking:
+    ef:
+      codepoint: 46
+      enabled: true
+  flows:
+    - name: voip-ef
+      match:
+        dscp: 46
+      priority: high
