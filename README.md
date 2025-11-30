@@ -216,3 +216,60 @@ MIT License - see LICENSE file for details
 **Last Updated**: December 2025  
 **Maintained by**: hellodeolu-era systems architecture team
 
+## 📌 Current Real Status vs Roadmap
+
+**Implemented (Git-controlled):**
+- Bootstrap: controller install, device adoption, VLAN stubs
+- Declarative VLANs: `vlans.yaml` reconciled via new `apply.py`
+- Zero-Trust Definitions: `policy-table.yaml` (manual GUI apply)
+- QoS Smart Queue Spec: `qos-smartqueue.yaml` (manual GUI apply)
+- AI Helpdesk: triage engine + webhook, unit tests
+- Shared Utilities: `shared/auth.py`, `shared/unifi_client.py`
+- Ops Tooling: isolation + SIP health + backup scripts
+- Docs: ADR, migration runbook, DR drill, operations guide, troubleshooting
+
+**Pending / Manual Steps:**
+- Policy route API automation (future endpoint research)
+- Smart Queue DSCP EF application (controller UI)
+- CI workflow for validation-ops (`validate-isolation.sh`, `phone-reg-test.py`)
+- Periodic backup verification in pipeline
+
+## 🔧 Validation & Ops
+
+Run isolation checks:
+```bash
+bash 03-validation-ops/validate-isolation.sh
+```
+
+Check SIP registrations (placeholder API expected):
+```bash
+python 03-validation-ops/phone-reg-test.py
+```
+
+Create backups (invoke or schedule):
+```bash
+BACKUP_DEST=/var/backups/rylan bash 03-validation-ops/backup-cron.sh
+```
+
+## 🚀 Ignite Sequence (Manual Orchestration)
+```bash
+# 1. Bootstrap (if fresh host)
+bash 01-bootstrap/install-unifi-controller.sh
+python 01-bootstrap/adopt-devices.py
+
+# 2. Declarative apply (dry-run then apply)
+python 02-declarative-config/apply.py --dry-run
+python 02-declarative-config/apply.py
+
+# 3. GUI tasks
+#   - Policy Routes: replicate policy-table.yaml
+#   - QoS Smart Queue: replicate qos-smartqueue.yaml
+
+# 4. Validation
+bash 03-validation-ops/validate-isolation.sh
+python 03-validation-ops/phone-reg-test.py
+
+# 5. Backup
+BACKUP_DEST=/var/backups/rylan bash 03-validation-ops/backup-cron.sh
+```
+

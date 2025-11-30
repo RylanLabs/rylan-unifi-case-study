@@ -6,26 +6,44 @@ vlans:
     purpose: UniFi devices + controller
     devices: [USG-3P, U6-LR, USW-Lite-8-PoE, controller@10.0.1.20]
   - id: 10
-    name: servers
-    subnet: 10.0.10.0/26
-    gateway: 10.0.10.1
-    purpose: Infrastructure
-    devices: [rylan-dc@10.0.10.10, AI@10.0.10.60, InfluxDB@10.0.10.50]
-  - id: 30
-    name: trusted-devices
-    subnet: 10.0.30.0/24
-    gateway: 10.0.30.1
-    purpose: Workstations + osTicket
-    devices: [Laptops, Pi5@10.0.30.40]
-  - id: 40
-    name: voip
-    subnet: 10.0.40.0/27
-    gateway: 10.0.40.1
-    purpose: VoIP only
-    devices: [FreePBX@10.0.40.30, Grandstream phones]
-  - id: 90
-    name: guest-iot
-    subnet: 10.0.90.0/25
-    gateway: 10.0.90.1
-    purpose: Guest + IoT
-    devices: [Guest SSID, smart bulbs, printers]
+    vlans:
+      - id: 1
+        name: Management
+        subnet: 10.0.1.0/27
+        gateway: 10.0.1.1
+        dhcp_enabled: true
+        dhcp_start: 10.0.1.6
+        dhcp_end: 10.0.1.26
+        dns_servers: ["1.1.1.1", "1.0.0.1"]
+      - id: 10
+        name: Servers
+        subnet: 10.0.10.0/26
+        gateway: 10.0.10.1
+        dhcp_enabled: true
+        dhcp_start: 10.0.10.10
+        dhcp_end: 10.0.10.62
+        dns_servers: ["1.1.1.1", "1.0.0.1"]
+      - id: 30
+        name: TrustedDevices
+        subnet: 10.0.30.0/24
+        gateway: 10.0.30.1
+        dhcp_enabled: true
+        dhcp_start: 10.0.30.10
+        dhcp_end: 10.0.30.250
+        dns_servers: ["1.1.1.1", "1.0.0.1"]
+      - id: 40
+        name: VoIP
+        subnet: 10.0.40.0/27
+        gateway: 10.0.40.1
+        dhcp_enabled: true
+        dhcp_start: 10.0.40.10
+        dhcp_end: 10.0.40.26
+        dns_servers: ["1.1.1.1", "1.0.0.1"]
+      - id: 90
+        name: GuestIoT
+        subnet: 10.0.90.0/25
+        gateway: 10.0.90.1
+        dhcp_enabled: true
+        dhcp_start: 10.0.90.10
+        dhcp_end: 10.0.90.120
+        dns_servers: ["1.1.1.1", "1.0.0.1"]
