@@ -1,150 +1,31 @@
-# VLANs Configuration for rylan-unifi-case-study
-# Production network VLAN definitions (December 2025)
-#
-# Applied via: python 02-declarative-config/apply.py --vlans-only
-
 vlans:
-  # VLAN 1: Management (default)
   - id: 1
-    name: "Management"
-    subnet: "10.0.1.0/24"
-    gateway: "10.0.1.1"
-    dhcp_enabled: true
-    dhcp_start: "10.0.1.100"
-    dhcp_end: "10.0.1.200"
-    dhcp_lease_time: 86400  # 24 hours
-    domain_name: "mgmt.rylan.local"
-    dns_servers:
-      - "10.0.10.10"  # Samba AD DC
-      - "1.1.1.1"     # Cloudflare fallback
-    description: "UniFi Controller, switches, management interfaces"
-    igmp_snooping: true
-    
-  # VLAN 10: Servers
+    name: Management
+    subnet: 10.0.1.0/27
+    gateway: 10.0.1.1
+    purpose: UniFi devices + controller
+    devices: [USG-3P, U6-LR, USW-Lite-8-PoE, controller@10.0.1.20]
   - id: 10
-    name: "Servers"
-    subnet: "10.0.10.0/24"
-    gateway: "10.0.10.1"
-    dhcp_enabled: true
-    dhcp_start: "10.0.10.50"
-    dhcp_end: "10.0.10.200"
-    dhcp_lease_time: 86400
-    domain_name: "srv.rylan.local"
-    dns_servers:
-      - "10.0.10.10"  # Samba AD DC (primary)
-      - "1.1.1.1"
-    description: "Samba AD DC, AI Workstation, InfluxDB, critical services"
-    igmp_snooping: false
-    dhcp_reservations:
-      - mac: "dc:a6:32:xx:xx:xx"  # Update with real MAC
-        ip: "10.0.10.10"
-        name: "samba-ad-dc"
-      - mac: "b8:27:eb:xx:xx:xx"  # Update with real MAC
-        ip: "10.0.10.60"
-        name: "ai-workstation"
-    
-  # VLAN 30: Trusted Devices
+    name: servers
+    subnet: 10.0.10.0/26
+    gateway: 10.0.10.1
+    purpose: Infrastructure
+    devices: [rylan-dc@10.0.10.10, AI@10.0.10.60, InfluxDB@10.0.10.50]
   - id: 30
-    name: "Trusted-Devices"
-    subnet: "10.0.30.0/24"
-    gateway: "10.0.30.1"
-    dhcp_enabled: true
-    dhcp_start: "10.0.30.50"
-    dhcp_end: "10.0.30.200"
-    dhcp_lease_time: 43200  # 12 hours
-    domain_name: "trusted.rylan.local"
-    dns_servers:
-      - "10.0.10.10"
-      - "1.1.1.1"
-    description: "Raspberry Pi 5 (osTicket), workstations, trusted endpoints"
-    igmp_snooping: true
-    dhcp_reservations:
-      - mac: "d8:3a:dd:xx:xx:xx"  # Update with real MAC
-        ip: "10.0.30.40"
-        name: "rpi5-osticket"
-    
-  # VLAN 40: VoIP
+    name: trusted-devices
+    subnet: 10.0.30.0/24
+    gateway: 10.0.30.1
+    purpose: Workstations + osTicket
+    devices: [Laptops, Pi5@10.0.30.40]
   - id: 40
-    name: "VoIP"
-    subnet: "10.0.40.0/24"
-    gateway: "10.0.40.1"
-    dhcp_enabled: true
-    dhcp_start: "10.0.40.50"
-    dhcp_end: "10.0.40.200"
-    dhcp_lease_time: 86400
-    domain_name: "voip.rylan.local"
-    dns_servers:
-      - "10.0.10.10"
-      - "1.1.1.1"
-    description: "IP phones with QoS prioritization (DSCP EF/46)"
-    igmp_snooping: true
-    # VoIP-specific settings
-    dhcp_options:
-      - option: 66  # TFTP server
-        value: "10.0.40.10"  # Update with PBX IP if applicable
-      - option: 150  # Cisco IP phone
-        value: "10.0.40.10"
-    
-  # VLAN 90: Guest/IoT
+    name: voip
+    subnet: 10.0.40.0/27
+    gateway: 10.0.40.1
+    purpose: VoIP only
+    devices: [FreePBX@10.0.40.30, Grandstream phones]
   - id: 90
-    name: "Guest-IoT"
-    subnet: "10.0.90.0/24"
-    gateway: "10.0.90.1"
-    dhcp_enabled: true
-    dhcp_start: "10.0.90.50"
-    dhcp_end: "10.0.90.250"
-    dhcp_lease_time: 3600  # 1 hour (short for guest)
-    domain_name: "guest.rylan.local"
-    dns_servers:
-      - "1.1.1.1"  # Public DNS only (no internal AD)
-      - "8.8.8.8"
-    description: "Guest devices and untrusted IoT (internet-only access)"
-    igmp_snooping: false
-    # Guest isolation
-    guest_policy: "pre-authorized"
-    client_isolation: true  # Prevent client-to-client communication
-
-# Global VLAN Settings
-global_settings:
-  multicast_enhancement: true  # UniFi enhanced multicast
-  ipv6_enabled: false  # Not used in production
-  default_vlan: 1  # Management VLAN
-  
-# VLAN Tagging Configuration for Switch Ports
-# (Applied manually via UniFi UI or via port profiles)
-port_profiles:
-  - name: "Trunk-All"
-    native_vlan: 1
-    tagged_vlans: [1, 10, 30, 40, 90]
-    description: "Trunk port for inter-switch links"
-    
-  - name: "Management-Only"
-    native_vlan: 1
-    tagged_vlans: []
-    description: "Access port for UniFi devices"
-    
-  - name: "Server-Access"
-    native_vlan: 10
-    tagged_vlans: []
-    description: "Access port for servers (VLAN 10)"
-    
-  - name: "Trusted-Access"
-    native_vlan: 30
-    tagged_vlans: []
-    description: "Access port for trusted devices (VLAN 30)"
-    
-  - name: "VoIP-Access"
-    native_vlan: 40
-    tagged_vlans: []
-    description: "Access port for IP phones (VLAN 40)"
-    
-  - name: "Guest-Access"
-    native_vlan: 90
-    tagged_vlans: []
-    description: "Access port for guest/IoT devices (VLAN 90)"
-
-# Notes:
-# - Update DHCP reservation MACs with real hardware addresses
-# - Policy Table (policy-table-rylan-v5.json) controls inter-VLAN routing
-# - VoIP QoS handled by config.gateway.json (DSCP marking)
-# - Hardware offload preserved with Policy Table (not firewall rules)
+    name: guest-iot
+    subnet: 10.0.90.0/25
+    gateway: 10.0.90.1
+    purpose: Guest + IoT
+    devices: [Guest SSID, smart bulbs, printers]
