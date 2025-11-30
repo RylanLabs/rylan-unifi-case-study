@@ -96,6 +96,34 @@ rylan-unifi-case-study/
 
 ## 🚀 Quick Start
 
+## ⚡ Quick Ignite (Post-Bootstrap)
+
+**One-command deployment sequence:**
+
+```bash
+# Clone and enter repository
+git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
+cd rylan-unifi-case-study
+
+# Activate environment and install dependencies
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -e .
+
+# Run ignite orchestrator
+bash scripts/ignite.sh
+```
+
+**Ignite phases:**
+1. **Bootstrap**: UniFi controller installation (Ubuntu 24.04)
+2. **Declarative Config**: Dry-run → Apply VLANs/policies/QoS
+3. **Validation**: Isolation checks + service health
+
+**Status:**
+- AI Helpdesk: ✅ 100% (triage engine operational)
+- Packaging: ✅ 100% (editable install + deps)
+- IaC: 🟡 Partial (manual policy/QoS GUI apply fallback)
+
 ### Prerequisites
 
 **All Platforms:**

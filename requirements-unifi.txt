@@ -1,0 +1,5 @@
+unifi-api-client>=1.2.0
+PyYAML==6.0.1
+deepdiff==7.0.1
+pydantic>=2.6.0
+requests>=2.32.0
