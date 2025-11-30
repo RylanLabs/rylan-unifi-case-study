@@ -1,121 +1,21 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "description": "USG Gateway JSON configuration for VoIP QoS (DSCP EF/46 marking) on VLAN 40. Applied to /usr/lib/unifi/data/sites/default/config.gateway.json on USG-3P.",
-  
-  "firewall": {
-    "modify": {
-      "VOIP_QOS": {
-        "description": "Mark all VLAN 40 traffic with DSCP 46 (Expedited Forwarding) for VoIP priority",
-        "rule": {
-          "10": {
-            "action": {
-              "dscp": "46"
-            },
-            "description": "DSCP EF for VoIP RTP traffic",
-            "protocol": "udp",
-            "source": {
-              "address": "10.0.40.0/24"
-            },
-            "destination": {
-              "port": "10000-20000"
-            }
-          },
-          "20": {
-            "action": {
-              "dscp": "46"
-            },
-            "description": "DSCP EF for VoIP SIP signaling",
-            "protocol": "udp",
-            "source": {
-              "address": "10.0.40.0/24"
-            },
-            "destination": {
-              "port": "5060-5061"
-            }
-          },
-          "30": {
-            "action": {
-              "dscp": "34"
-            },
-            "description": "DSCP AF41 for VoIP control (lower priority than media)",
-            "protocol": "tcp",
-            "source": {
-              "address": "10.0.40.0/24"
+  "qos": {
+    "policy": {
+      "smart-queue": {
+        "voip-priority": {
+          "wan-interface": "eth0",
+          "upload": {
+            "rate": "100m",
+            "queue-type": "fq-codel",
+            "match": {
+              "voip": {
+                "dscp": "46",
+                "priority": "7"
+              }
             }
           }
         }
       }
-    }
-  },
-  
-  "interfaces": {
-    "ethernet": {
-      "eth0": {
-        "description": "WAN interface (cable modem)",
-        "firewall": {
-          "in": {
-            "name": "WAN_IN"
-          },
-          "local": {
-            "name": "WAN_LOCAL"
-          }
-        }
-      },
-      "eth1": {
-        "description": "LAN interface (UniFi switch trunk)",
-        "firewall": {
-          "out": {
-            "modify": "VOIP_QOS"
-          }
-        },
-        "vif": {
-          "1": {
-            "description": "VLAN 1 - Management",
-            "address": ["10.0.1.1/24"]
-          },
-          "10": {
-            "description": "VLAN 10 - Servers",
-            "address": ["10.0.10.1/24"]
-          },
-          "30": {
-            "description": "VLAN 30 - Trusted Devices",
-            "address": ["10.0.30.1/24"]
-          },
-          "40": {
-            "description": "VLAN 40 - VoIP (DSCP marking applied)",
-            "address": ["10.0.40.1/24"]
-          },
-          "90": {
-            "description": "VLAN 90 - Guest/IoT",
-            "address": ["10.0.90.1/24"]
-          }
-        }
-      }
-    }
-  },
-  
-  "system": {
-    "offload": {
-      "hwnat": "enable",
-      "ipsec": "enable",
-      "ipv4": {
-        "forwarding": "enable",
-        "gre": "enable",
-        "pppoe": "enable",
-        "vlan": "enable"
-      }
-    },
-    "traffic-analysis": {
-      "dpi": "enable",
-      "export": "enable"
-    }
-  },
-  
-  "service": {
-    "upnp2": {
-      "listen-on": ["eth1.1"],
-      "wan": "eth0",
-      "secure-mode": "enable"
     }
   }
 }
