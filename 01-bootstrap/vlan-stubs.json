@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Management",
+    "purpose": "management",
+    "vlan": 1,
+    "subnet": "10.0.1.0/27",
+    "dhcpd_enabled": true,
+    "dhcpd_start": "10.0.1.5",
+    "dhcpd_stop": "10.0.1.25",
+    "domain_name": "mgmt.local"
+  },
+  {
+    "name": "servers",
+    "purpose": "corporate",
+    "vlan": 10,
+    "subnet": "10.0.10.0/26",
+    "dhcpd_enabled": true,
+    "dhcpd_start": "10.0.10.10",
+    "dhcpd_stop": "10.0.10.50",
+    "domain_name": "srv.local"
+  },
+  {
+    "name": "trusted-devices",
+    "purpose": "corporate",
+    "vlan": 30,
+    "subnet": "10.0.30.0/24",
+    "dhcpd_enabled": true,
+    "dhcpd_start": "10.0.30.50",
+    "dhcpd_stop": "10.0.30.200",
+    "domain_name": "trusted.local"
+  },
+  {
+    "name": "voip",
+    "purpose": "corporate",
+    "vlan": 40,
+    "subnet": "10.0.40.0/27",
+    "dhcpd_enabled": true,
+    "dhcpd_start": "10.0.40.5",
+    "dhcpd_stop": "10.0.40.25",
+    "domain_name": "voip.local"
+  },
+  {
+    "name": "guest-iot",
+    "purpose": "guest",
+    "vlan": 90,
+    "subnet": "10.0.90.0/25",
+    "dhcpd_enabled": true,
+    "dhcpd_start": "10.0.90.10",
+    "dhcpd_stop": "10.0.90.120",
+    "domain_name": "guest.local"
+  }
+]
