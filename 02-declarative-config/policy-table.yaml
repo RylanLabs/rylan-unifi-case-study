@@ -30,3 +30,5 @@ rules:
     source: { network: "guest-iot" }
     destination: { type: "local" }
     action: "drop"
+  # TODO: clarify: Expand rule 8 with all ports exactly as specified in Expansion Blueprint v2.
+  # The current file ends at rule 7. Awaiting blueprint to add/modify rule 8 verbatim.
