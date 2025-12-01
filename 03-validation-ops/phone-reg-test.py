@@ -9,6 +9,9 @@ import os
 import sys
 import requests
 
+# TODO: clarify: PBX API default host was on VLAN 20 (10.0.20.50),
+# which was removed in v5.0. Confirm new VLAN/IP (likely VLAN 40 VoIP)
+# and update the default below per Expansion Blueprint v2.
 PBX_API = os.getenv("PBX_API", "http://10.0.20.50:8080/api/peers")
 
 

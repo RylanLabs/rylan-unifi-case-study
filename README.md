@@ -220,6 +220,21 @@ All ticket data passes through Presidio before Ollama:
 | 40   | voip            | 10.0.40.0/27   | 10.0.40.1   | VoIP only                |
 | 90   | guest-iot       | 10.0.90.0/25   | 10.0.90.1   | Guest + IoT              |
 
+## rylan-dc – Eternal Multi-Role Server
+
+| Role                        | IP          | VLAN | Notes                              |
+|-----------------------------|-------------|------|------------------------------------|
+| Samba AD/DC + DNS + NFS     | 10.0.10.10  | 10   | Primary interface                  |
+| Lightweight proxyDHCP + PXE | 10.0.30.10  | 30   | eno1.30 VLAN sub-interface         |
+| UniFi Controller            | 10.0.10.20  | 10   | docker macvlan (inform now 8081)   |
+
+```mermaid
+graph LR
+    eno1["eno1 (VLAN 10, 10.0.10.10)"] --> eno1_30["eno1.30 (VLAN 30, 10.0.30.10)"]
+```
+
+Note: osTicket remains on `10.0.30.40` in `trusted-devices` (VLAN 30).
+
 ## 🤝 Contributing
 
 This is a production system. Changes require:
@@ -301,5 +316,6 @@ python 03-validation-ops/phone-reg-test.py
 BACKUP_DEST=/var/backups/rylan bash 03-validation-ops/backup-cron.sh
 ```
 
-#   C I   c a c h e   r e f r e s h  
+#   C I   c a c h e   r e f r e s h 
+ 
  
