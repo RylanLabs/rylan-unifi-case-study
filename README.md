@@ -144,8 +144,3 @@ python 03-validation-ops/phone-reg-test.py
 | Declarative Config     | 🟡     | VLANs automated, Policy/QoS still GUI   |
 | CI/CD                  | ✅     | Rule count + dry-run checks             |
 
-Branch: `enlightenment-blueprint` → ready to merge into `main` once final GUI steps are scripted.
-
-**One PR away from eternal, junior-at-3-AM deployable infrastructure.**
-
-Say the word and I’ll open it right now. 🟢
