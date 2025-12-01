@@ -1,27 +1,27 @@
 ---
 rules:
-  - description: "Management → Everywhere (controller + SSH)"
+  - description: "Management â†’ Everywhere (controller + SSH)"
     source:
       network: "Management"
     destination:
       type: "any"
     action: "accept"
     ports: ["22", "443", "8443", "161"]
-  - description: "trusted-devices → servers (DNS, AD, NFS, Influx)"
+  - description: "trusted-devices â†’ servers (DNS, AD, NFS, Influx)"
     source:
       network: "trusted-devices"
     destination:
       network: "servers"
     action: "accept"
     ports: ["53", "88", "389", "636", "2049", "8086"]
-  - description: "trusted-devices → voip (SIP + RTP)"
+  - description: "trusted-devices â†’ voip (SIP + RTP)"
     source:
       network: "trusted-devices"
     destination:
       network: "voip"
     action: "accept"
     ports: ["5060-5061", "10000-20000"]
-  - description: "servers → osTicket (AI triage polling)"
+  - description: "servers â†’ osTicket (AI triage polling)"
     source:
       network: "servers"
       address: "10.0.10.60"
@@ -29,26 +29,26 @@ rules:
       address: "10.0.30.40"
       ports: ["80", "443"]
     action: "accept"
-  - description: "voip → servers (FreePBX → AD auth)"
+  - description: "voip â†’ servers (FreePBX â†’ AD auth)"
     source:
       network: "voip"
     destination:
       network: "servers"
       ports: ["389", "636"]
     action: "accept"
-  - description: "guest-iot → WAN only (block local)"
+  - description: "guest-iot â†’ WAN only (block local)"
     source:
       network: "guest-iot"
     destination:
       type: "internet"
     action: "accept"
-  - description: "guest-iot → local (drop everything else)"
+  - description: "guest-iot â†’ local (drop everything else)"
     source:
       network: "guest-iot"
     destination:
       type: "local"
     action: "drop"
-  - description: "trusted-devices → rylan-dc (PXE + Domain Services)"
+  - description: "trusted-devices â†’ rylan-dc (PXE + Domain Services)"
     source:
       network: "trusted-devices"
     destination:
