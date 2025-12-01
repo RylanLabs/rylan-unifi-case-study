@@ -1,0 +1,2 @@
+# TODO: clarify: insert exact systemd unit from Expansion Blueprint v2
+# Service should manage lightweight dnsmasq proxy-DHCP for PXE per blueprint specifics.

@@ -1,0 +1,4 @@
+# TODO: clarify: insert exact netplan from Expansion Blueprint v2
+# Target state (for reference only; do not implement without blueprint):
+# - Primary: eno1 on VLAN 10, static IP 10.0.10.10/26, gw 10.0.10.1
+# - Sub-if: eno1.30 tagged VLAN 30, static IP 10.0.30.10/24

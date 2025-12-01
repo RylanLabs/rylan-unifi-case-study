@@ -1,0 +1,2 @@
+# TODO: clarify: insert exact UniFi docker-compose from Expansion Blueprint v2
+# Note: Inform port must be 8081 (changed from 8080 as per blueprint).
