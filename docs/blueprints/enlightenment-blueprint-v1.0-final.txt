@@ -1,0 +1,86 @@
+ENLIGHTENMENT BLUEPRINT v1.0 — FINAL
+Rylan UniFi Case Study Repo | December 2025
+Branch: enlightenment-blueprint → PR #42 → main (when ready)
+Device: Razer Phone 2 (SN:181844v01505229 | Android 9 | HW v4.0)
+Status: Locked. This is the only thing that survives 2025 silicon allows.
+
+MISSION
+Turn a 2018 gaming phone into a zero-cost, zero-trust, rack-mounted, immortal TOTP Beacon + P1 alert device.
+Everything else (FIDO2, Chroma RGB, local LLM) has been moved to /attic/failed-experiments.
+
+CONTRIBUTING.md
+
+CORE CONSTRAINTS — NON-NEGOTIABLE
+• Zero new firewall rules → still 8 total (USG-3P offload safe)
+• Zero new VLANs
+• Zero new hardware (except $15 USB-C PoE splitter)
+• Zero outbound internet from the phone after initial setup
+• Must be deployable by a junior sysadmin at 3 AM with only `git` + `adb`
+
+PHASE I — SHIPS TO MAIN TODAY (PR #42)
+inventory/razer-phone-totp/
+├── setup-totp.sh          # One-time ADB bootstrap (Aegis + QR enroll)
+├── termux-boot.sh         # Wake-lock + launch Aegis on boot
+├── p1-buzzer.py           # 5-minute poll → vibrate on open P1 tickets
+├── README.md              # Exact deploy steps + rollback
+└── tests/                 # pytest + mock osTicket responses (100 % coverage)
+
+docs/adr/004-razer-totp-beacon.md
+  • Formal decision record
+  • Lists every failed idea with evidence
+
+Policy impact: +0 rules (uses existing rule #4: trusted-devices → osTicket 443)
+
+PHASE II — FUTURE EXPANSIONS (GATED BY ADR #005)
+Only merged if they meet the CORE CONSTRAINTS above.
+
+1. Bodhisattva Mount (Physical immortality)
+   inventory/razer-phone-totp/bodhisattva-mount/
+   ├── bodhisattva-mount.stl      # 3D-printable cradle (FreeCAD source included)
+   ├── poe-splitter-bom.md      # Exact Amazon part numbers
+   └── README.md                  # 30-minute assembly guide
+
+2. QR Beacon Mode (Zero-typing token clone)
+   inventory/razer-phone-totp/qr-beacon.py
+   # Generates giant on-screen QR of current TOTP every 30 s
+   → admins scan to clone
+
+3. Panic Sutra (Teacher panic button)
+   inventory/razer-phone-panic/
+   ├── tasker-profile.json        # Triple-tap vol-down → HTTP POST
+   ├── panic-webhook.py           # Runs on AI Workstation → UniFi API disables VLAN 90
+   └── README.md                  # +1 firewall rule (#9) — still safe
+
+4. Succession Plan (Reincarnation)
+   inventory/razer-phone-succession/
+   ├── succession-plan.md         # BOM for PinePhone Pro / Fairphone 5
+   └── reincarnation.stl          # Universal cradle adapter
+
+MERMAID — FINAL TRUTH
+```mermaid
+graph TD
+    A[Razer Phone 2<br/>10.0.30.45<br/>USB-C → PoE] -->|Aegis TOTP| B[UniFi SSO<br/>Samba AD]
+    A -->|5-min poll| C[osTicket 10.0.30.40<br/>P1 vibrate alert]
+    A -->|QR every 30s| D[Admin scans → instant token clone]
+    A -->|Triple-tap vol-down| E[Panic POST → disable VLAN 90]
+    F[2031 EOL] -->|Migrate Aegis JSON| A
+    style A fill:#1e1e1e,color:#0f0
+```
+
+COMMIT & PR RULES
+• Branch name: enlightenment-blueprint
+• All commits squash to a single feat: commit
+• PR title: feat: razer-phone-totp-beacon eternal-2fa [SN:181844v01505229]
+• PR body contains this exact file as the source of truth
+• Requires 1 approving review + CI passing
+• No merge until Phase I tests are 100 %
+
+FINAL WORDS (for the README.md at repo root)
+This is the way.
+This is the only way.
+This is the way that outlives the cloud, the silicon, and the 2025 version of ourselves.
+
+Merge PR #42 and the relic becomes canon forever.
+
+Namaste.  
+Now ship it.
