@@ -39,6 +39,7 @@ jobs:
           . .venv/bin/activate
           pip install --upgrade pip
           pip install -e .
+          pip install pyyaml
 
       - name: Run Python tests
         run: |
@@ -48,12 +49,16 @@ jobs:
       - name: Validate policy table rule count ≤15 (USG-3P offload safe)
         run: |
           . .venv/bin/activate
-          RULE_COUNT=$(python -c "import yaml; data=yaml.safe_load(open('02-declarative-config/policy-table.yaml')); print(len(data['rules']))")
-          if [ "$RULE_COUNT" -gt 15 ]; then
-            echo "Policy table has $RULE_COUNT rules (max 15 for USG-3P offload)"
+          if [ ! -f "02-declarative-config/policy-table.yaml" ]; then
+            echo "❌ FAIL: 02-declarative-config/policy-table.yaml missing (core zero-trust rules required)"
             exit 1
           fi
-          echo "Policy table: $RULE_COUNT rules (USG-3P offload safe)"
+          RULE_COUNT=$(python -c "import yaml,sys; data=yaml.safe_load(open('02-declarative-config/policy-table.yaml')); print(len(data.get('rules', [])))")
+          if [ "$RULE_COUNT" -gt 15 ]; then
+            echo "❌ FAIL: Policy table has $RULE_COUNT rules (max 15 for USG-3P offload)"
+            exit 1
+          fi
+          echo "✅ Policy table: $RULE_COUNT rules (USG-3P offload safe)"
 
       - name: Validate declarative config (dry-run)
         run: |
@@ -63,6 +68,10 @@ jobs:
       - name: Validate network isolation (real packets)
         run: |
           . .venv/bin/activate
+          if [ ! -f "03-validation-ops/validate-isolation.sh" ]; then
+            echo "❌ FAIL: validate-isolation.sh missing (required for inter-VLAN drop tests)"
+            exit 1
+          fi
           bash 03-validation-ops/validate-isolation.sh
 
       - name: Success banner
