@@ -1,32 +1,49 @@
 rules:
-  - description: "Management → Everywhere (controller + SSH)"
-    source: { network: "Management" }
-    destination: { type: "any" }
+  - description: "Management to Everywhere (controller + SSH)"
+    source: 
+      network: "Management"
+    destination: 
+      type: "any"
     action: "accept"
     ports: ["22","443","8443","161"]
-  - description: "trusted-devices → servers (DNS, AD, NFS, Influx)"
-    source: { network: "trusted-devices" }
-    destination: { network: "servers" }
+  - description: "trusted-devices to servers (DNS, AD, NFS, Influx)"
+    source: 
+      network: "trusted-devices"
+    destination: 
+      network: "servers"
     action: "accept"
     ports: ["53","88","389","636","2049","8086"]
-  - description: "trusted-devices → voip (SIP + RTP)"
-    source: { network: "trusted-devices" }
-    destination: { network: "voip" }
+  - description: "trusted-devices to voip (SIP + RTP)"
+    source: 
+      network: "trusted-devices"
+    destination: 
+      network: "voip"
     action: "accept"
     ports: ["5060-5061","10000-20000"]
-  - description: "servers → osTicket (AI triage polling)"
-    source: { network: "servers", address: "10.0.10.60" }
-    destination: { address: "10.0.30.40", ports: ["80","443"] }
+  - description: "servers to osTicket (AI triage polling)"
+    source: 
+      network: "servers"
+      address: "10.0.10.60"
+    destination: 
+      address: "10.0.30.40"
+      ports: ["80","443"]
     action: "accept"
-  - description: "voip → servers (FreePBX → AD auth)"
-    source: { network: "voip" }
-    destination: { network: "servers", ports: ["389","636"] }
+  - description: "voip to servers (FreePBX to AD auth)"
+    source: 
+      network: "voip"
+    destination: 
+      network: "servers"
+      ports: ["389","636"]
     action: "accept"
-  - description: "guest-iot → WAN only (block local)"
-    source: { network: "guest-iot" }
-    destination: { type: "internet" }
+  - description: "guest-iot to WAN only (block local)"
+    source: 
+      network: "guest-iot"
+    destination: 
+      type: "internet"
     action: "accept"
-  - description: "guest-iot → local (drop everything else)"
-    source: { network: "guest-iot" }
-    destination: { type: "local" }
+  - description: "guest-iot to local (drop everything else)"
+    source: 
+      network: "guest-iot"
+    destination: 
+      type: "local"
     action: "drop"
