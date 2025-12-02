@@ -1,0 +1,8 @@
+{
+  "url": "https://middleware.internal/unifi/rogue-dhcp",
+  "method": "POST",
+  "headers": {
+    "X-UniFi-Key": "${VAULT_UNIFI_WEBHOOK_KEY}"
+  },
+  "content_type": "application/json"
+}
