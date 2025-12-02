@@ -1,4 +1,4 @@
-'''name: CI Validate Rylan v5.0
+name: CI Validate Rylan v5.1
 on:
   push:
     branches: [ main, dev ]
@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
 
       - name: Fix containerd conflicts and install Docker
         run: |
@@ -51,18 +52,18 @@ jobs:
          pip install -e .
          pip install pyyaml pytest
 
-      - name: Validate policy table rule count "''15 (USG-3P offload safe)
+      - name: Validate policy table rule count <=15 (USG-3P offload safe)
         run: |
           if [ ! -f "02-declarative-config/policy-table.yaml" ]; then
-            echo """' FAIL: policy-table.yaml missing (core zero-trust rules required)"
+            echo " FAIL: policy-table.yaml missing (core zero-trust rules required)"
             exit 1
           fi
           RULE_COUNT=$(python -c "import yaml; data=yaml.safe_load(open('02-declarative-config/policy-table.yaml')); print(len(data['rules']))")
           if [ "$RULE_COUNT" -gt 15 ]; then
-            echo """' FAIL: Policy table has $RULE_COUNT rules (max 15 for USG-3P offload)"
+            echo " FAIL: Policy table has $RULE_COUNT rules (max 15 for USG-3P offload)"
             exit 1
           fi
-          echo ""'' Policy table: $RULE_COUNT rules (USG-3P offload safe)"
+          echo " Policy table: $RULE_COUNT rules (USG-3P offload safe)"
 
       - name: Run Python tests
         run: pytest -v
@@ -73,7 +74,7 @@ jobs:
       - name: Validate network isolation (simulated)
         run: |
           if [ ! -f "03-validation-ops/validate-isolation.sh" ]; then
-            echo """' FAIL: validate-isolation.sh missing"
+            echo " FAIL: validate-isolation.sh missing"
             exit 1
           fi
           # Run with sudo for Docker socket access
@@ -82,9 +83,9 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "=== Rylan v5.0 Validation Complete ==="
+          echo "=== Rylan v5.1 Validation Complete ==="
           if [ "${{ job.status }}" == "success" ]; then
-            echo ""'' All checks passed "'' junior-at-3-AM deployable"
+            echo "✅ All checks passed — junior-at-3-AM deployable"
           else
-            echo """' One or more steps failed "'' check logs above"
+            echo "❌ One or more steps failed — check logs above"
           fi
