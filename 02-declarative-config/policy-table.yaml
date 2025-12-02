@@ -55,18 +55,11 @@ rules:
       type: "local"
     action: "drop"
 
-  - description: "trusted-devices → rylan-dc (PXE + Domain Services)"
+
+  - description: "trusted-devices → guest-iot (printer access only)"
     source:
       network: "trusted-devices"
     destination:
-      address: "10.0.30.10"
-      ports:
-        - "53"
-        - "67"
-        - "68"
-        - "69"
-        - "88"
-        - "389"
-        - "636"
-        - "4011"
+      network: "guest-iot"
+      ports: ["9100", "515", "631"]
     action: "accept"
