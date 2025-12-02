@@ -1,7 +1,14 @@
-﻿[project]
+﻿[# Project metadata]
+[project]
 name = "rylan-unifi-case-study"
 version = "5.0.0"
 
+# Pytest configuration (ensure parser reads clean TOML)
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+# Bandit configuration
 [tool.bandit]
 exclude_dirs = ["inventory", "tests"]
 skips = ["B404", "B603", "B607", "B110"]
