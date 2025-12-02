@@ -1,0 +1,1 @@
+0 2 * * * root /opt/scripts/samba-ad-backup.sh >> /var/log/samba-backup.log 2>&1
