@@ -5,6 +5,10 @@ vlans:
     gateway: 10.0.10.1
     dhcp_enabled: false
     dns_servers: [10.0.10.10, 1.1.1.1]
+    static_leases:
+      - mac: "de:ad:be:ef:ca:fe"   # ← replace with real FreeRADIUS LXC MAC once known
+        ip: "10.0.10.11"
+        hostname: "radius.rylan.internal"
   - id: 30
     name: trusted-devices
     subnet: 10.0.30.0/24
