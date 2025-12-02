@@ -21,36 +21,13 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
 
-      - name: Fix containerd conflicts and install Docker
-        run: |
-          # Remove conflicting packages
-          sudo apt-get remove -y containerd containerd.io docker.io || true
-          sudo apt-get autoremove -y
-
-          # Install Docker from official repo
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates curl
-          sudo install -m 0755 -d /etc/apt/keyrings
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-          sudo apt-get update
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
-          # Add user to docker group
-          sudo usermod -aG docker $USER
-
-          # Verify Docker is running
-          sudo systemctl start docker
-          sudo docker version
+      # Docker comes preinstalled on ubuntu-latest runners; no need to reinstall
 
       - name: Install Python dependencies
         run: |
-         pip install --upgrade pip
-         pip install -r  03-ai-helpdesk/triage-engine/requirements.txt
-         pip install pyyaml pytest
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyyaml pytest
 
       - name: Validate policy table rule count <=15 (USG-3P offload safe)
         run: |
