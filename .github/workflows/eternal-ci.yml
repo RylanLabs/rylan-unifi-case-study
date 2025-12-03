@@ -1,0 +1,74 @@
+name: Eternal CI — v∞.1.0 Validation
+
+on:
+  push:
+    branches: [main, "release/v∞.1.0-eternal"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  eternal-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyyaml pytest
+
+      - name: Guardian audit
+        run: python guardian/audit-eternal.py
+
+      - name: Validate YAML syntax
+        run: |
+          pip install yamllint
+          yamllint 02-declarative-config/*.yaml
+
+      - name: Validate policy table (exactly 10 rules, Phase 2 locked)
+        run: |
+          RULE_COUNT=$(python -c "import yaml; data=yaml.safe_load(open('02-declarative-config/policy-table.yaml')); print(len(data['rules']))")
+          if [ "$RULE_COUNT" -ne 10 ]; then
+            echo "FAIL: Expected 10 rules, got $RULE_COUNT"
+            exit 1
+          fi
+          echo "✅ Policy table: $RULE_COUNT rules (eternal locked, USG-3P offload safe)"
+
+      - name: Validate FreeRADIUS config syntax
+        run: |
+          if [ -d "01-bootstrap/freeradius" ]; then
+            docker run --rm -v "$PWD/01-bootstrap/freeradius:/etc/freeradius" \
+              freeradius/freeradius-server:3-alpine freeradius -C -d /etc/freeradius
+          fi
+
+      - name: Run test suite
+        run: pytest -v --maxfail=1
+
+      - name: Declarative config dry-run
+        run: cd 02-declarative-config && python apply.py --dry-run
+
+      - name: Validate network isolation (simulated)
+        run: |
+          if [ -f "03-validation-ops/validate-isolation.sh" ]; then
+            sudo bash 03-validation-ops/validate-isolation.sh
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "=== Eternal CI Complete ==="
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ All checks passed — fortress eternally green"
+          else
+            echo "❌ One or more checks failed — review logs above"
+          fi
