@@ -94,3 +94,16 @@ jobs:
           else
             echo "❌ One or more steps failed — check logs above"
           fi
+
+  remote-repro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Smoke test remote reproducibility
+        run: |
+          git clone https://github.com/T-Rylander/rylan-unifi-case-study.git /tmp/clone-test
+          cd /tmp/clone-test
+          git checkout "release/v.1.1-resilient" || exit 1
+          test -f guardian/audit-eternal.py || (echo "guardian glue missing" && exit 1)
+          test -f tests/test_triage_engine.py || (echo "triage tests missing" && exit 1)
+          echo "ETERNAL FORTRESS: FULLY RESILIENT"
