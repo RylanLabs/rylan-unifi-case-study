@@ -82,25 +82,25 @@ ldap {
 	port = 636
 	use_ssl = 'demand'				# LDAPS (secure)
 	start_tls = no
-	
+
 	# Authentication
 	identity = "cn=Administrator,cn=Users,dc=rylan,dc=internal"
 	password = "${VAULT_SAMBA_ADMIN}"
 	base_dn = "dc=rylan,dc=internal"
-	
+
 	# User Authentication Filter
 	filter = "(sAMAccountName=%{Stripped-User-Name:-%{User-Name}})"
-	
+
 	# Group Membership (NEW — Phase 3 Endgame)
 	group_base_dn = "cn=Users,dc=rylan,dc=internal"
 	group_attribute = "memberOf"
 	group_member_attribute = "member"
 	group_scope = "sub"
 	group_name_attribute = "cn"
-	
+
 	# Policy Authorization (NEW)
 	groupname_attribute = "cn"
-	
+
 	# Operational Settings
 	edir = no
 	chase_referrals = yes

@@ -260,7 +260,7 @@ klist
 # Output:
 # Ticket cache: FILE:/tmp/krb5cc_1000
 # Default principal: RYLAN\admin@RYLAN.INTERNAL
-# 
+#
 # Valid starting     Expires            Service principal
 # 12/03/2025 10:30   12/04/2025 10:30   krbtgt/RYLAN.INTERNAL@RYLAN.INTERNAL
 ```

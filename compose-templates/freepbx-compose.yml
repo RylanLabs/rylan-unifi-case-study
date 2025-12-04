@@ -45,24 +45,24 @@ services:
       DB_USER: asterisk
       DB_PASSWORD: ${FREEPBX_MYSQL_PASSWORD:-ChangeMe123!}
       DB_PORT: 3306
-      
+
       # Asterisk Configuration
       ASTERISK_DB_DRIVER: MySQL
       ASTERISK_DB_HOSTNAME: freepbx-db
       ASTERISK_DB_USER: asterisk
       ASTERISK_DB_PASSWORD: ${FREEPBX_MYSQL_PASSWORD:-ChangeMe123!}
       ASTERISK_DB_NAME: asterisk
-      
+
       # FreePBX Setup
       FREEPBX_DBENGINE: mysql
       FREEPBX_DBNAME: asterisk
       FREEPBX_DBUSER: asterisk
       FREEPBX_DBPASS: ${FREEPBX_MYSQL_PASSWORD:-ChangeMe123!}
-      
+
       # RTP Configuration (Audio Streams)
       RTP_START: 10000
       RTP_FINISH: 20000
-      
+
       # Timezone
       TZ: UTC
     volumes:

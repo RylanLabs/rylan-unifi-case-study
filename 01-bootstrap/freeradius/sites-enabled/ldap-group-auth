@@ -5,7 +5,7 @@
 authorize {
 	# LDAP user authentication
 	ldap
-	
+
 	# Check group membership (Phase 3 Endgame)
 	if (LDAP-Group =~ /CN=unifi-admins/i) {
 		update reply {
