@@ -36,3 +36,23 @@ vlans:
     dhcp_start: 10.0.90.100
     dhcp_end: 10.0.90.200
     dns_servers: [1.1.1.1, 1.0.0.1]
+  - id: 95
+    name: iot-isolated
+    subnet: 10.0.95.0/24
+    gateway: 10.0.95.1
+    dhcp_enabled: true
+    dhcp_start: 10.0.95.100
+    dhcp_end: 10.0.95.200
+    dns_servers: [1.1.1.1, 1.0.0.1]
+    purpose: "Untrusted IoT devices (Traeger grill)"
+    isolation: true
+  - id: 96
+    name: iot-trusted
+    subnet: 10.0.96.0/24
+    gateway: 10.0.96.1
+    dhcp_enabled: true
+    dhcp_start: 10.0.96.100
+    dhcp_end: 10.0.96.200
+    dns_servers: [10.0.10.10, 1.1.1.1]
+    purpose: "Semi-trusted hardwired IoT (Denon HEOS soundbars)"
+    isolation: true

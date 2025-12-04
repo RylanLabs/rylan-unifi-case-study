@@ -58,3 +58,21 @@ rules:
     destination:
       type: "local"
     action: "drop"
+
+  - description: "IoT-Isolated → Internet (Whitelist)"
+    source:
+      network: "iot-isolated"
+    destination:
+      type: "internet"
+    action: "accept"
+    ports: ["443", "8883"]
+    comment: "Traeger grill cloud access only (TLS + MQTT over TLS)"
+
+  - description: "IoT-Trusted → Streaming Services"
+    source:
+      network: "iot-trusted"
+    destination:
+      type: "internet"
+    action: "accept"
+    ports: ["80", "443"]
+    comment: "Denon HEOS soundbars - Spotify/Pandora/HEOS cloud"
