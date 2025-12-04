@@ -13,14 +13,16 @@ Trifecta Compliance: Bauer (No PII/Secrets in Docs)
 
 import re
 import logging
-import importlib.util
 from typing import Optional
 
-# Try to import Presidio, fallback to regex if unavailable
-PRESIDIO_AVAILABLE = (
-    importlib.util.find_spec("presidio_analyzer") is not None
-    and importlib.util.find_spec("presidio_anonymizer") is not None
-)
+try:
+    from presidio_analyzer import AnalyzerEngine
+    from presidio_anonymizer import AnonymizerEngine, AnalyzerResult  # noqa: F401
+
+    PRESIDIO_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    PRESIDIO_AVAILABLE = False
+    AnalyzerEngine = AnalyzerResult = None  # type: ignore
 
 if not PRESIDIO_AVAILABLE:
     logging.warning(
