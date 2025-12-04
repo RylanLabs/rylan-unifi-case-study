@@ -35,14 +35,18 @@ jobs:
           pip install yamllint
           yamllint 02-declarative-config/*.yaml
 
-      - name: Validate policy table (exactly 10 rules, Phase 2 locked)
+      - name: Validate policy table (≤10 rules, USG-3P offload safe)
         run: |
           RULE_COUNT=$(python -c "import yaml; data=yaml.safe_load(open('02-declarative-config/policy-table.yaml')); print(len(data['rules']))")
-          if [ "$RULE_COUNT" -ne 10 ]; then
-            echo "FAIL: Expected 10 rules, got $RULE_COUNT"
+          if [ "$RULE_COUNT" -gt 10 ]; then
+            echo "FAIL: Policy table has $RULE_COUNT rules (max 10 for hardware offload)"
             exit 1
           fi
-          echo "✅ Policy table: $RULE_COUNT rules (eternal locked, USG-3P offload safe)"
+          if [ "$RULE_COUNT" -eq 0 ]; then
+            echo "FAIL: Policy table has 0 rules (zero-trust requires explicit allows)"
+            exit 1
+          fi
+          echo "✅ Policy table: $RULE_COUNT/10 rules (USG-3P offload safe, Suehring compliant)"
 
       - name: Validate FreeRADIUS config syntax
         run: |
