@@ -1,4 +1,4 @@
-﻿# Project metadata
+# Project metadata
 [project]
 name = "rylan-unifi-case-study"
 version = "5.0.0"
@@ -12,3 +12,8 @@ addopts = "-ra"
 [tool.bandit]
 exclude_dirs = ["inventory", "tests"]
 skips = ["B404", "B603", "B607", "B110"]
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = ["presidio_analyzer", "presidio_anonymizer"]
+ignore_missing_imports = true
