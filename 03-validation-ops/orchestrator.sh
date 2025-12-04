@@ -6,6 +6,7 @@ set -euo pipefail
 
 DRY_RUN=false
 VERBOSE=false
+TEST_RESTORE=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -18,8 +19,12 @@ while [[ $# -gt 0 ]]; do
             VERBOSE=true
             shift
             ;;
+        --test-restore)
+            TEST_RESTORE=true
+            shift
+            ;;
         *)
-            echo "Usage: $0 [--dry-run] [--verbose]"
+            echo "Usage: $0 [--dry-run] [--verbose] [--test-restore]"
             exit 1
             ;;
     esac
@@ -56,6 +61,57 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Per-component timing
+declare -A COMPONENT_TIMES
+declare -A COMPONENT_START
+
+component_start() {
+    local component=$1
+    COMPONENT_START[$component]=$(date +%s%N)
+}
+
+component_end() {
+    local component=$1
+    local end_time=$(date +%s%N)
+    local start_time=${COMPONENT_START[$component]:-0}
+    local elapsed_ns=$((end_time - start_time))
+    local elapsed_ms=$((elapsed_ns / 1000000))
+    COMPONENT_TIMES[$component]=$elapsed_ms
+    log_info "  ⏱️  $component: ${elapsed_ms}ms"
+}
+
+test_restore() {
+    local component=$1
+    local backup_path=$2
+
+    if [[ ! -e "$backup_path" ]]; then
+        log_warn "  Restore test skipped: $backup_path not found"
+        return 1
+    fi
+
+    log_info "  Testing restore of $component from $backup_path..."
+
+    case "$component" in
+        samba)
+            if file "$backup_path" | grep -q "tar"; then
+                tar -tzf "$backup_path" >/dev/null 2>&1 && log_info "    ✅ $component restore test passed" || log_error "    ❌ $component restore test failed"
+            fi
+            ;;
+        freeradius)
+            tar -tzf "$backup_path" >/dev/null 2>&1 && log_info "    ✅ $component restore test passed" || log_error "    ❌ $component restore test failed"
+            ;;
+        mariadb)
+            grep -q "CREATE DATABASE" "$backup_path" && log_info "    ✅ $component restore test passed" || log_error "    ❌ $component restore test failed"
+            ;;
+        qdrant)
+            [[ -d "$backup_path" ]] && [[ -n "$(find "$backup_path" -type f 2>/dev/null | head -1)" ]] && log_info "    ✅ $component restore test passed" || log_error "    ❌ $component restore test failed"
+            ;;
+        *)
+            log_warn "    Unknown component: $component"
+            ;;
+    esac
+}
+
 log_info "=== Eternal Orchestrator: Backup + RTO Validation ==="
 log_info "Host: $HOSTNAME"
 log_info "Backup Directory: $BACKUP_DIR"
@@ -85,21 +141,35 @@ case "$HOSTNAME" in
         if [[ "$DRY_RUN" == false ]]; then
             # Backup Samba AD database
             if [[ -d /var/lib/samba ]]; then
+                component_start "samba"
                 log_info "Backing up Samba database..."
                 rsync -avz --exclude='*.ldb.bak' /var/lib/samba/ "$BACKUP_DIR/samba/" 2>&1 | tail -5
+                component_end "samba"
+
+                if [[ "$TEST_RESTORE" == true ]]; then
+                    test_restore "samba" "$BACKUP_DIR/samba/private/sam.ldb"
+                fi
             fi
 
             # Backup FreeRADIUS config
             if [[ -d /etc/freeradius ]]; then
+                component_start "freeradius"
                 log_info "Backing up FreeRADIUS configuration..."
                 tar czf "$BACKUP_DIR/freeradius-config.tar.gz" /etc/freeradius/ 2>/dev/null || true
+                component_end "freeradius"
+
+                if [[ "$TEST_RESTORE" == true ]]; then
+                    test_restore "freeradius" "$BACKUP_DIR/freeradius-config.tar.gz"
+                fi
             fi
 
             # Backup UniFi controller (if Docker)
             if command -v docker &>/dev/null && docker ps 2>/dev/null | grep -q unifi; then
+                component_start "unifi"
                 log_info "Backing up UniFi controller data..."
                 docker exec unifi-controller tar czf /tmp/unifi-backup.tar.gz /config 2>/dev/null || true
                 docker cp unifi-controller:/tmp/unifi-backup.tar.gz "$BACKUP_DIR/" 2>/dev/null || true
+                component_end "unifi"
             fi
 
             # Verify backup integrity
@@ -128,15 +198,23 @@ case "$HOSTNAME" in
         if [[ "$DRY_RUN" == false ]]; then
             # Backup MariaDB
             if command -v docker &>/dev/null && docker ps 2>/dev/null | grep -q mariadb; then
+                component_start "mariadb"
                 log_info "Backing up MariaDB database..."
                 docker exec mariadb mysqldump -u root -pSecurePass123 --all-databases \
                     > "$BACKUP_DIR/mariadb-dump.sql" 2>/dev/null || true
+                component_end "mariadb"
+
+                if [[ "$TEST_RESTORE" == true ]]; then
+                    test_restore "mariadb" "$BACKUP_DIR/mariadb-dump.sql"
+                fi
             fi
 
             # Backup osTicket data
             if command -v docker &>/dev/null && docker ps 2>/dev/null | grep -q osticket; then
+                component_start "osticket"
                 log_info "Backing up osTicket data..."
                 docker cp osticket:/data "$BACKUP_DIR/osticket-data" 2>/dev/null || true
+                component_end "osticket"
             fi
 
             # Verify backup integrity
@@ -161,21 +239,31 @@ case "$HOSTNAME" in
         if [[ "$DRY_RUN" == false ]]; then
             # Backup Qdrant collection
             if [[ -d /srv/qdrant ]]; then
+                component_start "qdrant"
                 log_info "Backing up Qdrant vectors..."
                 rsync -avz /srv/qdrant/ "$BACKUP_DIR/qdrant/" 2>&1 | tail -5
+                component_end "qdrant"
+
+                if [[ "$TEST_RESTORE" == true ]]; then
+                    test_restore "qdrant" "$BACKUP_DIR/qdrant"
+                fi
             fi
 
             # Backup recent Loki chunks (last 7 days only to save space)
             if [[ -d /srv/loki/data/chunks ]]; then
+                component_start "loki"
                 log_info "Backing up Loki logs (last 7 days)..."
                 find /srv/loki/data/chunks -mtime -7 -type f \
                     -exec rsync -avz {} "$BACKUP_DIR/loki-chunks/" \; 2>&1 | tail -5 || true
+                component_end "loki"
             fi
 
             # Backup NFS structure
             if [[ -d /srv/nfs/shared ]]; then
+                component_start "nfs-metadata"
                 log_info "Backing up NFS directory metadata..."
                 find /srv/nfs/shared -type d > "$BACKUP_DIR/nfs-structure.txt" 2>/dev/null || true
+                component_end "nfs-metadata"
             fi
 
             # Verify backup integrity
