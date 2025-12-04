@@ -1,4 +1,6 @@
-'''---
+---
+# QoS for VoIP EF Marking (DSCP 46)
+# Applied via config.gateway.json on USG-3P
 smart_queue:
   wan_interface: eth0
   enabled: true

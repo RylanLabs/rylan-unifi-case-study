@@ -1,4 +1,5 @@
 ---
+# Rylan Policy Table v5.0 - Zero-Trust Allows Only (7 rules)
 rules:
   - description: "Management → Everywhere (controller + SSH)"
     source:
@@ -8,14 +9,16 @@ rules:
     action: "accept"
     ports: ["22", "443", "8443", "161"]
 
-  - description: "trusted-devices → servers (DNS, AD, NFS, Influx, PXE)"
+  - description: >-
+      trusted-devices → servers (DNS, AD, NFS, Influx, PXE)
     source:
       network: "trusted-devices"
     destination:
       network: "servers"
     action: "accept"
-    ports: ["53", "67", "68", "69", "88", "389", "636", "2049", "4011", "8086"]
-    comment: "Consolidated server access including PXE boot (DHCP, TFTP, ProxyDHCP)"
+    ports: ["53", "67", "68", "69", "88", "389", "636", "2049",
+            "4011", "8086"]
+    comment: "Consolidated server access including PXE boot"
 
   - description: "trusted-devices → voip (SIP + RTP)"
     source:
@@ -55,28 +58,3 @@ rules:
     destination:
       type: "local"
     action: "drop"
-
-  - description: "trusted-devices → guest-iot (printer access only)"
-    source:
-      network: "trusted-devices"
-    destination:
-      network: "guest-iot"
-      ports: ["9100", "515", "631"]
-    action: "accept"
-
-  - description: "All networks → RADIUS (802.1X auth)"
-    source:
-      type: "any"
-    destination:
-      address: "10.0.10.11"
-      ports: ["1812", "1813"]
-    action: "accept"
-
-  - description: "VLAN 10 → Pi-hole Upstream DNS (Phase 3 Endgame Arch)"
-    source:
-      network: "servers"
-    destination:
-      address: "10.0.10.11"
-      ports: ["53"]
-    action: "accept"
-    comment: "Pi-hole on separate host (not on AD/DC) for zero DNS conflict. Samba AD forwards non-AD queries upstream."

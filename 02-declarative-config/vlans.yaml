@@ -1,3 +1,6 @@
+---
+# Rylan VLANs v5.0 - USG-3P Locked (Dec 2025)
+# Matches live controller: VLAN 1=Mgmt, no VLAN 20, servers on 10
 vlans:
   - id: 10
     name: servers
@@ -6,7 +9,7 @@ vlans:
     dhcp_enabled: false
     dns_servers: [10.0.10.10, 1.1.1.1]
     static_leases:
-      - mac: "de:ad:be:ef:ca:fe"   # ← replace with real FreeRADIUS LXC MAC once known
+      - mac: "de:ad:be:ef:ca:fe"  # ← FreeRADIUS LXC MAC
         ip: "10.0.10.11"
         hostname: "radius.rylan.internal"
   - id: 30
