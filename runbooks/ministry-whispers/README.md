@@ -215,9 +215,9 @@ This deploys:
 
 | File | Purpose |
 |------|---------|
-| `harden.sh` | Phase 2 orchestrator (SSH/nftables/fail2ban) |
+| `rylan-bauer-eternal-one-shot.sh` | Phase 2 orchestrator (atomic, <30s) |
 | `README.md` | This file |
-| `/etc/ssh/sshd_config` | Hardened SSH configuration (backed up) |
+| `/etc/ssh/sshd_config.d/99-bauer-eternal.conf` | Hardened SSH configuration (key-only) |
 | `/etc/nftables.conf` | Firewall ruleset (drop-default policy) |
 | `/etc/fail2ban/jail.local` | fail2ban configuration |
 
@@ -237,7 +237,7 @@ This deploys:
 Run the deployment with verbose logging:
 
 ```bash
-bash -x ./runbooks/ministry-whispers/harden.sh
+bash -x ./runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
 ```
 
 Check comprehensive status:

@@ -112,7 +112,7 @@ sudo samba-tool domain backup restore --backup-file=/path/to/backup.tar.bz2
 Once Phase 1 (Secrets) is complete, proceed to **Phase 2: Ministry of Whispers** (Bauer hardening):
 
 ```bash
-sudo bash ./runbooks/ministry-whispers/harden.sh
+sudo bash ./runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
 ```
 
 This deploys:
@@ -127,7 +127,7 @@ This deploys:
 
 | File | Purpose |
 |------|---------|
-| `deploy.sh` | Phase 1 orchestrator (Samba/LDAP/Kerberos) |
+| `rylan-carter-eternal-one-shot.sh` | Phase 1 orchestrator (atomic, <30s) |
 | `README.md` | This file |
 | `../../../.env` | Environment variables (Samba realm, IPs, etc.) |
 
@@ -138,7 +138,7 @@ This deploys:
 Run the deployment with verbose logging:
 
 ```bash
-bash -x ./runbooks/ministry-secrets/deploy.sh
+bash -x ./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
 ```
 
 For detailed status:

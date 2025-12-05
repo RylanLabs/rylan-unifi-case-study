@@ -222,9 +222,9 @@ This verifies:
 
 | File | Purpose |
 |------|---------|
-| `apply.sh` | Phase 3 orchestrator (policy/VLAN/rogue-DHCP) |
+| `rylan-suehring-eternal-one-shot.sh` | Phase 3 orchestrator (atomic, <45s) |
 | `README.md` | This file |
-| `../../02-declarative-config/policy-table-v5.json` | Policy table (10 rules) |
+| `../../02-declarative-config/policy-table.yaml` | Policy table (10 rules, sacred) |
 | `/usr/local/bin/detect-rogue-dhcp.sh` | Rogue DHCP detection webhook |
 
 ---
@@ -243,7 +243,7 @@ This verifies:
 Run the deployment with verbose logging:
 
 ```bash
-bash -x ./runbooks/ministry-perimeter/apply.sh
+bash -x ./runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh
 ```
 
 Check comprehensive status:

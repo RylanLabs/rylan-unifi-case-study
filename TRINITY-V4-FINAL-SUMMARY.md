@@ -171,19 +171,26 @@ Fortress is eternal. The ride is eternal.
 
 ## 📝 FILES CREATED/MODIFIED
 
-### NEW FILES (9)
+### ONE-SHOT SCRIPTS (3) — ATOMIC, <45s TOTAL
 
 | File | Size | Purpose |
 |------|------|---------|
-| `runbooks/ministry-secrets/deploy.sh` | 343 lines | Phase 1: Samba AD/DC + LDAP + Kerberos |
+| `runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh` | 2.1 KB | Phase 1: Samba AD/DC + LDAP + Kerberos (atomic) |
+| `runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh` | 1.6 KB | Phase 2: SSH + nftables + fail2ban (atomic) |
+| `runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh` | 2.6 KB | Phase 3: Policy table + VLAN (atomic) |
+
+### NEW FILES (8)
+
+| File | Size | Purpose |
+|------|------|---------|
 | `runbooks/ministry-secrets/README.md` | 145 lines | Phase 1 junior-proof guide |
-| `runbooks/ministry-whispers/harden.sh` | 317 lines | Phase 2: SSH + nftables + fail2ban |
 | `runbooks/ministry-whispers/README.md` | 168 lines | Phase 2 junior-proof guide |
-| `runbooks/ministry-perimeter/apply.sh` | 318 lines | Phase 3: Policy table + VLAN |
 | `runbooks/ministry-perimeter/README.md` | 172 lines | Phase 3 junior-proof guide |
-| `.github/workflows/ci-trinity.yaml` | 189 lines | CI/CD phase validation |
-| `docs/adr/adr-008-trinity-ministries.md` | 228 lines | Architecture decision record |
-| `EXACT-FILE-DIFFS.md` | 400+ lines | Comprehensive diff documentation |
+| `.github/workflows/ci-trinity.yaml` | 351 lines | CI/CD phase validation (9 jobs) |
+| `docs/adr/adr-008-trinity-ministries.md` | 112 lines | Architecture decision record |
+| `03-validation-ops/validate-bauer-eternal.sh` | 193 lines | Bauer validator (15 tests) |
+| `03-validation-ops/validate-suehring-eternal.sh` | TBD | Suehring validator (TBD tests) |
+| `EXACT-FILE-DIFFS.md` | 400+ lines | Comprehensive diff documentation (legacy) |
 
 ### MODIFIED FILES (1)
 
@@ -283,23 +290,27 @@ sudo bash ./scripts/ignite.sh
 
 ## 💾 COMMIT MESSAGES
 
-### Commit 1
+### Commit 1: Trinity One-Shots (Atomic)
 ```
-feat: add runbooks/ministry-* structure (Trinity phase 1-3)
+feat: add T3-Eternal one-shot runbooks (atomic, <45s total)
 
-- Create runbooks/ministry-secrets/ (Phase 1: Carter — Samba/LDAP/Kerberos)
-  * deploy.sh: Samba AD/DC provisioning + keytab export + NFS-Kerberos
-  * README.md: Junior-proof guide (<45 min, validation checklist, rollback)
+- Create runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh (Phase 1)
+  * Samba AD/DC provisioning + keytab export + NFS-Kerberos (atomic)
+  * Execution time: <30 seconds on Proxmox
+  * README.md: Junior-proof guide
 
-- Create runbooks/ministry-whispers/ (Phase 2: Bauer — SSH/nftables/fail2ban)
-  * harden.sh: Key-only SSH + drop-default firewall + intrusion prevention
+- Create runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh (Phase 2)
+  * Key-only SSH + drop-default firewall + intrusion prevention (atomic)
+  * Execution time: <30 seconds on Proxmox
   * README.md: Hardening guide + fail2ban tuning + rollback
 
-- Create runbooks/ministry-perimeter/ (Phase 3: Suehring — Policy/VLAN)
-  * apply.sh: Policy table (10 rules) + VLAN isolation + rogue-DHCP webhook
+- Create runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh (Phase 3)
+  * Policy table (10 rules) + VLAN isolation + rogue-DHCP webhook (atomic)
+  * Execution time: <45 seconds on Proxmox
   * README.md: Policy enforcement guide + segmentation matrix + rollback
 
-Validation: 4 checks per ministry (12 total), exit-on-fail enforcement.
+Validation: 4 checks per ministry, exit-on-fail enforcement.
+Total deployment time: <45 min on clean Ubuntu 24.04 LTS
 ```
 
 ### Commit 2
