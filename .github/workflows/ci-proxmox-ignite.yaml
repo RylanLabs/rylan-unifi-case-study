@@ -1,0 +1,357 @@
+name: Proxmox Ignite CI/CD Pipeline
+
+on:
+  push:
+    paths:
+      - '01-bootstrap/proxmox/**'
+      - '.github/workflows/ci-proxmox-ignite.yaml'
+  pull_request:
+    paths:
+      - '01-bootstrap/proxmox/**'
+  workflow_dispatch:
+
+jobs:
+  # Stage 1: Linting & Static Analysis
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ShellCheck (Bash syntax validation)
+        run: |
+          # Install ShellCheck if not present
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck
+          
+          # Validate shell scripts
+          echo "🔍 Validating shell scripts..."
+          shellcheck -x 01-bootstrap/proxmox/proxmox-ignite.sh
+          echo "✅ Shell script validation passed"
+
+      - name: Validate preseed configuration
+        run: |
+          echo "🔍 Validating preseed configuration..."
+          
+          # Check for required fields
+          grep -q "debian-installer/locale" 01-bootstrap/proxmox/proxmox-answer.cfg || exit 1
+          grep -q "proxmoxcfg-installer/target_disk" 01-bootstrap/proxmox/proxmox-answer.cfg || exit 1
+          grep -q "d-i passwd/root-password" 01-bootstrap/proxmox/proxmox-answer.cfg || exit 1
+          
+          echo "✅ Preseed configuration validation passed"
+
+      - name: Markdown validation (README)
+        run: |
+          echo "🔍 Validating markdown..."
+          
+          # Check for common markdown issues
+          if grep -q "TODO\|FIXME\|XXX" 01-bootstrap/proxmox/README.md; then
+            echo "⚠️  Warning: Found TODO/FIXME comments in README"
+          fi
+          
+          # Basic markdown structure check
+          if ! grep -q "^# Proxmox VE 8.2" 01-bootstrap/proxmox/README.md; then
+            echo "❌ README missing main heading"
+            exit 1
+          fi
+          
+          echo "✅ Markdown validation passed"
+
+  # Stage 2: Security Scanning
+  security:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck python3-pip
+          pip3 install --upgrade bandit
+
+      - name: Bandit (Python security scanner)
+        run: |
+          echo "🔒 Running Bandit security scan..."
+          
+          # Scan repository (excluding tests)
+          bandit -r . -ll -x ./tests/ -f json -o /tmp/bandit-report.json || true
+          
+          # Display summary
+          if [ -f /tmp/bandit-report.json ]; then
+            echo "Security scan report generated"
+            grep -o '"severity": "[^"]*"' /tmp/bandit-report.json | sort | uniq -c || true
+          fi
+
+      - name: Check for common security issues in scripts
+        run: |
+          echo "🔒 Checking for common security issues..."
+          
+          # Check for hardcoded passwords (warn only)
+          if grep -E "password.*=.*['\"]" 01-bootstrap/proxmox/proxmox-ignite.sh | grep -v "ChangeMe"; then
+            echo "⚠️  Warning: Possible hardcoded password detected"
+          fi
+          
+          # Check for weak cryptography references
+          if grep -E "md5|sha1|des" 01-bootstrap/proxmox/proxmox-ignite.sh; then
+            echo "⚠️  Warning: Weak cryptography references found"
+          fi
+          
+          echo "✅ Security checks completed"
+
+  # Stage 3: Documentation Completeness
+  docs:
+    name: Documentation Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify documentation coverage
+        run: |
+          echo "📚 Verifying documentation completeness..."
+          
+          # Check for required sections in README
+          required_sections=(
+            "Prerequisites"
+            "Installation Steps"
+            "Usage Examples"
+            "Troubleshooting"
+            "Security Guarantees"
+          )
+          
+          for section in "${required_sections[@]}"; do
+            if grep -q "^## $section" 01-bootstrap/proxmox/README.md; then
+              echo "✅ Found section: $section"
+            else
+              echo "❌ Missing section: $section"
+              exit 1
+            fi
+          done
+
+      - name: Check code comments
+        run: |
+          echo "📝 Verifying code documentation..."
+          
+          # Count comments in main script
+          comment_lines=$(grep -c "^[[:space:]]*#" 01-bootstrap/proxmox/proxmox-ignite.sh || echo 0)
+          total_lines=$(wc -l < 01-bootstrap/proxmox/proxmox-ignite.sh)
+          
+          echo "Comment density: $((comment_lines * 100 / total_lines))% ($comment_lines / $total_lines lines)"
+          
+          # Warn if comment density is low
+          if [ "$((comment_lines * 100 / total_lines))" -lt 20 ]; then
+            echo "⚠️  Warning: Low comment density (<20%)"
+          else
+            echo "✅ Good comment coverage"
+          fi
+
+  # Stage 4: Syntax & Format Validation
+  syntax:
+    name: Syntax & Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check file line endings
+        run: |
+          echo "🔍 Checking file line endings (LF required)..."
+          
+          # Check for CRLF line endings (should be LF only)
+          if file 01-bootstrap/proxmox/proxmox-ignite.sh | grep -q "CRLF"; then
+            echo "❌ File has CRLF line endings (should be LF)"
+            exit 1
+          fi
+          
+          echo "✅ Line endings are correct (LF)"
+
+      - name: Verify script permissions
+        run: |
+          echo "🔍 Checking file permissions..."
+          
+          # Check if script is executable
+          if [ -x "01-bootstrap/proxmox/proxmox-ignite.sh" ]; then
+            echo "✅ Script is executable"
+          else
+            echo "⚠️  Warning: Script is not executable (chmod +x needed)"
+          fi
+
+      - name: Validate script structure
+        run: |
+          echo "🔍 Validating script structure..."
+          
+          # Check for required sections
+          required_sections=(
+            "set -euo pipefail"
+            "SCRIPT_DIR="
+            "parse_arguments"
+            "validate_prerequisites"
+            "configure_network"
+            "harden_ssh"
+            "bootstrap_tooling"
+            "sync_repository"
+            "validate_security"
+          )
+          
+          for section in "${required_sections[@]}"; do
+            if grep -q "$section" 01-bootstrap/proxmox/proxmox-ignite.sh; then
+              echo "✅ Found required section: $section"
+            else
+              echo "❌ Missing required section: $section"
+              exit 1
+            fi
+          done
+
+  # Stage 5: Functional Validation (Dry Run)
+  validate:
+    name: Functional Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Parse script arguments
+        run: |
+          echo "🔍 Validating argument parsing..."
+          
+          # Extract argument parsing logic (basic validation)
+          if grep -A5 "parse_arguments()" 01-bootstrap/proxmox/proxmox-ignite.sh | grep -q "hostname"; then
+            echo "✅ Argument parsing looks valid"
+          fi
+
+      - name: Verify function definitions
+        run: |
+          echo "🔍 Checking function definitions..."
+          
+          # Extract all function definitions
+          functions=$(grep -o "^[a-z_][a-z_]*() {" 01-bootstrap/proxmox/proxmox-ignite.sh | sed 's/() {//')
+          echo "Found functions:"
+          echo "$functions"
+          
+          # Count functions
+          function_count=$(echo "$functions" | wc -l)
+          if [ "$function_count" -ge 10 ]; then
+            echo "✅ Sufficient modularization ($function_count functions)"
+          else
+            echo "⚠️  Low function count ($function_count functions)"
+          fi
+
+      - name: Validate phase structure
+        run: |
+          echo "🔍 Validating phase structure..."
+          
+          # Check for all 6 phases
+          phases=(0 1 2 3 4 5 6)
+          
+          for phase in "${phases[@]}"; do
+            if grep -q "Phase $phase:" 01-bootstrap/proxmox/proxmox-ignite.sh; then
+              echo "✅ Phase $phase found"
+            else
+              echo "❌ Phase $phase missing"
+              exit 1
+            fi
+          done
+
+  # Stage 6: Line Count & Complexity
+  metrics:
+    name: Code Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Calculate metrics
+        run: |
+          echo "📊 Code Metrics"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          script="01-bootstrap/proxmox/proxmox-ignite.sh"
+          
+          # Total lines
+          total=$(wc -l < "$script")
+          echo "Total lines:      $total"
+          
+          # Non-comment lines
+          code=$(grep -vc "^[[:space:]]*#" "$script")
+          echo "Code lines:       $code"
+          
+          # Comment lines
+          comments=$(grep -c "^[[:space:]]*#" "$script")
+          echo "Comment lines:    $comments"
+          
+          # Functions
+          functions=$(grep -c "^[a-z_][a-z_]*() {" "$script")
+          echo "Functions:        $functions"
+          
+          # Check constraints (Barrett: <400 lines target, allow up to 500)
+          if [ "$code" -le 500 ]; then
+            echo "✅ Code complexity within limits (Barrett Unix Zen: <500 LOC)"
+          else
+            echo "⚠️  Code complexity high (>500 LOC)"
+          fi
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # Stage 7: Test Reports
+  report:
+    name: Test Summary Report
+    runs-on: ubuntu-latest
+    needs: [lint, security, docs, syntax, validate, metrics]
+    if: always()
+    
+    steps:
+      - name: Generate test report
+        run: |
+          echo "✅ CI/CD Pipeline Summary"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Jobs Status:"
+          echo "  - Lint:        ${{ needs.lint.result }}"
+          echo "  - Security:    ${{ needs.security.result }}"
+          echo "  - Docs:        ${{ needs.docs.result }}"
+          echo "  - Syntax:      ${{ needs.syntax.result }}"
+          echo "  - Validate:    ${{ needs.validate.result }}"
+          echo "  - Metrics:     ${{ needs.metrics.result }}"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          
+          # Fail overall if any job failed
+          if [[ "${{ needs.lint.result }}" == "failure" || 
+                "${{ needs.security.result }}" == "failure" ||
+                "${{ needs.docs.result }}" == "failure" ||
+                "${{ needs.syntax.result }}" == "failure" ||
+                "${{ needs.validate.result }}" == "failure" ]]; then
+            echo "❌ One or more jobs failed"
+            exit 1
+          else
+            echo "✅ All checks passed!"
+            exit 0
+          fi
+
+      - name: Checkout repository (for artifact upload)
+        if: always()
+        uses: actions/checkout@v4
+
+      - name: Upload artifacts (optional)
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ci-reports
+          path: |
+            /tmp/bandit-report.json
+          retention-days: 7
+
+# Allow manual trigger for testing
+env:
+  PROXMOX_IGNITE_VERSION: "1.0.0"
+  T3_ETERNAL_COMPLIANCE: "true"
