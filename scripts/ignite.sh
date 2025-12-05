@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 # Trinity Orchestrator — Sequential Phase Enforcement (v4.0)
-# Carter (Secrets) → Bauer (Whispers) → Suehring (Perimeter) → Validate
+# Carter (Secrets) -> Bauer (Whispers) -> Suehring (Perimeter) -> Validate
 # Zero concurrency. Exit-on-fail. Junior-at-3-AM deployable (<45 min).
 
 set -euo pipefail
 
-echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║                    TRINITY ORCHESTRATOR v4.0                  ║"
-echo "║          Sequential Phase Deployment (Zero Concurrency)       ║"
-echo "║                                                               ║"
-echo "║  Phase 1: Ministry of Secrets (Carter) — Samba/LDAP/Kerberos ║"
-echo "║  Phase 2: Ministry of Whispers (Bauer) — SSH/nftables/audit  ║"
-echo "║  Phase 3: Ministry of Perimeter (Suehring) — Policy/VLAN     ║"
-echo "║  Final:   Validation (eternal green or die trying)           ║"
-echo "╚═══════════════════════════════════════════════════════════════╝"
+cat <<'BANNER'
+================================================================================
+                        TRINITY ORCHESTRATOR v4.0
+                 Sequential Phase Deployment (Zero Concurrency)
+
+  Phase 1: Ministry of Secrets (Carter)  -> Samba / LDAP / Kerberos
+  Phase 2: Ministry of Whispers (Bauer)  -> SSH / nftables / audit
+  Phase 3: Ministry of Perimeter (Suehring) -> Policy / VLAN
+  Final:   Validation (eternal green or die trying)
+================================================================================
+BANNER
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -26,23 +28,27 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_phase() { echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"; echo -e "${GREEN}[TRINITY]${NC} $1"; echo -e "${BLUE}══════════════════════════════════════════════════════════${NC}"; }
+log_phase() {
+  echo -e "${BLUE}==============================================================================${NC}"
+  echo -e "${GREEN}[TRINITY]${NC} $1"
+  echo -e "${BLUE}==============================================================================${NC}"
+}
 log_step() { echo -e "${GREEN}[TRINITY]${NC} $1"; }
 log_error() { echo -e "${RED}[TRINITY-ERROR]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[TRINITY-WARN]${NC} $1"; }
-log_success() { echo -e "${GREEN}[✓ SUCCESS]${NC} $1"; }
+log_success() { echo -e "${GREEN}[TRINITY-SUCCESS]${NC} $1"; }
 
 # Exit handler with duration
 exit_handler() {
   local exit_code=$?
   ELAPSED=$(($(date +%s) - START_TIME))
-  
+
   if [[ $exit_code -eq 0 ]]; then
     log_success "Trinity orchestration complete (${ELAPSED}s)"
   else
     log_error "Trinity orchestration FAILED at $(date) (exit code: $exit_code)"
   fi
-  
+
   exit $exit_code
 }
 
@@ -60,14 +66,14 @@ if [[ ! -f "$REPO_ROOT/.env" ]]; then
   exit 1
 fi
 source "$REPO_ROOT/.env"
-log_step "✓ .env loaded"
+log_step ".env loaded"
 
 # Verify we're running as root (required for service management)
 if [[ $EUID -ne 0 ]]; then
   log_error "This script must be run as root (sudo ./ignite.sh)"
   exit 1
 fi
-log_step "✓ Running as root"
+log_step "Running as root"
 
 # Verify runbooks exist
 if [[ ! -d "$REPO_ROOT/runbooks/ministry-secrets" ]]; then
@@ -82,13 +88,13 @@ if [[ ! -d "$REPO_ROOT/runbooks/ministry-perimeter" ]]; then
   log_error "Ministry of Perimeter runbook not found"
   exit 1
 fi
-log_step "✓ All Ministry runbooks present"
+log_step "All Ministry runbooks present"
 
 # Verify Ubuntu 24.04 LTS
 if ! grep -q "24.04" /etc/os-release 2>/dev/null; then
   log_warn "Not Ubuntu 24.04 LTS (some components may not work as documented)"
 fi
-log_step "✓ OS check passed"
+log_step "OS check passed"
 
 # =============================================================================
 # PHASE 1: MINISTRY OF SECRETS (CARTER FOUNDATION)
@@ -105,7 +111,7 @@ fi
 
 # Confirm before proceeding
 echo ""
-read -r -p "✓ Phase 1 complete. Continue to Phase 2 (Whispers)? [y/N] " RESP
+read -r -p "Phase 1 complete — continue to Whispers? [y/N] " RESP
 if [[ ! "${RESP:-N}" =~ ^[Yy]$ ]]; then
   log_warn "User aborted after Phase 1"
   exit 0
@@ -126,7 +132,7 @@ fi
 
 # Confirm before proceeding
 echo ""
-read -r -p "✓ Phase 2 complete. Continue to Phase 3 (Perimeter)? [y/N] " RESP
+read -r -p "Phase 2 complete — continue to Perimeter? [y/N] " RESP
 if [[ ! "${RESP:-N}" =~ ^[Yy]$ ]]; then
   log_warn "User aborted after Phase 2"
   exit 0
@@ -147,7 +153,7 @@ fi
 
 # Confirm before final validation
 echo ""
-read -r -p "✓ Phase 3 complete. Continue to final validation? [y/N] " RESP
+read -r -p "Phase 3 complete — continue to final validation? [y/N] " RESP
 if [[ ! "${RESP:-N}" =~ ^[Yy]$ ]]; then
   log_warn "User aborted before final validation"
   exit 0
@@ -161,21 +167,16 @@ log_phase "FINAL VALIDATION: Eternal Green or Die Trying"
 
 log_step "Running comprehensive validation suite..."
 
-if bash "$REPO_ROOT/validate-eternal.sh"; then
-  log_success "═════════════════════════════════════════════════════════"
-  log_success "🏆 TRINITY ORCHESTRATION COMPLETE — ETERNAL GREEN 🏆"
-  log_success "═════════════════════════════════════════════════════════"
-  log_success "Ministry of Secrets (Carter) — ✓ ACTIVE"
-  log_success "Ministry of Whispers (Bauer) — ✓ ACTIVE"
-  log_success "Ministry of Perimeter (Suehring) — ✓ ACTIVE"
-  log_success "═════════════════════════════════════════════════════════"
+if bash "$REPO_ROOT/scripts/validate-eternal.sh"; then
+  log_success "TRINITY ORCHESTRATION COMPLETE — ETERNAL GREEN"
+  log_success "Ministry of Secrets (Carter) — ACTIVE"
+  log_success "Ministry of Whispers (Bauer) — ACTIVE"
+  log_success "Ministry of Perimeter (Suehring) — ACTIVE"
   echo ""
   log_success "Fortress is eternal. The ride is eternal."
   exit 0
 else
-  log_error "═════════════════════════════════════════════════════════"
   log_error "FINAL VALIDATION FAILED — Eternal fortress compromised"
-  log_error "═════════════════════════════════════════════════════════"
   log_error "Run: sudo ./validate-eternal.sh (verbose mode)"
   exit 1
 fi

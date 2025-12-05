@@ -32,21 +32,22 @@ jobs:
 
       - name: Validate policy table
         run: |
-          python3 -m json.tool ./02-declarative-config/policy-table.yaml || true
-          RULE_COUNT=$(python3 -c "import yaml; data=yaml.safe_load(open('./02-declarative-config/policy-table.yaml')); print(len(data.get('rules', [])))" 2>/dev/null || echo "0")
+          RULE_COUNT=$(grep -cE '^  - id:' ./02-declarative-config/policy-table.yaml || echo "0")
           if [ "$RULE_COUNT" -gt 10 ]; then
             echo "❌ Policy table exceeds 10 rules (Suehring constraint violated): $RULE_COUNT"
             exit 1
           fi
           echo "✓ Policy table: $RULE_COUNT ≤ 10 rules"
 
-      - name: File count check (<40 files)
+      - name: File count check (≤150 files)
         run: |
           TOTAL_FILES=$(find . -type f ! -path './.git/*' ! -path './.*' | wc -l)
           echo "Total files: $TOTAL_FILES"
-          if [ "$TOTAL_FILES" -gt 40 ]; then
-            echo "⚠️  Warning: File count may indicate bloat ($TOTAL_FILES > 40)"
+          if [ "$TOTAL_FILES" -gt 150 ]; then
+            echo "❌ Repo bloat detected ($TOTAL_FILES > 150)"
+            exit 1
           fi
+          echo "✓ Repo file budget respected (≤150)"
 
   lint:
     name: Code Quality (Lint, Type Check, Security)
@@ -168,6 +169,13 @@ jobs:
         run: |
           bash -n scripts/ignite.sh
           echo "✓ Trinity orchestrator: syntax OK"
+
+      - name: Validate ignite sequencing
+        run: |
+          grep -q "Phase 1 complete — continue to Whispers? \[y/N\]" scripts/ignite.sh
+          grep -q "Phase 2 complete — continue to Perimeter? \[y/N\]" scripts/ignite.sh
+          grep -q "scripts/validate-eternal.sh" scripts/ignite.sh
+          echo "✓ Ignite prompts and final validation path enforced"
 
       - name: Phase sequence validation
         run: |
