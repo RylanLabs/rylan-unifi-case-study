@@ -87,9 +87,20 @@ jobs:
 
       - name: Check exit-on-fail semantics
         run: |
-          grep -q "set -euo pipefail" scripts/ignite.sh
-          grep -q "exit 1" scripts/ignite.sh | wc -l | grep -E "[1-9]"
-          echo "✓ Exit-on-fail enabled in orchestrator"
+          if grep -q "set -euo pipefail" scripts/ignite.sh; then
+            echo "✓ Found 'set -euo pipefail'"
+          else
+            echo "❌ Missing 'set -euo pipefail' in ignite.sh"
+            exit 1
+          fi
+          
+          EXIT_COUNT=$(grep -c "exit 1" scripts/ignite.sh || echo 0)
+          if [[ $EXIT_COUNT -ge 1 ]]; then
+            echo "✓ Exit-on-fail enabled ($EXIT_COUNT occurrences)"
+          else
+            echo "❌ No 'exit 1' found in ignite.sh"
+            exit 1
+          fi
 
   firewall-rule-count:
     name: Enforce ≤10 Firewall Rules
