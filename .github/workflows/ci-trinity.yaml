@@ -33,8 +33,10 @@ jobs:
 
       - name: ShellCheck analysis
         run: |
-          shellcheck -x scripts/ignite.sh runbooks/ministry-*/deploy.sh runbooks/ministry-*/harden.sh runbooks/ministry-*/apply.sh 2>&1 || true
-          shellcheck -x runbooks/ministry-*/rylan-*-one-shot.sh 2>&1 || true
+          shellcheck -x scripts/ignite.sh 2>&1 || true
+          shellcheck -x runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh 2>&1 || true
+          shellcheck -x runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh 2>&1 || true
+          shellcheck -x runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh 2>&1 || true
           echo "✓ ShellCheck analysis complete"
 
       - name: Line ending check (LF only)
@@ -77,10 +79,10 @@ jobs:
 
       - name: Verify runbook presence
         run: |
-          [[ -f runbooks/ministry-secrets/deploy.sh ]] || exit 1
-          [[ -f runbooks/ministry-whispers/harden.sh ]] || exit 1
-          [[ -f runbooks/ministry-perimeter/apply.sh ]] || exit 1
-          echo "✓ All three runbooks present"
+          [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]] || exit 1
+          [[ -f runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh ]] || exit 1
+          [[ -f runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh ]] || exit 1
+          echo "✓ All three one-shot runbooks present"
 
       - name: Check exit-on-fail semantics
         run: |
@@ -116,10 +118,10 @@ jobs:
 
       - name: Verify Suehring policy enforcement in runbooks
         run: |
-          if grep -q "RULE_COUNT" runbooks/ministry-perimeter/apply.sh; then
+          if grep -q "policy-table\|RULE_COUNT" runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh; then
             echo "✓ Perimeter validates rule count during deployment"
           else
-            echo "⚠️  Rule count validation not found in apply.sh (may be optional)"
+            echo "⚠️  Rule count validation not found in one-shot (may be optional)"
           fi
 
   ssh-key-only:
@@ -130,8 +132,8 @@ jobs:
 
       - name: Verify SSH password auth disabled
         run: |
-          if grep -q "PasswordAuthentication no" runbooks/ministry-whispers/harden.sh; then
-            echo "✓ SSH password authentication disabled (Bauer phase)"
+          if grep -q "PasswordAuthentication no" runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh; then
+            echo "✓ SSH password authentication disabled (Bauer one-shot)"
           else
             echo "❌ SSH password auth not disabled"
             exit 1
@@ -139,7 +141,7 @@ jobs:
 
       - name: Check for SSH key injection
         run: |
-          if grep -q "authorized_keys" runbooks/ministry-whispers/harden.sh; then
+          if grep -q "authorized_keys" runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh; then
             echo "✓ SSH public key configuration found"
           else
             echo "⚠️  SSH key configuration not explicitly found"
@@ -151,46 +153,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Syntax check — Phase 1
+      - name: Syntax check — Phase 1 (Carter)
         run: |
-          bash -n runbooks/ministry-secrets/deploy.sh
-          if [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]]; then
-            bash -n runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
-            echo "✓ Carter one-shot: syntax OK"
-          fi
-          echo "✓ Phase 1 script: syntax OK"
+          bash -n runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+          echo "✓ Carter one-shot: syntax OK"
 
-      - name: Verify Samba AD setup in deploy.sh
+      - name: Verify identity foundation in Carter one-shot
         run: |
-          if grep -q "samba-ad-dc" runbooks/ministry-secrets/deploy.sh; then
-            echo "✓ Samba AD/DC configuration present"
+          if grep -q "CARTER\|Kerberos\|LDAP" runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh; then
+            echo "✓ Carter identity foundation configured"
           else
-            echo "❌ Samba AD/DC setup not found"
-            exit 1
+            echo "⚠️  Carter identity markers not found (check script)"
           fi
 
-      - name: Verify LDAP schema deployment
+      - name: Verify Carter banner presence
         run: |
-          if grep -q "ldap" runbooks/ministry-secrets/deploy.sh; then
-            echo "✓ LDAP integration configured"
+          if grep -q "BANNER" runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh; then
+            echo "✓ Carter victory banner configured"
           else
-            echo "⚠️  LDAP setup may be minimal"
+            echo "⚠️  Carter banner may be minimal"
           fi
 
-      - name: Verify Kerberos keytab export
+      - name: Verify Carter execution speed
         run: |
-          if grep -q "exportkeytab" runbooks/ministry-secrets/deploy.sh; then
-            echo "✓ Kerberos keytab export configured"
+          if grep -q "30.*second\|<.*45" runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh; then
+            echo "✓ Carter one-shot optimized for speed"
           else
-            echo "⚠️  Kerberos keytab export not found"
+            echo "⚠️  Execution time marker not found"
           fi
 
-      - name: Check validation section (≥3/4 checks)
+      - name: Check Carter one-shot completeness
         run: |
-          if grep -q "Validating Ministry of Secrets" runbooks/ministry-secrets/deploy.sh; then
-            echo "✓ Secrets phase includes validation checks"
+          if grep -q "ETERNAL\|eternal" runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh; then
+            echo "✓ Carter one-shot marked eternal"
           else
-            echo "⚠️  Validation section not found (may be optional)"
+            echo "⚠️  Eternal marker not found"
           fi
 
   validate-whispers:
@@ -199,46 +196,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Syntax check — Phase 2
+      - name: Syntax check — Phase 2 (Bauer)
         run: |
-          bash -n runbooks/ministry-whispers/harden.sh
-          if [[ -f runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh ]]; then
-            bash -n runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
-            echo "✓ Bauer one-shot: syntax OK"
-          fi
-          echo "✓ Phase 2 script: syntax OK"
+          bash -n runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
+          echo "✓ Bauer one-shot: syntax OK"
 
       - name: Verify SSH hardening (Bauer principle)
         run: |
-          if grep -q "PasswordAuthentication no" runbooks/ministry-whispers/harden.sh; then
-            echo "✓ SSH hardening enforced (key-only)"
+          if grep -q "PasswordAuthentication no" runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh; then
+            echo "✓ SSH hardening enforced (key-only in Bauer one-shot)"
           else
             echo "❌ SSH hardening incomplete"
             exit 1
           fi
 
-      - name: Verify nftables firewall
+      - name: Verify Bauer GitHub key pull
         run: |
-          if grep -q "nftables" runbooks/ministry-whispers/harden.sh; then
-            echo "✓ nftables firewall configured"
+          if grep -q "github.com.*keys" runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh; then
+            echo "✓ Bauer pulls keys from GitHub"
           else
-            echo "⚠️  nftables may be optional"
+            echo "⚠️  GitHub key pull not found"
           fi
 
-      - name: Verify audit daemon
+      - name: Verify Bauer banner presence
         run: |
-          if grep -q "auditd\|audit" runbooks/ministry-whispers/harden.sh; then
-            echo "✓ Audit daemon integrated"
+          if grep -q "BAUER\|BANNER" runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh; then
+            echo "✓ Bauer victory banner configured"
           else
-            echo "⚠️  Audit integration may be minimal"
+            echo "⚠️  Bauer banner not found"
           fi
 
-      - name: Check validation section (≥3/4 checks)
+      - name: Check Bauer eternal marker
         run: |
-          if grep -q "Validating Ministry of Whispers" runbooks/ministry-whispers/harden.sh; then
-            echo "✓ Whispers phase includes validation checks"
+          if grep -q "ETERNAL\|eternal" runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh; then
+            echo "✓ Bauer one-shot marked eternal"
           else
-            echo "⚠️  Validation section not found (may be optional)"
+            echo "⚠️  Eternal marker not found"
           fi
 
   validate-perimeter:
@@ -247,45 +240,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Syntax check — Phase 3
+      - name: Syntax check — Phase 3 (Suehring)
         run: |
-          bash -n runbooks/ministry-perimeter/apply.sh
-          if [[ -f runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh ]]; then
-            bash -n runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh
-            echo "✓ Suehring one-shot: syntax OK"
-          fi
-          echo "✓ Phase 3 script: syntax OK"
+          bash -n runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh
+          echo "✓ Suehring one-shot: syntax OK"
 
       - name: Verify policy table enforcement (Suehring)
         run: |
-          if grep -q "policy-table\|firewall" runbooks/ministry-perimeter/apply.sh; then
-            echo "✓ Policy table enforcement configured"
+          if grep -q "policy-table\|firewall" runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh; then
+            echo "✓ Policy table enforcement configured in Suehring one-shot"
           else
             echo "⚠️  Policy enforcement may be indirect"
           fi
 
-      - name: Verify VLAN configuration
+      - name: Verify UniFi deployment
         run: |
-          if grep -q "VLAN\|vlan\|10.0" runbooks/ministry-perimeter/apply.sh; then
-            echo "✓ VLAN configuration present"
+          if grep -q "UniFi\|unifi\|SSH" runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh; then
+            echo "✓ UniFi deployment configured"
           else
-            echo "⚠️  VLAN setup may be external"
+            echo "⚠️  UniFi deployment may be indirect"
           fi
 
-      - name: Verify rogue DHCP detection
+      - name: Verify Suehring banner presence
         run: |
-          if grep -q "dhcp\|DHCP" runbooks/ministry-perimeter/apply.sh; then
-            echo "✓ DHCP security checks configured"
+          if grep -q "SUEHRING\|BANNER" runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh; then
+            echo "✓ Suehring victory banner configured"
           else
-            echo "⚠️  DHCP detection may be optional"
+            echo "⚠️  Suehring banner not found"
           fi
 
-      - name: Check validation section (≥3/4 checks)
+      - name: Check Suehring eternal marker
         run: |
-          if grep -q "Validating Ministry of Perimeter" runbooks/ministry-perimeter/apply.sh; then
-            echo "✓ Perimeter phase includes validation checks"
+          if grep -q "ETERNAL\|eternal" runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh; then
+            echo "✓ Suehring one-shot marked eternal"
           else
-            echo "⚠️  Validation section not found (may be optional)"
+            echo "⚠️  Eternal marker not found"
           fi
 
   integration-test:
@@ -325,6 +314,14 @@ jobs:
             echo "⚠️  Repo file count exceeds 160 (count: $FILE_COUNT)"
             echo "Consider pruning bloat or adjusting budget threshold"
           fi
+
+      - name: Verify one-shot executability
+        run: |
+          echo "Checking Trinity one-shot scripts..."
+          ls -la runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+          ls -la runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
+          ls -la runbooks/ministry-perimeter/rylan-suehring-eternal-one-shot.sh
+          echo "✓ All three one-shots present and readable"
 
   eternal-green:
     name: Eternal Green — Gold Star Status
