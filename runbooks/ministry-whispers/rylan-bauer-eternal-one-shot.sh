@@ -1,12 +1,32 @@
 #!/usr/bin/env bash
-# === BAUER ETERNAL HARDENING – ONE SHOT (30 seconds) ===
+# === BAUER ETERNAL HARDENING v6 — MINISTRY OF WHISPERS (30 seconds) ===
+# runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
+# T3-ETERNAL: Key-only SSH. No passwords. Idempotent. nmap-verified.
+# Commit: feat/t3-eternal-v6-whispers | Tag: v6.0.0-whispers
 set -euo pipefail
 
+# === STEP 1: Fetch Carter's Keys (GitHub or local) ===
+echo "[BAUER] Fetching authorized keys..."
 mkdir -p /root/.ssh && chmod 700 /root/.ssh
-curl -s https://github.com/T-Rylander.keys >> /root/.ssh/authorized_keys
+
+if curl -fsSL https://github.com/T-Rylander.keys -o /root/.ssh/authorized_keys 2>/dev/null; then
+    echo "  [OK] Keys fetched from GitHub"
+else
+    echo "  [WARN] GitHub fetch failed - checking local carter-banner-drop.sh"
+    if [[ -f "/root/rylan-unifi-case-study/runbooks/ministry-secrets/carter-banner-drop.sh" ]]; then
+        bash /root/rylan-unifi-case-study/runbooks/ministry-secrets/carter-banner-drop.sh
+    else
+        echo "  [FATAL] No keys available - deployment unsafe"
+        exit 1
+    fi
+fi
+
 chmod 600 /root/.ssh/authorized_keys
 
+# === STEP 2: Harden SSH (Bauer's Silence) ===
+echo "[BAUER] Hardening SSH config..."
 cat > /etc/ssh/sshd_config.d/99-bauer-eternal.conf <<'EOF'
+# === BAUER ETERNAL HARDENING v6 ===
 PasswordAuthentication no
 PermitRootLogin prohibit-password
 PubkeyAuthentication yes
@@ -21,12 +41,26 @@ AllowTcpForwarding no
 X11Forwarding no
 PermitTunnel no
 UsePAM yes
+
+Match User root
+    PermitRootLogin prohibit-password
 EOF
 
-echo 'Match User root' >> /etc/ssh/sshd_config.d/99-bauer-eternal.conf
-echo '    PermitRootLogin prohibit-password' >> /etc/ssh/sshd_config.d/99-bauer-eternal.conf
+# === STEP 3: Reload + Fail Loud ===
+sshd -t || { echo "[FATAL] SSH config invalid"; exit 1; }
+systemctl reload sshd || { echo "[FATAL] SSH reload failed"; exit 1; }
 
-sshd -t && systemctl reload sshd && echo "BAUER HARDENING COMPLETE – PASSWORD LOGIN DEAD"
+# === STEP 4: Whitaker Pentest (local nmap sim) ===
+echo "[BAUER] Validating with nmap..."
+if command -v nmap >/dev/null; then
+    if nmap -p 22 --script ssh-auth-methods localhost 2>/dev/null | grep -q "password"; then
+        echo "[FATAL] Password auth still exposed"
+        exit 1
+    fi
+    echo "  [OK] Password auth DEAD (nmap verified)"
+else
+    echo "  [WARN] nmap not installed - manual verification required"
+fi
 
 cat <<'BANNER'
 
@@ -36,5 +70,6 @@ cat <<'BANNER'
 ██╔══██╗██╔══██║╚██╗ ██╔╝██╔══╝  ██╔══██╗
 ██║  ██║██║  ██║ ╚████╔╝ ███████╗██║  ██║
 ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝
-SSH IS NOW KEY-ONLY. THE RIDE IS ETERNAL.
+SSH IS NOW KEY-ONLY. PASSWORD LOGIN DEAD.
+THE RIDE IS ETERNAL.
 BANNER
