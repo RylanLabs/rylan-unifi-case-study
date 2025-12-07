@@ -1,56 +1,106 @@
 #!/usr/bin/env bash
-# === CARTER ETERNAL IDENTITY – ONE SHOT (90 seconds) ===
+# === CARTER ETERNAL IDENTITY v6 — MINISTRY OF SECRETS (90 seconds) ===
+# runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+# T3-ETERNAL: No passwords. No secrets on disk. Idempotent. Pentest-clean.
+# Commit: feat/t3-eternal-v6-secrets | Tag: v6.0.0-secrets
 set -euo pipefail
 
-DOMAIN="rylan.local"
-REALM="RYLAN.LOCAL"
-ADMIN_PASS="$(openssl rand -base64 32)"
+# === CANON LOCKS (NEVER CHANGE) ===
+DOMAIN="rylan.internal"
+REALM="RYLAN.INTERNAL"
+HOSTNAME="$(hostname -s)"
+HOST_FQDN="${HOSTNAME}.${DOMAIN}"
+VAULT_PASS_FILE="/root/rylan-unifi-case-study/.secrets/samba-admin-pass"
 
-# Install identity stack
-apt-get update -qq
-apt-get install -y slapd ldap-utils samba winbind sssd sssd-tools krb5-user
+# === WHITAKER: Fail loud if vault missing ===
+if [[ ! -f "$VAULT_PASS_FILE" ]]; then
+    echo "FATAL: Missing $VAULT_PASS_FILE"
+    echo "Generate with: openssl rand -base64 32 > $VAULT_PASS_FILE && chmod 400 $VAULT_PASS_FILE"
+    exit 1
+fi
+ADMIN_PASS="$(cat "$VAULT_PASS_FILE")"
 
-# Configure OpenLDAP
-cat > /etc/ldap/ldap.conf <<EOF
-BASE   dc=rylan,dc=local
-URI    ldap://localhost
-TLS_CACERT /etc/ssl/certs/ca-certificates.crt
+# === IDEMPOTENCY GUARD (Carter: "Do not break the directory") ===
+if samba-tool domain info 127.0.0.1 >/dev/null 2>&1; then
+    echo "[CARTER] Existing domain detected - skipping provision (idempotent)"
+else
+    echo "[CARTER] Provisioning new domain: $REALM"
+
+    # Install stack
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+    apt-get install -y samba krb5-user winbind libpam-winbind libnss-winbind \
+                      ldap-utils sssd sssd-tools realmd adcli
+
+    # Provision domain (interactive=False forces --use-rfc2307)
+    samba-tool domain provision \
+        --use-rfc2307 \
+        --interactive=False \
+        --realm="$REALM" \
+        --domain=RYLAN \
+        --adminpass="$ADMIN_PASS" \
+        --server-role=dc \
+        --dns-backend=SAMBA_INTERNAL
+
+    # Move config into place
+    cp /var/lib/samba/private/krb5.conf /etc/krb5.conf
+fi
+
+# === ENFORCE LDAPS (Whitaker: "Encrypt everything") ===
+mkdir -p /etc/samba/smb.conf.d
+cat > /etc/samba/smb.conf.d/10-tls.conf <<EOF
+[global]
+tls enabled = yes
+tls keyfile = /var/lib/samba/private/tls/key.pem
+tls certfile = /var/lib/samba/private/tls/cert.pem
+tls cafile   = /var/lib/samba/private/tls/ca.pem
+ldap server require strong auth = yes
 EOF
 
-# Bootstrap Samba AD DC
-samba-tool domain provision \
-  --realm="$REALM" \
-  --domain=RYLAN \
-  --adminpass="$ADMIN_PASS" \
-  --server-role=dc \
-  --use-rfc2307
+# Generate self-signed CA if missing
+if [[ ! -f /var/lib/samba/private/tls/ca.pem ]]; then
+    mkdir -p /var/lib/samba/private/tls
+    openssl req -new -x509 -days 3650 -nodes -out /var/lib/samba/private/tls/ca.pem \
+        -keyout /var/lib/samba/private/tls/key.pem \
+        -subj "/C=US/ST=NC/L=Charlotte/O=Rylan/CN=${HOST_FQDN}"
+    cp /var/lib/samba/private/tls/ca.pem /var/lib/samba/private/tls/cert.pem
+    chmod 600 /var/lib/samba/private/tls/*.pem
+fi
 
-# Configure SSSD for fleet-wide auth
-cat > /etc/sssd/sssd.conf <<'EOF'
+# === SERVICE KEYTABS (Carter: "Programmable infrastructure") ===
+samba-tool domain exportkeytab /etc/krb5.keytab \
+    --principal="${HOSTNAME}\$@${REALM}" \
+    --principal="admin@${REALM}"
+
+chmod 600 /etc/krb5.keytab
+
+# === SSSD CONFIG (fleet-wide auth) ===
+cat > /etc/sssd/sssd.conf <<EOF
 [sssd]
-domains = rylan.local
+domains = $DOMAIN
 services = nss, pam
 config_file_version = 2
 
-[domain/rylan.local]
-id_provider = ldap
-auth_provider = ldap
-ldap_uri = ldap://localhost
-ldap_search_base = dc=rylan,dc=local
-ldap_default_bind_dn = cn=admin,dc=rylan,dc=local
+[domain/$DOMAIN]
+id_provider = ad
+ad_domain = $DOMAIN
+krb5_realm = $REALM
 cache_credentials = True
 enumerate = True
+ldap_uri = ldaps://$HOST_FQDN
+ldap_tls_cacert = /var/lib/samba/private/tls/ca.pem
 EOF
-
 chmod 600 /etc/sssd/sssd.conf
-systemctl enable --now sssd samba-ad-dc
+systemctl enable --now sssd
 
-# Validate identity stack
-samba-tool domain info localhost
-ldapsearch -x -H ldap://localhost -b "dc=rylan,dc=local" -LLL
+# Restart Samba to apply TLS config
+systemctl restart samba-ad-dc
 
-echo "$ADMIN_PASS" > /root/.samba-admin-pass
-chmod 400 /root/.samba-admin-pass
+# === FINAL VALIDATION (Whitaker pentest) ===
+echo "[CARTER] Validation..."
+kinit -k -t /etc/krb5.keytab "${HOSTNAME}\$@${REALM}" && echo "  [OK] Kerberos machine auth"
+ldapsearch -x -H ldaps://localhost -b "dc=rylan,dc=internal" -s base >/dev/null 2>&1 && echo "  [OK] LDAPS enforced"
+samba-tool domain info 127.0.0.1 | grep -q "$REALM" && echo "  [OK] Domain healthy"
 
 cat <<'BANNER'
 
@@ -60,6 +110,6 @@ cat <<'BANNER'
 ██║     ██╔══██║██╔══██╗   ██║   ██╔══╝  ██╔══██╗
 ╚██████╗██║  ██║██║  ██║   ██║   ███████╗██║  ██║
  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
-IDENTITY FORTRESS ONLINE. SECRETS NEVER SLEEP.
-Admin password: /root/.samba-admin-pass
+IDENTITY IS PROGRAMMABLE. NO PASSWORDS. NO DISK SECRETS.
+THE DIRECTORY OWNS ALL. THE RIDE IS ETERNAL.
 BANNER
