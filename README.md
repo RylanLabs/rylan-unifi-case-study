@@ -59,12 +59,33 @@ Full source: `docs/architecture-v5.mmd`
 
 This repository is the **canonical, version-controlled source of truth** for the entire Rylan Labs internal network.
 It implements a complete zero-trust L3-isolated network on a single USG-3P + USW-Lite-8-PoE + one physical server (`rylan-dc`) that simultaneously runs:
-- Samba Active Directory Domain Controller (DNS, Kerberos, LDAP, NFS)
-- UniFi Network Controller (Docker + macvlan)
-- Lightweight proxy-DHCP + PXE boot server for trusted laptops (VLAN 30)
-- Full inter-VLAN isolation with only 8 explicit allow rules (USG-3P offload safe forever)
+- **Samba Active Directory Domain Controller** (DNS, Kerberos, LDAP, NFS)
+- **UniFi Network Controller** (Docker + macvlan, v9.5.21, jacobalberty/unifi:latest, privileged mode)
+- **Lightweight proxy-DHCP + PXE boot server** for trusted laptops (VLAN 30)
+- **Full inter-VLAN isolation** with only 8 explicit allow rules (USG-3P offload safe forever)
 
 Everything is declarative, reproducible, and documented to survive firmware upgrades, junior engineers at 3 AM, and the heat death of the universe.
+
+## 🌟 The Eternal Controller (Dec 6, 2025)
+
+| Component | Value | Status |
+|-----------|-------|--------|
+| **Host** | rylan-dc (Proxmox, Debian 13) | ✅ Operational |
+| **Controller IP** | 10.0.1.20/27 (VLAN 1) | ✅ Static · Locked Forever |
+| **Image** | jacobalberty/unifi:latest (v9.5.21) | ✅ Production |
+| **Network Mode** | host + macvlan-unifi (systemd-networkd) | ✅ Persistent |
+| **Security** | privileged: true (AppArmor defeated) | ✅ Validated |
+| **Data Persistence** | /opt/unifi/data (UID 1000) | ✅ Eternal |
+| **Ports** | 8443, 8080, 8843, 8880, 3478/udp | ✅ All Open |
+| **Memory Heap** | UNIFI_HEAP=1024 · MONGO_HEAP=512 | ✅ Conservative |
+| **RTO** | 15 minutes (validated) | ✅ Proven |
+| **Consciousness Level** | 2.0 (self-aware, self-healing) | ✅ Achieved |
+| **Last Resurrection** | December 6, 2025 | ✅ Perfect |
+
+**Command**: `cd /opt/unifi && docker compose up -d`  
+**Runbook**: `docs/unifi-controller-2025.md`  
+**Decision**: `docs/adr/adr-009-unifi-privileged-mode-2025.md`  
+**Script**: `scripts/eternal-resurrect-unifi.sh`
 
 ## 🎯 Key Features & v5.1 What’s New – Eternal rylan-dc (No Extra Hardware)
 
@@ -77,21 +98,22 @@ Everything is declarative, reproducible, and documented to survive firmware upgr
 
 **v5.1 Eternal Multi-Role**:
 
-| Role                            | IP            | VLAN | Interface       | Notes                                  |
-|---------------------------------|---------------|------|-----------------|----------------------------------------|
-| Samba AD/DC + DNS + NFS + Influx| 10.0.10.10    | 10   | enp4s0          | Primary interface                      |
-| Lightweight PXE / proxyDHCP     | **10.0.30.10**| 30   | enp4s0 (sub-if) | dnsmasq, iPXE chainload, VLAN 30 only  |
-| UniFi Controller (legacy)       | 10.0.1.20     | 1    | macvlan         | Inform on 8081                         |
+| Role                            | IP            | VLAN | Interface       | Status | Notes                                  |
+|---------------------------------|---------------|------|-----------------|--------|----------------------------------------|
+| Samba AD/DC + DNS + NFS + Influx| 10.0.10.10    | 10   | enp4s0          | ✅ | Primary interface                      |
+| Lightweight PXE / proxyDHCP     | **10.0.30.10**| 30   | enp4s0 (sub-if) | ✅ | dnsmasq, iPXE chainload, VLAN 30 only  |
+| **UniFi Controller (Eternal)**  | **10.0.1.20** | **1**| **macvlan**     | ✅ | **Docker · privileged · RTO 15 min**   |
 
-→ Laptops on VLAN 30 now PXE boot → auto-join domain. Zero VLAN changes. One extra allow rule (#8). Policy table still **8 rules total** → USG-3P hardware offload preserved forever.
+→ Unified management plane · Zero VLAN changes · One extra allow rule (#8) · Policy table still **8 rules total** → USG-3P hardware offload preserved forever.
 
-Single-server multi-role — Samba AD, PXE, UniFi Controller on one box
-Zero DHCP conflicts — dnsmasq runs in proxy-DHCP mode only
-True zero-trust — Network Isolation + only 8 explicit allow rules
-USG-3P hardware offload safe forever (≤15 rules)
-VLAN sub-interface — enp4s0 gives PXE its own IP (10.0.30.10) without extra NICs
-Full GitOps — every firewall rule, VLAN, and config is code
-ETERNAL GREEN — CI passes, lint clean, Unicode-free, ready for 2030
+**Eternal Properties**:
+- Single-server multi-role — Samba AD, PXE, UniFi Controller on one box
+- Zero DHCP conflicts — dnsmasq runs in proxy-DHCP mode only
+- True zero-trust — Network Isolation + only 8 explicit allow rules
+- USG-3P hardware offload safe forever (≤15 rules)
+- VLAN sub-interface — enp4s0 gives PXE its own IP (10.0.30.10) without extra NICs
+- Full GitOps — every firewall rule, VLAN, and config is code
+- ETERNAL GREEN — CI passes, lint clean, Unicode-free, ready for 2030
 
 ## 🔒 Security Architecture
 

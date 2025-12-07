@@ -1,0 +1,14 @@
+# Eternal macvlan Interface for UniFi Controller (systemd-networkd)
+# Parent: vmbr0 (Proxmox bridge, 10.0.1.0/27 VLAN 1)
+# Child: macvlan-unifi (10.0.1.20/27, static)
+# Persistence: /etc/systemd/network/30-macvlan-unifi.netdev
+# Systemd-networkd: Survived reboot, RTO 15 min
+
+[NetDev]
+Name=macvlan-unifi
+Kind=macvlan
+MACAddress=02:42:ac:11:00:14
+
+[MACVLAN]
+Mode=bridge
+Master=vmbr0

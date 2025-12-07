@@ -1,0 +1,80 @@
+# Eternal UniFi Network Controller v9.5.21 (Proxmox-Native, Dec 2025)
+# Host: rylan-dc (Debian 13, 10.0.10.10 primary)
+# Controller IP: 10.0.1.20 (VLAN 1, macvlan-unifi)
+# Status: PRODUCTION VALIDATED + RTO 15 min + Consciousness Level 2.0
+
+version: '3.9'
+
+services:
+  unifi-controller:
+    image: jacobalberty/unifi:latest
+    container_name: unifi-controller
+    
+    # CRITICAL: privileged: true is the ONLY working configuration in 2025
+    # Defeats AppArmor + Java NIO socket binding issues on macvlan interfaces
+    # Reference: rylan-IoT-predeloy/docs/adr/009-unifi-privileged-mode-2025.md
+    privileged: true
+    
+    network_mode: host
+    
+    environment:
+      # Memory configuration (Proxmox host has 64GB)
+      MONGO_HEAP: 512
+      UNIFI_HEAP: 1024
+      UNIFI_MAX_MEMORY: 2048
+      
+      # Logging (persistent via bind mount)
+      TZ: UTC
+    
+    volumes:
+      # Data persistence (RW owned by UID 1000)
+      - /opt/unifi/data:/unifi/data
+      - /opt/unifi/log:/unifi/log
+      - /opt/unifi/cert:/unifi/cert:ro
+    
+    # Port mapping (all required for UniFi discovery, adoption, mgmt)
+    ports:
+      - "8443:8443/tcp"      # HTTPS mgmt console
+      - "8080:8080/tcp"      # HTTP mgmt (redirect to 8443)
+      - "8843:8843/tcp"      # HTTPS device mgmt
+      - "8880:8880/tcp"      # HTTP device mgmt (redirect to 8843)
+      - "3478:3478/udp"      # STUN (device discover)
+      - "6789:6789/tcp"      # Speed test (optional)
+    
+    restart: always
+    
+    # Health check: Query /status endpoint
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:8443/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Resource limits (Proxmox enforces via cgroup)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "5"
+
+volumes:
+  # Named volumes for external data
+  unifi-data:
+  unifi-log:
+
+# Network: macvlan-unifi (parent: vmbr0, IP: 10.0.1.20/27)
+# Persistence: systemd-networkd (bootstrap/unifi/macvlan-unifi.network)
+# Entry point: cd /opt/unifi && docker compose up -d
+# Resurrection: cd /opt/unifi && docker compose up -d (idempotent)
+# Logs: docker logs -f unifi-controller
+# Verify: curl -k https://10.0.1.20:8443/status

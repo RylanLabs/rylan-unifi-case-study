@@ -154,8 +154,17 @@ secrets/
 *.pem
 *.p12
 *password*
-*secret*
+*secret*.txt
+*secret*.yml
+*secret*.yaml
+*secret*.json
+*secret*.env
 .credentials
+
+# BUT allow Trinity Ministry directories
+!runbooks/ministry-secrets/
+!runbooks/ministry-whispers/
+!runbooks/ministry-perimeter/
 
 # UniFi backups
 *.unf

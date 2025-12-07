@@ -1,0 +1,22 @@
+# Eternal macvlan Interface Address Configuration (systemd-networkd)
+# Interface: macvlan-unifi (created by 30-macvlan-unifi.netdev)
+# IP: 10.0.1.20/27 (VLAN 1 – Management)
+# Gateway: 10.0.1.1 (USG-3P)
+# Persistence: /etc/systemd/network/30-macvlan-unifi.network
+# Status: Locked forever, survived December 2025 reboot cycle
+
+[Match]
+Name=macvlan-unifi
+
+[Network]
+Address=10.0.1.20/27
+Gateway=10.0.1.1
+DNS=10.0.10.10
+Domains=rylan.internal
+
+# DHCP disabled (static configuration only)
+DHCP=no
+LinkLocalAddressing=no
+
+[Link]
+MTU=1500

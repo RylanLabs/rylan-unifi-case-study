@@ -32,6 +32,69 @@ git checkout release/v∞.1.0-eternal
 ./eternal-resurrect.sh
 ```
 
+## Sacred Glue (Must Always Exist)
+
+| Path | Function | Canonical | Notes |
+|------|----------|-----------|-------|
+| `eternal-resurrect.sh` | One-command fortress deployment | Bash | Ubuntu 24.04, source .env |
+| `bootstrap/samba-dc-provision.sh` | Canonical AD/DC provisioning | Bash | Ubuntu 24.04 (WSL2 on Windows) |
+| `bootstrap/samba-dc-test.ps1` | Dev-only reference (Windows) | PowerShell | Feature branches only, not merged to main |
+| `guardian/audit-eternal.py` | PII redaction + audit trail | Python | importlib.util lazy Presidio |
+| `.github/workflows/ci-validate.yaml` | Eternal validation pipeline | Bash/Python | Pytest, orchestrator smoke test |
+| `docs/canon/README.md` | This file (sealed forever) | Markdown | Canonical trinity reference |
+| `.env.example` | Hardware-agnostic configuration | Bash | Copy to .env, customize for your environment |
+
+### Windows Development Workflow (Trinity-Compliant)
+
+For Windows engineers working on this fortress:
+
+1. **Install WSL2 Ubuntu 24.04**:
+   ```powershell
+   wsl --install -d Ubuntu-24.04
+   ```
+
+2. **Clone repository inside WSL**:
+   ```bash
+   wsl
+   cd /mnt/c/Path/To/Repos
+   git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
+   cd rylan-unifi-case-study
+   ```
+
+3. **Run canonical bash scripts**:
+   ```bash
+   source .env
+   bash bootstrap/samba-dc-provision.sh
+   bash eternal-resurrect.sh
+   ```
+
+4. **Optional: Use PowerShell for Multipass testing** (feature branch only):
+   ```powershell
+   # Windows-specific Multipass testing (feature branches)
+   cd F:\Sources\Repos\rylan-unifi-case-study-iot
+   .\bootstrap\samba-dc-test.ps1
+   
+   # NOTE: samba-dc-test.ps1 is dev-only reference.
+   # Port to bash (samba-dc-provision.sh) before merging to main.
+   ```
+
+### CI Guard: Bash Enforcement in Main Branch
+
+All Pull Requests to `main` must pass this check:
+
+```yaml
+# .github/workflows/ci-validate.yaml
+- name: Enforce canonical bash (block PowerShell in main branch)
+  run: |
+    if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+      if find bootstrap/ -name "*.ps1" 2>/dev/null | grep -q .; then
+        echo "❌ PowerShell scripts not allowed in main branch"
+        echo "   Port to bash (bootstrap/samba-dc-provision.sh) before merging"
+        exit 1
+      fi
+    fi
+```
+
 This directory is **sealed** — changes require ADR approval and Phase increment.
 
 **Status:** Phase -∞ → v∞.1.0-eternal complete

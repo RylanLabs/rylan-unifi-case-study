@@ -2,3 +2,57 @@
 unifi_user: "admin"
 unifi_pass: "secret123"
 osticket_key: "your-osticket-api-key-here"
+
+# IoT Devices - v∞.1.2-iot-ready (Dec 2025)
+iot_devices:
+  - device_name: "Traeger Pellet Grill"
+    mac_address: "<TBD-Week1>"
+    ip_current: "<TBD-Week1>"
+    manufacturer: "Traeger"
+    model_number: "<TBD>"
+    firmware_version: "<TBD>"
+    ports_required: ["443", "8883"]
+    cloud_dependencies: ["traeger-cloud.io", "mqtt.traeger.com"]
+    update_mechanism: "OTA via cloud"
+    encryption: "TLS 1.2"
+    connection_type: "WiFi (VLAN 95 iot-isolated)"
+    notes: "High cloud dependency, untrusted VLAN, whitelist ports only"
+
+  - device_name: "Denon HEOS E300 Soundbar"
+    mac_address: "<TBD-Week1>"
+    ip_current: "<TBD-Week1>"
+    manufacturer: "Denon"
+    model_number: "HEOS E300"
+    firmware_version: "<TBD>"
+    ports_required: ["80", "443", "1900", "8009"]
+    cloud_dependencies: ["heos.denon.com", "spotify.com", "pandora.com"]
+    update_mechanism: "OTA via HEOS app"
+    encryption: "TLS 1.2 for cloud, mDNS local"
+    connection_type: "Hardwired US-8 Port 2 (VLAN 96 iot-trusted)"
+    notes: "Ethernet center termination, semi-trusted, requires mDNS reflector"
+
+  - device_name: "Denon HEOS E400 Soundbar"
+    mac_address: "<TBD-Week1>"
+    ip_current: "<TBD-Week1>"
+    manufacturer: "Denon"
+    model_number: "HEOS E400"
+    firmware_version: "<TBD>"
+    ports_required: ["80", "443", "1900", "8009"]
+    cloud_dependencies: ["heos.denon.com", "spotify.com", "pandora.com"]
+    update_mechanism: "OTA via HEOS app"
+    encryption: "TLS 1.2 for cloud, mDNS local"
+    connection_type: "Hardwired US-8 Port 2 (VLAN 96 iot-trusted)"
+    notes: "Ethernet center termination, semi-trusted, requires mDNS reflector"
+
+  - device_name: "Network Printer"
+    mac_address: "<TBD-Week1>"
+    ip_current: "<TBD-Week1>"
+    manufacturer: "<TBD>"
+    model_number: "<TBD>"
+    firmware_version: "<TBD>"
+    ports_required: ["9100", "515", "631"]
+    cloud_dependencies: []
+    update_mechanism: "Manual firmware via web UI"
+    encryption: "None (IPP only)"
+    connection_type: "WiFi or Hardwired (VLAN 30 trusted-devices)"
+    notes: "Legacy device, no cloud deps, print-only ports"

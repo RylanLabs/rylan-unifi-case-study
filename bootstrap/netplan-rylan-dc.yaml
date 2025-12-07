@@ -1,20 +1,22 @@
-'''# /etc/netplan/99-rylan-dc.yaml
 network:
   version: 2
+  renderer: networkd
   ethernets:
-    eno1:
+    primary-nic:
+      match:
+        name: "en*"  # Matches eno1, enp3s0, etc. (systemd predictable naming)
       dhcp4: no
       addresses:
-        - 10.0.10.10/26 # Primary IP (VLAN 10 untagged)
+        - 10.0.10.10/26  # Primary IP (VLAN 10 untagged)
       routes:
         - to: default
           via: 10.0.10.1
       nameservers:
-        addresses: [127.0.0.1, 1.1.1.1] # Local Samba DNS first
+        addresses: [127.0.0.1, 1.1.1.1]  # Local Samba DNS first
 
   vlans:
-    eno1.30: # Tagged VLAN 30 sub-interface
+    primary-nic.30:  # Tagged VLAN 30 sub-interface
       id: 30
-      link: eno1
+      link: primary-nic
       addresses:
-        - 10.0.30.10/24 # PXE service IP
+        - 10.0.30.10/24  # PXE service IP

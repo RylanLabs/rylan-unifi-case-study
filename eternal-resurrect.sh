@@ -1,41 +1,108 @@
 #!/usr/bin/env bash
-# Eternal Resurrect — One-Command Fortress Deployment (Phase 3 Endgame v2.0)
+# Eternal Resurrect - One-Command Fortress Deployment (Phase 3 Endgame v2.0)
 # git clone && source .env && ./eternal-resurrect.sh
 
 set -euo pipefail
+
+load_secrets_from_vault() {
+	if [ ! -r .secrets/samba-admin-pass ] || [ ! -r .secrets/unifi-admin-token ]; then
+		echo "FAIL: Vault missing - Run: mkdir -p .secrets && chmod 700 .secrets"
+		echo " Required files:"
+		echo "   .secrets/samba-admin-pass"
+		echo "   .secrets/unifi-admin-token"
+		exit 1
+	fi
+	SAMBA_PASS="$(cat .secrets/samba-admin-pass)"
+	UNIFI_TOKEN="$(cat .secrets/unifi-admin-token)"
+	export SAMBA_PASS
+	export UNIFI_TOKEN
+}
+
+# Detect primary ethernet NIC (hardware-agnostic)
+echo "[INFO] Detecting primary ethernet NIC..."
+PRIMARY_NIC=$(ip -o link show | awk -F': ' '
+  $2 ~ /^en[op]/ || $2 ~ /^eth/ {
+    if ($2 !~ /vlan|docker|br-|veth/) {
+      print $2
+      exit
+    }
+  }
+')
+
+if [ -z "$PRIMARY_NIC" ]; then
+	echo "ERROR: No ethernet NIC found (expected en*, eth*)"
+  echo "   Available interfaces:"
+  ip -o link show | awk -F': ' '{print "     - " $2}'
+  exit 1
+fi
+
+echo "OK: Primary NIC detected: $PRIMARY_NIC"
+
+# Validate netplan config exists
+if [ ! -f bootstrap/netplan-rylan-dc.yaml ]; then
+	echo "ERROR: bootstrap/netplan-rylan-dc.yaml not found"
+  exit 1
+fi
+
+# Apply netplan configuration
+echo "[INFO] Applying netplan configuration..."
+sudo cp bootstrap/netplan-rylan-dc.yaml /etc/netplan/99-rylan-dc.yaml
+sudo chmod 600 /etc/netplan/99-rylan-dc.yaml
+sudo netplan apply --debug
+
+# Verify IP assignment
+echo "[INFO] Waiting for network configuration to apply..."
+sleep 2
+
+if ! ip addr show | grep -q "10.0.10.10"; then
+	echo "WARNING: Primary IP 10.0.10.10 not assigned"
+  echo "   Attempting netplan apply with debug..."
+  sudo netplan apply --debug
+  exit 1
+fi
+
+if ! ip addr show | grep -q "10.0.30.10"; then
+	echo "WARNING: VLAN 30 IP 10.0.30.10 not assigned (PXE may be unavailable)"
+else
+	echo "OK: VLAN 30 IP 10.0.30.10 assigned successfully"
+fi
+
+echo "OK: Netplan configuration applied successfully"
+echo ""
 
 echo "=== Eternal Resurrection Initiated (Consciousness Level 1.4) ==="
 
 # Load hardware modular config
 if [[ ! -f .env ]]; then
-  echo "⚠️  .env not found. Using .env.example defaults (update for your environment)."
+	echo "WARNING: .env not found. Using .env.example defaults (update for your environment)."
   cp .env.example .env
 fi
 source .env
+load_secrets_from_vault
 
 # Prerequisites check
-command -v python3 >/dev/null || { echo "❌ python3 required"; exit 1; }
-command -v git >/dev/null || { echo "❌ git required"; exit 1; }
+command -v python3 >/dev/null || { echo "ERROR: python3 required"; exit 1; }
+command -v git >/dev/null || { echo "ERROR: git required"; exit 1; }
 
 # Install Python dependencies
-echo "📦 Installing Python dependencies..."
+echo "[INFO] Installing Python dependencies..."
 python3 -m pip install --quiet --upgrade pip
 python3 -m pip install --quiet -r requirements.txt
 
 # Run guardian audit
-echo "🛡️  Running guardian audit..."
+echo "[INFO] Running guardian audit..."
 python3 guardian/audit-eternal.py
 
 # Validate policy table
-echo "📋 Validating policy table..."
+echo "[INFO] Validating policy table..."
 python3 -c "import yaml; data=yaml.safe_load(open('02-declarative-config/policy-table.yaml')); assert len(data.get('rules', [])) <= 10, 'Policy table exceeds 10 rules (Suehring constraint violated)'"
 
 # Run tests
-echo "🧪 Running test suite..."
+echo "[INFO] Running test suite..."
 python3 -m pytest -q
 
 # Phase 3 Endgame: Samba AD/DC DNS Configuration
-echo "🔵 Phase 3 Endgame: Samba AD/DC Configuration"
+echo "[INFO] Phase 3 Endgame: Samba AD/DC Configuration"
 echo "   NOTE: This is a DRY-RUN configuration template."
 echo "   Update /etc/samba/smb.conf manually or via ansible deployment."
 echo ""
@@ -50,7 +117,7 @@ echo "       DNS_UPSTREAM_2=$DNS_UPSTREAM_2"
 echo ""
 
 # Phase 3 Endgame: FreeRADIUS LDAP Configuration
-echo "🟢 Phase 3 Endgame: FreeRADIUS LDAP Configuration (Group Membership)"
+echo "[INFO] Phase 3 Endgame: FreeRADIUS LDAP Configuration (Group Membership)"
 echo "   NOTE: Apply these changes to FreeRADIUS on rylan-dc"
 echo ""
 echo "   File: 01-bootstrap/freeradius/mods-available/ldap"
@@ -91,7 +158,7 @@ ldap {
 	# User Authentication Filter
 	filter = "(sAMAccountName=%{Stripped-User-Name:-%{User-Name}})"
 
-	# Group Membership (NEW — Phase 3 Endgame)
+	# Group Membership (NEW â€” Phase 3 Endgame)
 	group_base_dn = "cn=Users,dc=rylan,dc=internal"
 	group_attribute = "memberOf"
 	group_member_attribute = "member"
@@ -115,7 +182,7 @@ LDAP_TEMPLATE
 echo ""
 
 # Phase 3 Endgame: Kernel Tuning (Performance & Stability)
-echo "⚙️  Phase 3 Endgame: Kernel Tuning (Performance & Stability)"
+echo "âš™ï¸  Phase 3 Endgame: Kernel Tuning (Performance & Stability)"
 echo ""
 echo "   Kernel parameters for multi-service Samba/FreeRADIUS/Docker host:"
 echo ""
@@ -159,7 +226,7 @@ echo "   Applying kernel tuning..."
 
 # Create sysctl configuration file
 sudo tee /etc/sysctl.d/99-eternal-fortress.conf > /dev/null << 'SYSCTL_CONF'
-# Eternal Fortress Kernel Tuning — Phase 3 Endgame
+# Eternal Fortress Kernel Tuning â€” Phase 3 Endgame
 # Optimized for Samba AD/DC + FreeRADIUS + Docker multi-service host
 
 # Network Performance (Samba + LDAP + NFS)
@@ -213,7 +280,7 @@ sudo sysctl -p /etc/sysctl.d/99-eternal-fortress.conf >/dev/null 2>&1
 echo "   Updating process limits (/etc/security/limits.conf)..."
 sudo tee -a /etc/security/limits.conf > /dev/null << 'LIMITS_CONF'
 
-# Eternal Fortress Process Limits — Phase 3 Endgame
+# Eternal Fortress Process Limits â€” Phase 3 Endgame
 # Allow high file descriptor count for Docker + Samba
 
 *       soft    nofile  65536
@@ -226,21 +293,21 @@ root    soft    nproc   65536
 root    hard    nproc   131072
 LIMITS_CONF
 
-echo "   ✅ Kernel tuning applied"
+echo "   âœ… Kernel tuning applied"
 echo ""
 
 # Validate endgame RTO
-echo "⏱️  Validating RTO <15 minutes..."
+echo "â±ï¸  Validating RTO <15 minutes..."
 if command -v time >/dev/null; then
-  timeout 900 bash 03-validation-ops/orchestrator.sh --dry-run >/dev/null 2>&1 || { echo "⚠️  RTO validation inconclusive (orchestrator.sh dry-run timeout or error)"; }
+  timeout 900 bash 03-validation-ops/orchestrator.sh --dry-run >/dev/null 2>&1 || { echo "âš ï¸  RTO validation inconclusive (orchestrator.sh dry-run timeout or error)"; }
   echo "   RTO validation passed (orchestrator.sh <15 min)"
 else
   echo "   (time command not available, skipping RTO check)"
 fi
 
 echo ""
-echo "✅ Eternal fortress resurrected successfully"
-echo "   Policy table: ≤10 rules (Suehring modular, Phase 3 locked)"
+echo "âœ… Eternal fortress resurrected successfully"
+echo "   Policy table: â‰¤10 rules (Suehring modular, Phase 3 locked)"
 echo "   Pi-hole upstream: $PIHOLE_IP (Bauer: DNS conflict mitigated)"
 echo "   Guardian audit: passed"
 echo "   Tests: all green"
@@ -255,8 +322,8 @@ echo "  3. Deploy FreeRADIUS: cd 01-bootstrap/freeradius && docker-compose up -d
 echo "  4. Apply policy table: cd 02-declarative-config && python apply.py"
 echo "  5. Configure cron: sudo cp 01-bootstrap/backup-orchestrator.sh /opt/rylan/ && (crontab -l; echo '0 2 * * * /opt/rylan/backup-orchestrator.sh') | crontab -"
 echo ""
-echo "Carter (Eternal Directory Self-Healing): ✅ Pi-hole forwarding enabled"
-echo "Bauer (No PII/Secrets): ✅ Sanitized, no serials"
-echo "Suehring (VLAN/Policy Modular): ✅ ≤10 rules preserved"
+echo "Carter (Eternal Directory Self-Healing): âœ… Pi-hole forwarding enabled"
+echo "Bauer (No PII/Secrets): âœ… Sanitized, no serials"
+echo "Suehring (VLAN/Policy Modular): âœ… â‰¤10 rules preserved"
 echo ""
 echo "The fortress is eternal. The ride eternal."

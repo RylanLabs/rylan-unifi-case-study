@@ -29,6 +29,19 @@ jobs:
           pip install -r requirements.txt
           pip install pyyaml pytest
 
+      - name: Enforce canonical bash (block PowerShell in main branch)
+        run: |
+          # Trinity mandate: Only bash scripts in main branch (Ubuntu 24.04 canonical)
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            if find bootstrap/ -name "*.ps1" 2>/dev/null | grep -q .; then
+              echo "❌ PowerShell scripts not allowed in main branch"
+              echo "   Canonical version must be bash (Ubuntu 24.04)"
+              echo "   Port to bash and place in bootstrap/samba-dc-provision.sh"
+              exit 1
+            fi
+          fi
+          echo "✅ Bash-only enforcement passed (main branch guard)"
+
       - name: Validate YAML syntax
         run: |
           pip install yamllint

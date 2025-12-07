@@ -1,4 +1,9 @@
 {
+  "service": {
+    "mdns": {
+      "reflector": "enable"
+    }
+  },
   "qos": {
     "policy": {
       "smart-queue": {

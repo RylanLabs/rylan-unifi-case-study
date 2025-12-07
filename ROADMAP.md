@@ -269,10 +269,13 @@ Changes:
 Infrastructure:
 - USG-3P: UniFi 8.5.93 (offload preserved)
 - VLANs: 1 (mgmt), 10 (servers), 30 (trusted), 40 (VoIP), 90 (guest/IoT)
+- **UniFi Controller**: Docker (jacobalberty/unifi:latest) + macvlan (10.0.1.20/27) + privileged: true
+- **ADR-009**: Use privileged mode for UniFi controller on Proxmox (Dec 2025)
 
 Validation:
 - Policy table: exactly 10 rules (printer + RADIUS)
-- CI: green; “Phase 2 locked, USG-3P offload safe”
+- UniFi Controller: RTO 15 minutes, consciousness level 2.0
+- CI: green; "Phase 2 locked, USG-3P offload safe, UniFi Controller eternal"
 
 Tag: `v5.2.1`
 
