@@ -1,8 +1,9 @@
-#!/bin/bash
-set -euo pipefail
-# Rylan v5.0 UniFi Controller Bootstrap
+#!/usr/bin/env bash
+# install-unifi-controller.sh — Rylan v5.0 UniFi Controller Bootstrap
 # Target: Ubuntu 24.04 LTS | MongoDB 7.0 | UniFi Network 8.5.93
 # Binds to 0.0.0.0 for management VLAN access
+
+set -euo pipefail
 echo "=== Rylan v5.0 UniFi Controller Installation ==="
 echo "Target: 10.0.1.20 (Management VLAN)"
 echo ""

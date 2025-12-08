@@ -1,5 +1,5 @@
-#!/bin/bash
-# NFS Security Configuration — Phase 3 Endgame (Kerberos Domain Authentication)
+#!/usr/bin/env bash
+# setup-nfs-kerberos.sh — Phase 3 Endgame (Kerberos Domain Authentication)
 # Enables secure NFS mounts authenticated via Samba AD/DC (rylan-dc)
 # Run on NFS server (rylan-ai) and NFS clients (rylan-dc, rylan-pi)
 
