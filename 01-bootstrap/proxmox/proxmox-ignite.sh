@@ -18,13 +18,15 @@ set -euo pipefail
 # CONFIGURATION & SETUP
 ################################################################################
 
-SCRIPT_START=$(date +%s)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="/var/log/proxmox-ignite.log"
 
 # Source shared libraries
+# shellcheck source=01-bootstrap/proxmox/lib/common.sh
 source "${SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=01-bootstrap/proxmox/lib/metrics.sh
 source "${SCRIPT_DIR}/lib/metrics.sh"
+# shellcheck source=01-bootstrap/proxmox/lib/security.sh
 source "${SCRIPT_DIR}/lib/security.sh"
 
 # Global environment variables (passed to phases)

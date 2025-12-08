@@ -1,11 +1,10 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 #
 # lib/security.sh - Whitaker offensive security validation functions
 # Post-ignition audit suite and attack surface scanning
 #
 # Sourced by: phase5-validate.sh and standalone testing
-
-set -euo pipefail
+# NOTE: No shebang or set -euo pipefail (sourced file, not executed)
 
 ################################################################################
 # WHITAKER 10-POINT VALIDATION MATRIX

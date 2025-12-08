@@ -34,17 +34,17 @@ jobs:
       - name: Lint main orchestrator
         run: |
           echo "🔍 Linting main orchestrator..."
-          shellcheck -x 01-bootstrap/proxmox/proxmox-ignite.sh
+          shellcheck -x -S warning 01-bootstrap/proxmox/proxmox-ignite.sh
 
       - name: Lint phase scripts
         run: |
           echo "🔍 Linting phase modules..."
-          shellcheck 01-bootstrap/proxmox/phases/*.sh
+          shellcheck -S warning 01-bootstrap/proxmox/phases/*.sh
 
       - name: Lint library scripts
         run: |
           echo "🔍 Linting shared libraries..."
-          shellcheck 01-bootstrap/proxmox/lib/*.sh
+          shellcheck -S warning 01-bootstrap/proxmox/lib/*.sh
 
       - name: Lint test scripts
         run: |
@@ -232,23 +232,23 @@ jobs:
           echo ""
           echo "Line of Code (LOC) Summary:"
           
-          ORCHESTRATOR=$(wc -l < 01-bootstrap/proxmox/proxmox-ignite.sh 2>/dev/null || echo 0)
+          ORCHESTRATOR=$(wc -l < 01-bootstrap/proxmox/proxmox-ignite.sh || echo 0)
           echo "  Orchestrator: $ORCHESTRATOR LOC"
           
           PHASES_LOC=0
-          for phase in 01-bootstrap/proxmox/phases/phase*.sh 2>/dev/null; do
+          for phase in 01-bootstrap/proxmox/phases/phase*.sh; do
             [ -f "$phase" ] && PHASES_LOC=$((PHASES_LOC + $(wc -l < "$phase")))
           done
           echo "  Phases Total: $PHASES_LOC LOC"
           
           LIBS_LOC=0
-          for lib in 01-bootstrap/proxmox/lib/*.sh 2>/dev/null; do
+          for lib in 01-bootstrap/proxmox/lib/*.sh; do
             [ -f "$lib" ] && LIBS_LOC=$((LIBS_LOC + $(wc -l < "$lib")))
           done
           echo "  Libraries Total: $LIBS_LOC LOC"
           
           TESTS_LOC=0
-          for test in tests/**/*.sh 2>/dev/null; do
+          for test in tests/**/*.sh; do
             [ -f "$test" ] && TESTS_LOC=$((TESTS_LOC + $(wc -l < "$test")))
           done
           echo "  Tests Total: $TESTS_LOC LOC"

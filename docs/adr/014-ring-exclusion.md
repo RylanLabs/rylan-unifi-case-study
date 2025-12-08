@@ -56,9 +56,9 @@ However, Ring devices present significant security and privacy concerns incompat
 ## Implementation Timeline
 
 - **v∞.1.2 (current)**: Ring explicitly excluded from IoT integration
-- **v∞.2.x (future)**: Evaluate Reolink RVD800-NVR doorbell with local NVR
+  - **v∞.2.x (future)**: Evaluate Reolink RVD800-NVR doorbell with local NVR
   - Blue Iris on Windows VM or Frigate on LXC
-  - VLAN 96 (iot-trusted) with RTSP-only rule
+  - Use guest-iot (VLAN 90) or iot-isolated VLAN 95 depending on deployment
   - No internet access for doorbell itself
 
 ## References

@@ -1,11 +1,10 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 #
 # lib/common.sh - Shared utility functions for proxmox-ignite
 # Logging, error handling, retries, and backup/rollback mechanisms
 #
 # Sourced by: main orchestrator and all phase scripts
-
-set -euo pipefail
+# NOTE: No shebang or set -euo pipefail (sourced file, not executed)
 
 ################################################################################
 # GLOBAL CONFIGURATION

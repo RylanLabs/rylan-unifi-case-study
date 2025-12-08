@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[BAUER] Eternal Guardrails: Validating YAML before push..."
+
+# Run pre-commit hooks (fail on syntax, warn on style)
+if ! pre-commit run --all-files --hook-stage push --show-diff-on-failure; then
+  echo "❌ YAML syntax or rule-count violation — fix before pushing"
+  exit 1
+fi
+
+# Optional: non-blocking style warnings
+WARNINGS=$(yamllint -c .yamllint 02-declarative-config/*.yaml 2>&1 | grep -c "warning" || true)
+if [[ $WARNINGS -gt 0 ]]; then
+  echo "⚠️  $WARNINGS style warnings detected (line-length, indentation, etc.)"
+  echo "   Use --no-verify to bypass (not recommended)"
+fi
+
+# Whitaker quick isolation check (dry-run)
+if [[ -f scripts/validate-isolation.sh ]]; then
+  ./scripts/validate-isolation.sh --dry || {
+    echo "❌ VLAN isolation test failed — aborting push"
+    exit 1
+  }
+fi
+
+echo "✅ Guardrails green. Fortress eternal. Pushing..."

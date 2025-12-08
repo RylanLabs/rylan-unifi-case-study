@@ -155,13 +155,13 @@ cd 02-declarative-config
 python apply.py --dry-run  # Verify syntax
 python apply.py            # Apply VLANs, firewall rules
 
-# Expected output:
+# Expected Output:
 # ✅ VLAN 10 (servers) created
 # ✅ VLAN 30 (trusted-devices) created
 # ✅ VLAN 40 (voip) created
 # ✅ VLAN 90 (guest-iot) created
 # ✅ VLAN 95 (iot-isolated) created  # v∞.1.2
-# ✅ VLAN 96 (iot-trusted) created    # v∞.1.2
+# ✅ VLAN historical references removed    # v∞.3.3-consolidated
 # ✅ Policy rule 1-9 applied (9/10, offload safe)
 ```
 

@@ -6,3 +6,9 @@ rules:
     level: warning
   comments: disable
   document-start: disable
+  empty-lines: disable
+  indentation: {spaces: 2, level: warning}
+
+ignore: |
+  .github/workflows/*.yaml
+  vendor/

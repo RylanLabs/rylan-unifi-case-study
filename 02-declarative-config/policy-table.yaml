@@ -11,38 +11,38 @@ rules:
   - id: 1
     name: guest-to-internet
     description: "Guest/IoT (VLAN 90) to WAN only"
-    source: { vlan: 90 }
-    destination: { type: wan }
+    source: {vlan: 90}
+    destination: {type: wan}
     action: accept
 
   - id: 2
     name: guest-to-local-drop
     description: "Block guest/IoT to internal VLANs 10/30/40"
-    source: { vlan: 90 }
-    destination: { vlans: [10, 30, 40] }
+    source: {vlan: 90}
+    destination: {vlans: [10, 30, 40]}
     action: drop
 
   - id: 3
     name: servers-nfs
     description: "Servers (VLAN 10) NFS backups"
-    source: { vlan: 10 }
-    destination: { vlan: 10, ports: [2049] }
+    source: {vlan: 10}
+    destination: {vlan: 10, ports: [2049]}
     protocol: tcp
     action: accept
 
   - id: 4
     name: dns-dhcp-mgmt
     description: "DNS/DHCP to mgmt (VLAN 1)"
-    source: { vlans: [10, 30, 40, 90] }
-    destination: { vlan: 1, ports: [53, 67, 68] }
+    source: {vlans: [10, 30, 40, 90]}
+    destination: {vlan: 1, ports: [53, 67, 68]}
     protocol: udp
     action: accept
 
   - id: 5
     name: voip-rtp
     description: "VoIP RTP EF/DSCP 46 priority"
-    source: { vlan: 40 }
-    destination: { vlan: 10, port_range: "10000-20000" }
+    source: {vlan: 40}
+    destination: {vlan: 10, port_range: "10000-20000"}
     protocol: udp
     dscp: 46
     action: accept
@@ -50,32 +50,32 @@ rules:
   - id: 6
     name: mgmt-ssh
     description: "Mgmt/Servers/Trusted SSH to Servers"
-    source: { vlans: [1, 10, 30] }
-    destination: { vlan: 10, ports: [22] }
+    source: {vlans: [1, 10, 30]}
+    destination: {vlan: 10, ports: [22]}
     protocol: tcp
     action: accept
 
   - id: 7
     name: trusted-services
     description: "Trusted (30) to Services (10/40)"
-    source: { vlan: 30 }
-    destination: { vlans: [10, 40], ports: [443, 3000, 5000] }
+    source: {vlan: 30}
+    destination: {vlans: [10, 40], ports: [443, 3000, 5000]}
     protocol: tcp
     action: accept
 
   - id: 8
     name: voip-sip
     description: "VoIP SIP signaling"
-    source: { vlan: 40 }
-    destination: { vlan: 10, ports: [5060, 5061] }
+    source: {vlan: 40}
+    destination: {vlan: 10, ports: [5060, 5061]}
     protocol: tcp
     action: accept
 
   - id: 9
     name: rogue-dhcp-detect
     description: "DHCP detection (logged)"
-    source: { vlans: [10, 30, 40, 90] }
-    destination: { vlan: 1, ports: [67] }
+    source: {vlans: [10, 30, 40, 90]}
+    destination: {vlan: 1, ports: [67]}
     protocol: udp
     logging: true
     action: accept
@@ -83,6 +83,6 @@ rules:
   - id: 10
     name: default-drop
     description: "Default drop (implicit deny, hardware offload)"
-    source: { any: true }
-    destination: { any: true }
+    source: {any: true}
+    destination: {any: true}
     action: drop

@@ -7,8 +7,10 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/." && pwd)"
+# shellcheck source=01-bootstrap/proxmox/lib/common.sh
 source "${SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=01-bootstrap/proxmox/lib/metrics.sh
 source "${SCRIPT_DIR}/lib/metrics.sh"
 
 ################################################################################

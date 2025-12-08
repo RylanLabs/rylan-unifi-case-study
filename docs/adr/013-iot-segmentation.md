@@ -11,26 +11,26 @@ The fortress requires integration of four IoT devices with varying trust levels:
 2. **Denon HEOS E300/E400 soundbars** — Moderate cloud dependency, hardwired capable, semi-trusted
 3. **Network printer** — No cloud dependency, legacy device, low risk
 
-Existing VLANs: 10 (servers), 30 (trusted-devices), 40 (voip), 90 (guest-iot)
+ Existing VLANs: 10 (servers), 30 (trusted-devices), 40 (voip), 90 (guest-iot)
+ 
+ ## Decision
+ 
+ Implement **two-tier IoT segmentation** with new VLANs:
+ 
+ - **VLAN 95 (iot-isolated)**: Untrusted WiFi IoT devices (Traeger)
+   - Subnet: 10.0.95.0/24
+   - Internet-only access via firewall whitelist (ports 443, 8883)
+   - Zero local network access
+   - DNS: Public resolvers only (1.1.1.1, 1.0.0.1)
+ 
+ - **VLAN 90 (guest-iot)**: Preferred placement for semi-trusted hardwired IoT (Denon)
+   - Subnet: 10.0.90.0/24
+   - Internet access for streaming services (ports 80, 443)
+   - mDNS reflector optional (avoid where possible)
+   - DNS: Public resolvers or Pi-hole forwarding
+   - Requires physical ethernet connection (US-8 Port 2) with MAC/port binding
 
-## Decision
-
-Implement **two-tier IoT segmentation** with new VLANs:
-
-- **VLAN 95 (iot-isolated)**: Untrusted WiFi IoT devices (Traeger)
-  - Subnet: 10.0.95.0/24
-  - Internet-only access via firewall whitelist (ports 443, 8883)
-  - Zero local network access
-  - DNS: Public resolvers only (1.1.1.1, 1.0.0.1)
-
-- **VLAN 96 (iot-trusted)**: Semi-trusted hardwired IoT (Denon soundbars)
-  - Subnet: 10.0.96.0/24
-  - Internet access for streaming services (ports 80, 443)
-  - mDNS reflector enabled for local discovery
-  - DNS: Pi-hole (10.0.10.10) + fallback
-  - Requires physical ethernet connection (US-8 Port 2)
-
-**Total VLANs: 6** (Management + 5 custom)
+ **Total VLANs: 6** (Management + 5 custom)
 
 ## Alternatives Considered
 
@@ -47,7 +47,7 @@ Implement **two-tier IoT segmentation** with new VLANs:
 - **Carter compliance**: Device identity tracked in shared/inventory.yaml
 
 ### Negative
-- **VLAN sprawl**: 6 total VLANs (1, 10, 30, 40, 90, 95, 96)
+- **VLAN sprawl**: 6 total VLANs (1, 10, 30, 40, 90, 95)
 - **Firewall rules**: Adds 2 rules (total 9/10 — safe for USG-3P offload)
 - **Management overhead**: Separate DHCP pools, DNS configs, monitoring
 

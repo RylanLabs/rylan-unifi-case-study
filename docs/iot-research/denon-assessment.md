@@ -3,7 +3,7 @@
 **Devices:** Denon HEOS E300 and E400 soundbars
 **Assessment Date:** 2025-12-04
 **Risk Level:** MEDIUM (semi-trusted IoT)
-**Recommended VLAN:** 96 (iot-trusted)
+**Recommended VLAN:** 90 (guest-iot) — WAN-only isolation
 
 ---
 
@@ -75,16 +75,16 @@ Denon HEOS soundbars provide:
 
 ### Known Vulnerabilities
 - **CVE-2021-XXXXX** (hypothetical): No major published CVEs as of Dec 2024
-- UPnP vulnerabilities common in IoT devices (mitigated by VLAN 96 isolation)
+- UPnP vulnerabilities common in IoT devices (mitigated by VLAN 90 isolation)
 - Firmware updates address security patches (Denon changelog available)
 
 ---
 
-## Mitigations (VLAN 96 Semi-Trusted)
+### Mitigations (VLAN 90 — guest/IoT)
 
-### Why VLAN 96 (Not VLAN 95)?
+### Why VLAN 90 (guest-iot) vs VLAN 95?
 
-Denon soundbars receive **semi-trusted** status due to:
+Denon soundbars were previously classified as semi-trusted but operational experience favors placing these devices on `guest-iot` (VLAN 90) with strict egress-only policies and MAC/port binding on the switch. This provides WAN-only isolation without adding an extra VLAN.
 1. **Hardwired ethernet** (US-8 Port 2) — physical access required for compromise
 2. **Established manufacturer** (Denon/Masimo) with security track record
 3. **Local playback capability** — not 100% cloud-dependent
@@ -93,20 +93,20 @@ Denon soundbars receive **semi-trusted** status due to:
 ### Network Segmentation
 
 ```yaml
-# VLAN 96 Configuration
-vlan: 96
-name: iot-trusted
-subnet: 10.0.96.0/24
-isolation: true  # Cannot access VLANs 10, 30, 40 (servers/workstations)
+# VLAN 90 (guest-iot) Configuration (Denon deployment)
+vlan: 90
+name: guest-iot
+subnet: 10.0.90.0/24
+isolation: true  # Egress-only: can reach streaming services but not servers/workstations
 internet_access: streaming_services
-dns: [10.0.10.10, 1.1.1.1]  # Pi-hole + fallback (allows ad-blocking)
+dns: [1.1.1.1, 1.0.0.1]  # Public resolvers + optional Pi-hole forwarding
 ```
 
 ### Firewall Rules
 
 ```yaml
-# Policy table rule 9
-source: iot-trusted (10.0.96.0/24)
+# Policy table: Denon egress rule (sample)
+source: guest-iot (10.0.90.0/24)
 destination: internet
 ports: [80, 443]  # HTTP + HTTPS for streaming
 action: accept
@@ -131,7 +131,7 @@ action: accept
 }
 ```
 
-**Purpose:** Allows HEOS app (VLAN 30) to discover soundbars (VLAN 96)
+**Purpose:** Allows HEOS app (VLAN 30) to discover soundbars on VLAN 90 via optional mDNS reflector
 
 ### Physical Security
 - **US-8 Port 2**: Entertainment center ethernet termination
@@ -170,10 +170,14 @@ action: accept
 
 ---
 
-## Deployment Decision
+-### Deployment Decision (updated)
 
-**Approved for v∞.1.2** with configuration:
-- VLAN 96 (iot-trusted) via US-8 Port 2
+**Approved for v∞.3.3-consolidated** with configuration:
+- Denon devices placed on VLAN 90 (guest-iot) via US-8 Port 2
+- Hardwired ethernet (NO WiFi)
+- mDNS reflector considered optional (avoid if possible)
+- Firewall allows ports 80, 443 (streaming)
+- Pi-hole DNS optional
 - Hardwired ethernet (NO WiFi)
 - mDNS reflector enabled
 - Firewall allows ports 80, 443 (streaming)
@@ -181,9 +185,9 @@ action: accept
 
 **Configuration Steps:**
 1. Run Cat6 cable from US-8 Port 2 to ET center
-2. Configure US-8 Port 2: Native VLAN 96, storm control enabled
-3. Power on Denon soundbar (will DHCP on 10.0.96.X)
-4. HEOS app discovers via mDNS reflector
+2. Configure US-8 Port 2: Native VLAN 90, storm control enabled
+3. Power on Denon soundbar (will DHCP on 10.0.90.X)
+4. HEOS app discovers via mDNS reflector (if enabled)
 5. Verify streaming services work (Spotify, Pandora)
 
 ---
@@ -218,7 +222,7 @@ If user enables Alexa skill for HEOS:
 ---
 
 ## References
-- ADR-013: IoT segmentation (why VLAN 96 vs. 95)
+- ADR-013: IoT segmentation (why VLAN 90 vs. 95)
 - Bauer (2005): "Trust nothing, verify everything"
 - Carter (2003): "Identity as infrastructure" (hardwired = physical identity)
 - Denon HEOS docs: <https://www.denon.com/en-us/heos>

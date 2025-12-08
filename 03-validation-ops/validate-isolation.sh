@@ -6,11 +6,15 @@ echo "Expecting: Allows (e.g., servers â†’ osTicket) succeed; Drops (e.g., 
 
 # Probe from each VLAN â†’ osTicket (10.0.30.40:443); --network host simulates L3 isolation timeouts
 for vlan in 10 30 40 90; do
-  echo "Probing from 10.0.${vlan}.x â†’ 10.0.30.40 (osTicket HTTPS)"
-  if docker run --rm --network host alpine/curl curl -I --connect-timeout 3 --max-time 5 https://10.0.30.40; then
-    echo "âœ… ALLOW expected for VLAN $vlan (trusted/voip paths)"
+  echo "Probing from 10.0.${vlan}.x -> 10.0.30.40 (osTicket HTTPS)"
+  if command -v docker >/dev/null 2>&1; then
+    if docker run --rm --network host alpine/curl curl -I --connect-timeout 3 --max-time 5 https://10.0.30.40; then
+      echo "✓ ALLOW expected for VLAN $vlan (trusted/voip paths)"
+    else
+      echo "✗ DROP expected for VLAN $vlan (e.g., guest-iot isolation)"
+    fi
   else
-    echo "âŒ DROP expected for VLAN $vlan (e.g., guest-iot isolation)"
+    echo "WARN: docker not available in runner; skipping network host curl probes for VLAN $vlan"
   fi
 done
 

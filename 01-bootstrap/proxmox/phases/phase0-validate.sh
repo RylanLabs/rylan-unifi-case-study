@@ -16,8 +16,10 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/." && pwd)"
+# shellcheck source=01-bootstrap/proxmox/lib/common.sh
 source "${SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=01-bootstrap/proxmox/lib/metrics.sh
 source "${SCRIPT_DIR}/lib/metrics.sh"
 
 # Parse arguments
@@ -122,7 +124,8 @@ flatnet_recon() {
   
   log_info "Scanning 192.168.1.0/24 for live hosts and services..."
   
-  local recon_file="/tmp/flatnet-recon-$(date +%s).txt"
+  local recon_file
+  recon_file="/tmp/flatnet-recon-$(date +%s).txt"
   
   if ! command -v nmap &>/dev/null; then
     log_warn "nmap not installed — skipping flatnet recon"
@@ -146,7 +149,8 @@ flatnet_recon() {
   fi
   
   # Count live hosts
-  local live_hosts=$(grep -c "Nmap scan report for" "$recon_file" || echo "0")
+  local live_hosts
+  live_hosts=$(grep -c "Nmap scan report for" "$recon_file" || echo "0")
   log_info "Detected $live_hosts live hosts on flatnet"
   
   echo "$recon_file"
@@ -241,7 +245,8 @@ red_team_audit() {
   phase_start "0" "Whitaker/Newman Red-Team - Full Offensive Audit"
   
   # 1. Flatnet recon
-  local recon_file=$(flatnet_recon)
+  local recon_file
+  recon_file=$(flatnet_recon)
   
   # 2. Open port scan on all detected hosts
   log_info "Scanning for dangerous open ports..."

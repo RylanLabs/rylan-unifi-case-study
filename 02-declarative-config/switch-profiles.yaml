@@ -2,15 +2,6 @@
 # Rylan Switch Profiles v∞.1.2 - IoT Integration (Dec 2025)
 # Defines port profiles for managed switches (US-8)
 
-profiles:
-  - name: iot-trusted-hardwired
-    native_vlan: 96
-    tagged_vlans: []
-    poe_mode: "auto"
-    storm_control: true
-    stp: "rstp"
-    description: "Hardwired IoT devices (Denon HEOS soundbars on US-8 Port 2)"
-
 switches:
   - device_name: "US-8"
     switch_mac: "<TBD-Week1>"
@@ -18,6 +9,6 @@ switches:
     location: "Entertainment Center"
     ports:
       - port: 2
-        profile: "iot-trusted-hardwired"
-        description: "Denon HEOS E300/E400 (ET center ethernet termination)"
-        notes: "VLAN 96, PoE not required, requires mDNS reflector for discovery"
+        profile: "iot_isolated"
+        description: "Denon HEOS E300/E400 — Ethernet to entertainment center"
+        notes: "Moved to VLAN 90 (guest-iot) — WAN-only isolation; no PoE"

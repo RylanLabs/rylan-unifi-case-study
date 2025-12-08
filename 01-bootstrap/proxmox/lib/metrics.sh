@@ -1,11 +1,10 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 #
 # lib/metrics.sh - Real-time metrics and telemetry tracking
 # JSON output for RTO compliance and performance analysis
 #
 # Sourced by: orchestrator and phase scripts
-
-set -euo pipefail
+# NOTE: No shebang or set -euo pipefail (sourced file, not executed)
 
 ################################################################################
 # METRICS CONFIGURATION
