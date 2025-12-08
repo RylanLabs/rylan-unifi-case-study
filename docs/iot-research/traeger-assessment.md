@@ -101,7 +101,7 @@ action: accept
 - Access servers VLAN 10 (AD, NFS, Pi-hole)
 - Access trusted-devices VLAN 30 (workstations)
 - Access VoIP VLAN 40
-- Pivot to other IoT devices VLAN 96
+- Pivot to other IoT devices VLAN 90
 
 ### DNS Restrictions
 - DNS servers: 1.1.1.1, 1.0.0.1 (public only, NO Pi-hole)

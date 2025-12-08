@@ -6,3 +6,4 @@ rules:
     level: warning
   comments: disable
   document-start: disable
+  empty-lines: disable

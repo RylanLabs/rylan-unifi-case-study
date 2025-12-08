@@ -17,9 +17,9 @@ Current VLAN count (v∞.1.2):
 4. VLAN 40: VoIP (FreePBX, phones)
 5. VLAN 90: Guest/IoT (untrusted guest WiFi)
 6. VLAN 95: IoT-isolated (Traeger grill)
-7. VLAN 96: IoT-trusted (Denon soundbars)
+7. [Removed historical VLAN entry]
 
-**Total: 7 VLANs** (including management)
+**Total: 6 VLANs** (including management)
 
 ## Decision
 

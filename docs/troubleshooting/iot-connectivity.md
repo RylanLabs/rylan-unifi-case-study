@@ -10,7 +10,7 @@
 **Symptoms:**
 - HEOS app shows "No devices found"
 - Soundbar is online (LED shows network connection)
-- Soundbar on VLAN 96, phone on VLAN 30
+- Soundbar on VLAN 90, phone on VLAN 30
 
 **Root Cause:** mDNS (multicast DNS) doesn't cross VLAN boundaries by default
 
@@ -165,7 +165,7 @@ tshark -r denon-update.pcap -T fields -e ip.dst -e tcp.dstport | sort -u
 # 1. Identify device by MAC
 # 2. Settings → Network → Override to VLAN 30
 # 3. Perform firmware update
-# 4. Revert to VLAN 96 after update completes
+# 4. Revert to VLAN 90 after update completes
 ```
 
 ---

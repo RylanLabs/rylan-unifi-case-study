@@ -2,7 +2,7 @@
 
 **Purpose:** Step-by-step procedures for onboarding Traeger, Denon, and Printer to fortress
 **Audience:** Junior-at-3-AM deployable
-**Prerequisites:** VLANs 95/96 configured, mDNS reflector enabled, policy table applied
+**Prerequisites:** VLANs 95 and 90 configured, mDNS reflector enabled, policy table applied
 
 ---
 
@@ -13,7 +13,7 @@
    ```bash
    # Check VLANs exist
    ssh admin@$USG_IP "show interfaces"
-   # Expected: eth0.95 (10.0.95.1), eth0.96 (10.0.96.1)
+   # Expected: eth0.95 (10.0.95.1), eth0.90 (10.0.90.1)
 
    # Check firewall rules
    python 02-declarative-config/apply.py --dry-run
@@ -83,7 +83,7 @@ curl https://traeger-cloud.io  # Should succeed
 
 ## Device 2: Denon HEOS E300/E400 Soundbars
 
-**VLAN:** 96 (iot-trusted)
+**VLAN:** 90 (guest-iot)
 **Connection:** Hardwired (US-8 Port 2)
 **Ports allowed:** 80 (HTTP), 443 (HTTPS), 1900 (UPnP), 8009 (HEOS)
 
@@ -92,8 +92,8 @@ curl https://traeger-cloud.io  # Should succeed
 ```bash
 # In UniFi Controller
 1. Navigate to Devices → US-8 → Ports → Port 2
-2. Set Profile: iot-trusted-hardwired
-   - Native VLAN: 96
+2. Set Profile: iot_isolated
+   - Native VLAN: 90
    - PoE: Auto (not required but safe)
    - Storm Control: Enabled
    - STP: RSTP
@@ -104,7 +104,7 @@ curl https://traeger-cloud.io  # Should succeed
 
 ```bash
 1. Run Cat6 ethernet from US-8 Port 2 to soundbar
-2. Soundbar will DHCP on VLAN 96 (10.0.96.100-200)
+2. Soundbar will DHCP on VLAN 90 (10.0.90.100-200)
 3. Check DHCP leases in UniFi Controller
    - Expected: Denon device appears with MAC
 ```
@@ -126,7 +126,7 @@ curl https://traeger-cloud.io  # Should succeed
 avahi-browse -a -t | grep HEOS
 # Expected: _heos._tcp local
 
-# Check internet access (from VLAN 96)
+# Check internet access (from VLAN 90)
 curl -I https://heos.denon.com
 # Expected: HTTP 200
 
@@ -139,9 +139,9 @@ nc -zv 10.0.10.10 22  # SSH to Pi-hole should timeout
 ```yaml
 # shared/inventory.yaml (repeat for E300 and E400)
 - device_name: "Denon HEOS E300 Soundbar"
-  mac_address: "<US8_PORT2_MAC>"
-  ip_current: "10.0.96.XXX"
-  connection_type: "Hardwired US-8 Port 2 (VLAN 96 iot-trusted)"
+   mac_address: "<US8_PORT2_MAC>"
+   ip_current: "10.0.90.XXX"
+   connection_type: "Hardwired US-8 Port 2 (VLAN 90 guest-iot)"
 ```
 
 ---

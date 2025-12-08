@@ -1,0 +1,10 @@
+---
+# IoT-specific switch profiles
+switch_profiles:
+  iot_isolated:
+    name: "IoT Isolated – Denon Receivers"
+    description: "Port 2 only – Denon AVR-E300/E400 (EOL firmware, UPnP exposure)"
+    native_vlan: 90
+    voice_vlan: none
+    tagged_vlans: []
+    poe_mode: auto
