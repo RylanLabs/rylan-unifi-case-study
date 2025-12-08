@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Versioned pre-commit hook: normalize BOM/CRLF in staged text files and re-add them
+# This hook auto-remediates common encoding issues to keep repo LF-only and BOM-free.
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "${repo_root}"
+
+# Only consider these extensions
+PATTERN='\.(sh|py|md|json|yaml|yml|txt|conf|ini|csv|service)$'
+
+# Get staged files (Added, Copied, Modified)
+mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACM)
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+FIXED=0
+for f in "${FILES[@]}"; do
+  [[ -f "$f" ]] || continue
+  if ! [[ "$f" =~ $PATTERN ]]; then
+    continue
+  fi
+
+  # Detect BOM
+  first3=$(dd if="$f" bs=1 count=3 2>/dev/null | od -An -t u1 | tr -s ' ' | sed 's/^ //') || true
+  if [[ "$first3" == "239 187 191" ]]; then
+    echo "Removing UTF-8 BOM from: $f"
+    tail -c +4 "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    git add -- "$f"
+    FIXED=$((FIXED+1))
+  fi
+
+  # Detect CRLF or bare CR and normalize to LF
+  if grep -U $'\r' -q "$f" 2>/dev/null || true; then
+    echo "Converting CRLF -> LF in: $f"
+    # Use awk to strip CR
+    awk '{ sub("\r$", ""); print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    git add -- "$f"
+    FIXED=$((FIXED+1))
+  fi
+done
+
+if [[ $FIXED -gt 0 ]]; then
+  echo "Pre-commit: fixed $FIXED file(s) (BOM/CRLF) and re-staged them. Please review changes and re-run commit."
+  exit 1
+fi
+
+exit 0

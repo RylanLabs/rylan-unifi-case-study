@@ -1,0 +1,36 @@
+# Enforce LF line endings for text files
+* text=auto eol=lf
+
+# Shell, Python and similar scripts
+*.sh     text eol=lf
+*.py     text eol=lf
+
+# Mark common documentation formats as text
+*.md     text eol=lf
+*.txt    text eol=lf
+*.rst    text eol=lf
+
+# Config and YAML/JSON files
+*.json   text eol=lf
+*.yaml   text eol=lf
+*.yml    text eol=lf
+*.ini    text eol=lf
+*.conf   text eol=lf
+*.service text eol=lf
+
+# CSV and other structured text
+*.csv    text eol=lf
+
+# Ensure binary files are not modified
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.zip    binary
+*.gz     binary
+
+# Ensure hooks directory is versioned (ignored by export if needed)
+.githooks/ export-ignore
+
+# End of .gitattributes
