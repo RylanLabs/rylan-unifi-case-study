@@ -101,7 +101,8 @@ main() {
 	done <<<"${bash_scripts}"
 
 	# Summary
-	log "\n════════════════════════════════════════════════════════════════"
+	log ""
+	log "════════════════════════════════════════════════════════════════"
 	log "BASH VALIDATION SUMMARY"
 	log "  Total scripts: ${total_scripts}"
 	log "  Passed: ${passed_scripts}"

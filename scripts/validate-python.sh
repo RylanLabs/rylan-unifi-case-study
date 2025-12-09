@@ -72,7 +72,8 @@ main() {
 	fi
 
 	# Stage 1: ruff check
-	log "\n[STAGE 1] ruff check (code quality, style, security)"
+	log ""
+	log "[STAGE 1] ruff check (code quality, style, security)"
 	if cd "${REPO_ROOT}" && ${RUFF_CMD} . 2>&1 | tee /tmp/ruff-output.txt; then
 		log_pass "ruff: All violations fixed (score 10.00)"
 	else
@@ -82,7 +83,8 @@ main() {
 	fi
 
 	# Stage 2: mypy --strict
-	log "\n[STAGE 2] mypy --strict (type checking)"
+	log ""
+	log "[STAGE 2] mypy --strict (type checking)"
 	if cd "${REPO_ROOT}" && ${MYPY_CMD} . 2>&1 | tee /tmp/mypy-output.txt; then
 		log_pass "mypy: Type checking passed (zero errors)"
 	else
@@ -92,7 +94,8 @@ main() {
 	fi
 
 	# Stage 3: bandit (security audit)
-	log "\n[STAGE 3] bandit (security audit)"
+	log ""
+	log "[STAGE 3] bandit (security audit)"
 	if cd "${REPO_ROOT}" && ${BANDIT_CMD} . --json 2>&1 | tee /tmp/bandit-output.json; then
 		# Check for HIGH/MEDIUM issues
 		if grep -q '"severity": "HIGH"' /tmp/bandit-output.json 2>/dev/null; then
@@ -113,7 +116,8 @@ main() {
 	fi
 
 	# Stage 4: pytest with coverage
-	log "\n[STAGE 4] pytest (test suite, >=93% coverage)"
+	log ""
+	log "[STAGE 4] pytest (test suite, >=93% coverage)"
 	if cd "${REPO_ROOT}" && ${PYTEST_CMD} 2>&1 | tee /tmp/pytest-output.txt; then
 		log_pass "pytest: All tests passed (>=93% coverage)"
 	else
@@ -124,7 +128,8 @@ main() {
 	fi
 
 	# Summary
-	log "\n════════════════════════════════════════════════════════════════"
+	log ""
+	log "════════════════════════════════════════════════════════════════"
 	log "PYTHON VALIDATION SUMMARY"
 	if [[ ${EXIT_CODE} -eq 0 ]]; then
 		log_pass "ALL PYTHON VALIDATORS PASSED"
