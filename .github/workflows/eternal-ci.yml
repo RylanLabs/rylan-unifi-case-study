@@ -64,7 +64,7 @@ jobs:
       - name: Validate network isolation (simulated)
         run: |
           if [ -f "03-validation-ops/validate-isolation.sh" ]; then
-            sudo bash 03-validation-ops/validate-isolation.sh
+            CI_MODE=1 sudo bash 03-validation-ops/validate-isolation.sh
           fi
 
       - name: Summary
