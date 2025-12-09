@@ -74,7 +74,7 @@ main() {
 		local script_name="${script#${REPO_ROOT}/}"
 
 		# ShellCheck validation
-		if shellcheck "${SHELLCHECK_ARGS[@]}" "${script}" 2>/dev/null; then
+		if shellcheck "${SHELLCHECK_ARGS[@]}" "${script}"; then
 			log_pass "ShellCheck: ${script_name}"
 			((passed_scripts++))
 		else
@@ -85,7 +85,7 @@ main() {
 		fi
 
 		# shfmt check (dry-run, no modifications)
-		if shfmt "${SHFMT_ARGS[@]}" -d "${script}" 2>/dev/null | grep -q .; then
+		if shfmt "${SHFMT_ARGS[@]}" -d "${script}" | grep -q .; then
 			log_fail "shfmt format issue: ${script_name}"
 			shfmt "${SHFMT_ARGS[@]}" -d "${script}" || true
 			((failed_scripts++))
