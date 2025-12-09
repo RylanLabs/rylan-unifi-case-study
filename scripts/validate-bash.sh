@@ -55,13 +55,8 @@ main() {
 	local bash_scripts
 	bash_scripts=$(find "${REPO_ROOT}" \
 		-type f \
-		-name "*.sh" \
-		-o -path "*/scripts/*" -type f -executable | \
-		while read -r file; do
-			if head -1 "$file" 2>/dev/null | grep -q "^#!/.*bash"; then
-				echo "$file"
-			fi
-		done | sort -u)
+		\( -name "*.sh" -o -path "*/scripts/*" \) \
+		-exec grep -l "^#!/.*bash" {} \; 2>/dev/null | sort -u)
 
 	if [[ -z "${bash_scripts}" ]]; then
 		log_warn "No bash scripts found"
