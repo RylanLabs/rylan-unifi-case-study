@@ -52,7 +52,7 @@ main() {
     --boot order=scsi0;ide2 \
     --ide2 "${cloud_init_iso},media=cdrom" \
     --cicustom user="${cicustom_user}" \
-    --ipconfig0 ip=${vm_ip}/26,gw=10.0.10.1 \
+    --ipconfig0 ip="${vm_ip}"/26,gw=10.0.10.1 \
     --agent enabled=1
 
   log "Starting VM ${vm_id} and waiting for cloud-init..."
