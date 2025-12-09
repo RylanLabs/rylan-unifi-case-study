@@ -2,6 +2,7 @@
 # validate-heresy.sh — Enforce heresy wrapper canon
 # Usage: ./scripts/validate-heresy.sh <wrapper.sh>
 set -euo pipefail
+IFS=$'\n\t'
 
 readonly TARGET="${1:-}"
 [[ -f "${TARGET}" ]] || { echo "Usage: $0 path/to/wrapper.sh"; exit 1; }

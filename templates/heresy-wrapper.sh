@@ -5,8 +5,8 @@
 # Video: https://www.youtube.com/watch?v=yWR6m0YaGpY&t=109s
 # Wrapper: ≤19 lines | Python: mypy --strict, bandit clean, pytest ≥93%
 
-set -euo pipefail                    # Bauer: trust nothing, fail loudly
-IFS=$'\n\t'                          # Unix: never break on spaces
+set -euo pipefail
+IFS=$'\n\t'
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 

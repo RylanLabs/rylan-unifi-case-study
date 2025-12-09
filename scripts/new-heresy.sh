@@ -2,6 +2,7 @@
 # new-heresy.sh — One-command heresy wrapper creator
 # Usage: ./scripts/new-heresy.sh runbooks/ministry-ai/new-tool.sh
 set -euo pipefail
+IFS=$'\n\t'
 
 readonly TEMPLATE="templates/heresy-wrapper.sh"
 readonly TARGET="${1:-}"
