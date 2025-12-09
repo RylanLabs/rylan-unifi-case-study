@@ -56,7 +56,7 @@ main() {
 	bash_scripts=$(find "${REPO_ROOT}" \
 		-type f \
 		\( -name "*.sh" -o -path "*/scripts/*" \) \
-		-exec grep -l "^#!/.*bash" {} \; 2>/dev/null | sort -u)
+		-exec grep -l "^#!/.*bash" {} \; | sort -u)
 
 	if [[ -z "${bash_scripts}" ]]; then
 		log_warn "No bash scripts found"
