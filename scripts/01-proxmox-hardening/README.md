@@ -1,0 +1,18 @@
+# 01-proxmox-hardening (Beale)
+- Purpose: bootstrap first VM via cloud-init, then eject CD-ROM to avoid loops
+- One-command: `bash vm-cloudinit-eject.sh 100`
+- ISO staging: `bash fetch-cloud-init-iso.sh /var/lib/vz/template/iso/ubuntu-24.04-cloudinit.iso`
+- Post-check: `bash simulate-breach-vm.sh 10.0.10.100` (top 100 ports)
+- CI_MODE=1 skips live Proxmox and nmap actions
+- QM_BIN/NMAP_BIN override binaries for mocks or alternate installs
+- User-data default: `local:iso/samba-ad-dc-user-data.yaml`
+- ISO default: `/var/lib/vz/template/iso/ubuntu-24.04-cloudinit.iso`
+- Idempotent: exits early if VM already exists
+- Wait: polls cloud-init boot-finished (120s timeout)
+- Eject: clears ide2 and reorders boot to scsi0
+- Whitaker: nmap surface must stay minimal (<=6 opens)
+- fetch script: optional ISO_SHA256 for checksum
+- simulate script: EXPECTED_MAX_OPEN to tune threshold
+- Integrates with eternal-resurrect (post-Bauer hardening)
+- Tested in CI with CI_MODE=1 and QM_BIN/NMAP_BIN mocks
+- Owner: Beale ministry (detection + hardening)

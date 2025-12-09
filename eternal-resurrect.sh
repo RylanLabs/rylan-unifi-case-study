@@ -107,6 +107,37 @@ phase_bauer_validation() {
   log "✓ Bauer phase complete — Zero-trust verified"
 }
 
+# ────── LEO: PROXMOX VM ASCENSION (CLOUD-INIT + EJECT) ──────
+phase_leo_proxmox_vm() {
+  begin_phase "LEO — Proxmox VM ascension (cloud-init + eject)"
+
+  if [[ "${CI_MODE:-}" == "1" ]]; then
+    log "CI_MODE: Skipping Proxmox VM provisioning"
+    return 0
+  fi
+
+  if [[ "${DRY_RUN}" == "1" ]] || [[ "${DRY_RUN}" == "true" ]]; then
+    log "DRY-RUN: Would fetch cloud-init ISO and bootstrap VM 100"
+    return 0
+  fi
+
+  if [[ -x "${SCRIPT_DIR}/scripts/01-proxmox-hardening/fetch-cloud-init-iso.sh" ]]; then
+    bash "${SCRIPT_DIR}/scripts/01-proxmox-hardening/fetch-cloud-init-iso.sh" || \
+      die "Cloud-init ISO fetch failed"
+  else
+    log "WARN: fetch-cloud-init-iso.sh not found — ensure ISO staged manually"
+  fi
+
+  if [[ -x "${SCRIPT_DIR}/scripts/01-proxmox-hardening/vm-cloudinit-eject.sh" ]]; then
+    bash "${SCRIPT_DIR}/scripts/01-proxmox-hardening/vm-cloudinit-eject.sh" 100 || \
+      die "Proxmox VM ascension failed"
+  else
+    log "WARN: vm-cloudinit-eject.sh not found — skipping Proxmox bootstrap"
+  fi
+
+  log "✓ Leo phase complete — bootstrap VM provisioned with cloud-init and CD-ROM ejected"
+}
+
 # ────── MINISTRY BEALE: DETECTION & HARDENING ──────
 phase_beale_detection() {
   begin_phase "BEALE — Hardening & Detection (CIS + Audit)"
@@ -346,6 +377,7 @@ main() {
   # Execute phases
   phase_carter_identity
   phase_bauer_validation
+  phase_leo_proxmox_vm
   phase_beale_detection
   phase_bootstrap_unifi
   phase_adopt_devices
