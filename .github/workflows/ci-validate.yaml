@@ -43,7 +43,9 @@ jobs:
         shell: bash
       
       - name: Validate heresy containment
-        run: bash ./scripts/validate-heresy.sh
+        run: |
+          bash ./scripts/validate-heresy.sh 01-bootstrap/adopt-devices-wrapper.sh
+          bash ./scripts/validate-heresy.sh 02-declarative-config/apply-wrapper.sh
         shell: bash
 
   lint-python:

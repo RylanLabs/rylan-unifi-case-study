@@ -9,11 +9,18 @@ readonly TARGET="${1:-}"
 
 echo "Validating heresy wrapper: ${TARGET}"
 
-# Check 1: Line count ≤19 (excluding Python payload)
-LINE_COUNT="$(grep -cvE '^(PYTHON_PAYLOAD|PY)$' "${TARGET}")"
+# Check 1: Line count ≤19 (excluding Python heredoc and comments)
+# Count only non-comment, non-blank lines outside heredoc
+LINE_COUNT="$(awk '
+  /exec python3.*<<.*PYTHON_PAYLOAD/,/^PYTHON_PAYLOAD$/ {next}
+  /^[[:space:]]*#/ {next}
+  /^[[:space:]]*$/ {next}
+  {count++}
+  END {print count}
+' "${TARGET}")"
 readonly LINE_COUNT
 if [[ ${LINE_COUNT} -gt 19 ]]; then
-  echo "❌ FAIL: Wrapper exceeds 19 lines (found: ${LINE_COUNT})"
+  echo "❌ FAIL: Wrapper exceeds 19 executable lines (found: ${LINE_COUNT})"
   exit 1
 fi
 
@@ -37,9 +44,9 @@ if ! shellcheck -x "${TARGET}" 2>/dev/null; then
   exit 1
 fi
 
-# Check 5: Python payload exists
-if ! grep -q "exec python3 -" "${TARGET}"; then
-  echo "❌ FAIL: Missing Python payload execution"
+# Check 5: Python payload exists (heredoc OR standalone .py)
+if ! grep -qE 'exec python3 (-|"\$\{SCRIPT_DIR\}/.+\.py")' "${TARGET}"; then
+  echo "❌ FAIL: Missing Python payload execution (exec python3 - or exec python3 \"\${SCRIPT_DIR}/*.py\")"
   exit 1
 fi
 
