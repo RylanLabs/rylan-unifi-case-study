@@ -39,7 +39,7 @@ jobs:
         shell: bash
       
       - name: Run validate-bash.sh
-        run: ./scripts/validate-bash.sh
+        run: bash ./scripts/validate-bash.sh
         shell: bash
 
   lint-python:
@@ -58,7 +58,7 @@ jobs:
           pip install ruff mypy bandit pytest pytest-cov
       
       - name: Run validate-python.sh
-        run: ./scripts/validate-python.sh
+        run: bash ./scripts/validate-python.sh
         shell: bash
 
   test-python:
@@ -96,7 +96,7 @@ jobs:
       - name: Validate VLAN isolation (CI mode)
         run: |
           cd 03-validation-ops
-          CI_MODE=1 ./validate-isolation.sh
+          CI_MODE=1 bash ./validate-isolation.sh
         shell: bash
       
       - name: Validate firewall policy (<=10 rules)
@@ -125,7 +125,7 @@ jobs:
           export UNIFI_PASS="mock-pass"
           
           # Execute orchestrator in DRY_RUN mode
-          DRY_RUN=1 ./eternal-resurrect.sh || {
+          DRY_RUN=1 bash ./eternal-resurrect.sh || {
             echo "❌ Orchestrator failed smoke test"
             exit 1
           }
