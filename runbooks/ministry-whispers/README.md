@@ -1,19 +1,20 @@
-# Ministry of Whispers — Bauer Hardening (Phase 2)
+# Ministry of Whispers — Bauer Hardening (Phase 1 + 1.1)
 
-**Status**: T3-ETERNAL v6 production-ready  
-**Time**: <30 seconds (idempotent, nmap-verified)  
+**Status**: T3-ETERNAL v3.2 production-ready  
+**Time**: <60 seconds (idempotent, nmap-verified)  
 **Depends**: Phase 1 optional (keys from GitHub)
 
-## What It Does
+## Execution Order
 
-Hardens SSH: key-only auth, fetches `github.com/T-Rylander.keys`, nmap validates password auth removal.
+1. `sudo bash ./runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh`
+2. `sudo bash ./scripts/bauer-glow-up.sh` (Phase 1.1: repo-bound keys)
+3. Test: `ssh root@<ip>` (instant, no password)
 
-## One-Command Deploy
+## Validation
 
-```bash
-sudo bash ./runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
-```
+- `ls ~/rylan-unifi-case-study/identity/$(hostname -s)/` (folder 700, keys 600)
+- `crontab -l | grep refresh-keys` (daily 2 AM, if allowed_keys/ exists)
+- `nmap -p 22 --script ssh-auth-methods localhost` (publickey only)
 
-**Validation**: `nmap -p 22 --script ssh-auth-methods localhost` (should show "publickey" only)
-
-**Rollback**: Re-image (cleanest per canon)
+**Order**: rylan-dc → Proxmox → Cloud Key → fleet  
+**Trinity**: Bauer ✅ → Beale (IDS) next

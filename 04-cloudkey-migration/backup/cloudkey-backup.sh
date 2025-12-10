@@ -31,15 +31,16 @@ log_success "SSH access confirmed"
 
 # Trigger backup on Cloud Key
 log_info "Triggering backup on Cloud Key..."
-ssh "$BACKUP_USER@$CLOUDKEY_IP" << 'BACKUP_CMD' > /tmp/cloudkey-backup.tmp 2>&1 || {
-  log_error "Backup trigger failed"
-  exit 1
-}
+if ! ssh "$BACKUP_USER@$CLOUDKEY_IP" > /tmp/cloudkey-backup.tmp 2>&1 << 'BACKUP_CMD'
   unifi-os backup
 BACKUP_CMD
+then
+  log_error "Backup trigger failed"
+  exit 1
+fi
 
 # Extract backup file path from output
-BACKUP_FILE=$(cat /tmp/cloudkey-backup.tmp | grep -oP '(?<=/data/autobackup/)[^ ]+' | head -1 || echo "")
+BACKUP_FILE=$(grep -oP '(?<=/data/autobackup/)[^ ]+' /tmp/cloudkey-backup.tmp | head -1 || echo "")
 
 if [ -z "$BACKUP_FILE" ]; then
   log_warn "Could not detect backup file; attempting standard path"

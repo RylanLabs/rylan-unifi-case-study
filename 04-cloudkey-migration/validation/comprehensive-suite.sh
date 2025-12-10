@@ -100,7 +100,8 @@ test_disk_space() {
   log_info "Test 5: Disk space available..."
   ((TOTAL_TESTS++))
   
-  local available=$(ssh "ubnt@$CONTROLLER_IP" "df /data | tail -1 | awk '{print \$4}'" 2>/dev/null || echo "0")
+  local available
+  available=$(ssh "ubnt@$CONTROLLER_IP" "df /data | tail -1 | awk '{print \$4}'" 2>/dev/null || echo "0")
   local required=$((2 * 1024 * 1024))  # 2GB required
   
   if [ "$available" -gt "$required" ]; then
@@ -148,8 +149,10 @@ test_clock_sync() {
   log_info "Test 9: System clock synchronized..."
   ((TOTAL_TESTS++))
   
-  local cloudkey_time=$(ssh "ubnt@$CONTROLLER_IP" "date +%s" 2>/dev/null || echo "0")
-  local local_time=$(date +%s)
+  local cloudkey_time
+  cloudkey_time=$(ssh "ubnt@$CONTROLLER_IP" "date +%s" 2>/dev/null || echo "0")
+  local local_time
+  local_time=$(date +%s)
   local time_diff=$((cloudkey_time - local_time))
   
   if [ "$time_diff" -lt 10 ] && [ "$time_diff" -gt -10 ]; then
@@ -164,7 +167,8 @@ test_controller_uptime() {
   log_info "Test 10: Controller uptime..."
   ((TOTAL_TESTS++))
   
-  local uptime=$(ssh "ubnt@$CONTROLLER_IP" "uptime | awk -F'up' '{print \$2}' | awk -F',' '{print \$1}'" 2>/dev/null || echo "unknown")
+  local uptime
+  uptime=$(ssh "ubnt@$CONTROLLER_IP" "uptime | awk -F'up' '{print \$2}' | awk -F',' '{print \$1}'" 2>/dev/null || echo "unknown")
   log_pass "Controller uptime: $uptime"
 }
 

@@ -37,10 +37,10 @@ prompt_text() {
   local input
   
   if [ -n "$default" ]; then
-    read -p "$(echo -e "${CYAN}${prompt}${NC}") [${default}]: " input
+    read -r -p "$(echo -e "${CYAN}${prompt}${NC}") [${default}]: " input
     echo "${input:-$default}"
   else
-    read -p "$(echo -e "${CYAN}${prompt}${NC}"): " input
+    read -r -p "$(echo -e "${CYAN}${prompt}${NC}"): " input
     echo "$input"
   fi
 }
@@ -142,7 +142,7 @@ main() {
   print_configuration "$hostname" "$ip" "$gateway" "$ssh_key"
   
   # Confirm before proceeding
-  read -p "$(echo -e "${YELLOW}Proceed with deployment? [y/N]: ${NC}")" confirm
+  read -r -p "$(echo -e "${YELLOW}Proceed with deployment? [y/N]: ${NC}")" confirm
   
   if [[ ! "$confirm" =~ ^[yY]$ ]]; then
     echo "Deployment cancelled"

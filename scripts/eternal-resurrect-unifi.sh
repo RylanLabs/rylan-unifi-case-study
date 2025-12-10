@@ -98,10 +98,7 @@ log_info "Phase 1: Network Validation (30 sec)"
 
 # Check: macvlan interface exists and is up
 if ! ip link show macvlan-unifi &> /dev/null; then
-  log_error "macvlan-unifi interface not found. Run:"
-  echo "  sudo cp bootstrap/unifi/macvlan-unifi.netdev /etc/systemd/network/"
-  echo "  sudo cp bootstrap/unifi/macvlan-unifi.network /etc/systemd/network/"
-  echo "  sudo systemctl restart systemd-networkd"
+  log_error $'macvlan-unifi interface not found. Run:\n  sudo cp bootstrap/unifi/macvlan-unifi.netdev /etc/systemd/network/\n  sudo cp bootstrap/unifi/macvlan-unifi.network /etc/systemd/network/\n  sudo systemctl restart systemd-networkd'
 fi
 log_success "macvlan-unifi interface found"
 

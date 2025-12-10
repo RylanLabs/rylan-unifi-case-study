@@ -112,16 +112,14 @@ sudo DEBIAN_FRONTEND=noninteractive apt install -y \
 
 # Step 3: Provision AD/DC (NON-INTERACTIVE - all params scripted)
 echo "[3/8] Provisioning Samba AD/DC (non-interactive)..."
-sudo samba-tool domain provision \
+if ! sudo samba-tool domain provision \
     --use-rfc2307 \
     --realm="$REALM" \
     --domain="$NETBIOS" \
     --server-role=dc \
     --dns-backend=SAMBA_INTERNAL \
     --adminpass="$ADMIN_PASS" \
-    --option="dns forwarder = $DNS_FORWARDER"
-
-if [[ $? -ne 0 ]]; then
+    --option="dns forwarder = $DNS_FORWARDER"; then
     echo "❌ Samba domain provision failed"
     exit 1
 fi

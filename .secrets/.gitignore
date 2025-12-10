@@ -1,0 +1,41 @@
+# .secrets/.gitignore — Vault hygiene (T3-ETERNAL v∞.3.2)
+# Purpose: Prevent credential leakage to Git
+# Canon: Bauer (trust nothing) + Beale (detection)
+
+# Passwords and secrets
+*.pass
+*.password
+*.secret
+
+# SSH keys
+*.key
+*.pem
+id_*
+!id_*.pub
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Database credentials
+*.sql.gz
+*.db
+
+# API tokens
+*token*
+*-token
+*.token
+
+# Certificates (private only)
+*.crt
+*.key
+*.p12
+*.pfx
+
+# Ansible vault
+vault.yml
+*-vault.yml
+
+# Do NOT ignore this file itself
+!.gitignore

@@ -1,19 +1,34 @@
-# Ministry of Detection Beale Eternal Defense (Phase 3)
+﻿# Ministry of Detection  Beale Eternal
 
-**Status**: T3-ETERNAL v6 | **Time**: <30s | **Rules**: ≤10 (USG-3P offload safe)
+**Status**: T3-ETERNAL v6 | **Time**: <120s | **Modules**: Snort IDS + Wazuh Agent
 
-Deploys firewall via UniFi API, counts rules with `yq`, validates VLAN isolation.
+Detection is the first line of defense. Deploys Snort IDS with eternal ruleset, registers Wazuh agent, optional Cowrie honeypot.
 
 ## Prerequisites
 
-```bash
-echo "your-password" > /root/rylan-unifi-case-study/.secrets/unifi-admin-pass
-chmod 400 /root/rylan-unifi-case-study/.secrets/unifi-admin-pass
-snap install yq
-```
+`bash
+# Generate Wazuh API key vault
+echo "your-wazuh-api-key" > /root/rylan-unifi-case-study/.secrets/wazuh-api-key
+chmod 400 /root/rylan-unifi-case-study/.secrets/wazuh-api-key
+
+# Ensure Snort + Wazuh installed
+apt-get install -y snort wazuh-agent
+`
 
 ## Deploy
 
-```bash
+`bash
 sudo bash ./runbooks/ministry-detection/rylan-beale-eternal-one-shot.sh
-```
+`
+
+## Validation
+
+`bash
+# Check Snort running
+systemctl status snort
+
+# Verify Wazuh agent connected
+/var/ossec/bin/agent_control -l
+`
+
+**Beale has risen. The fortress watches eternal.**

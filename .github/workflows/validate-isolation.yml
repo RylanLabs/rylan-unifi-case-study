@@ -60,6 +60,7 @@ jobs:
       - name: Run isolation validation
         env:
           OSTICKET_KEY: ${{ secrets.OSTICKET_KEY }}
+          CI_MODE: 1
         run: |
           set -eux
           bash 03-validation-ops/validate-isolation.sh

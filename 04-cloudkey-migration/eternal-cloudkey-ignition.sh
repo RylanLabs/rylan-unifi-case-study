@@ -16,7 +16,6 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CURRENT_CONTROLLER_IP="10.0.1.20"
-CURRENT_CONTROLLER_PORT="8443"
 MODE="${1:-full}"  # full, backup-only, restore-only, validate-only
 DRY_RUN="${2:-false}"
 
@@ -64,7 +63,8 @@ phase_preflight() {
 phase_backup() {
   log_info "Phase 2: Backing up current LXC controller (10.0.1.20)..."
   
-  local backup_dir="/tmp/cloudkey-backup-$(date +%s)"
+  local backup_dir
+  backup_dir="/tmp/cloudkey-backup-$(date +%s)"
   mkdir -p "$backup_dir"
   
   # Test SSH access to current controller
@@ -151,7 +151,8 @@ phase_restore() {
   fi
   
   # Find backup file
-  local backup_file=$(find "$backup_dir" -name "*.unf" | head -1)
+  local backup_file
+  backup_file=$(find "$backup_dir" -name "*.unf" | head -1)
   
   if [ -z "$backup_file" ]; then
     log_warn "No .unf backup found in $backup_dir"

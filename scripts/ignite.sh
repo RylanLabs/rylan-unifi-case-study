@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Trinity Orchestrator — Sequential Phase Enforcement (v4.0)
-# Carter (Secrets) -> Bauer (Whispers) -> Suehring (Perimeter) -> Validate
+# Carter (Secrets) -> Bauer (Whispers) -> Beale (Detection) -> Validate
 # Zero concurrency. Exit-on-fail. Junior-at-3-AM deployable (<45 min).
 
 set -euo pipefail
@@ -12,7 +12,7 @@ cat <<'BANNER'
 
   Phase 1: Ministry of Secrets (Carter)  -> Samba / LDAP / Kerberos
   Phase 2: Ministry of Whispers (Bauer)  -> SSH / nftables / audit
-  Phase 3: Ministry of Perimeter (Suehring) -> Policy / VLAN
+  Phase 3: Ministry of Detection (Beale) -> Policy / VLAN / Audit
   Final:   Validation (eternal green or die trying)
 ================================================================================
 BANNER
@@ -39,6 +39,7 @@ log_warn() { echo -e "${YELLOW}[TRINITY-WARN]${NC} $1"; }
 log_success() { echo -e "${GREEN}[TRINITY-SUCCESS]${NC} $1"; }
 
 # Exit handler with duration
+# shellcheck disable=SC2317
 exit_handler() {
   local exit_code=$?
   ELAPSED=$(($(date +%s) - START_TIME))
@@ -49,7 +50,7 @@ exit_handler() {
     log_error "Trinity orchestration FAILED at $(date) (exit code: $exit_code)"
   fi
 
-  exit $exit_code
+  exit "$exit_code"
 }
 
 trap 'exit_handler' EXIT
@@ -65,6 +66,7 @@ if [[ ! -f "$REPO_ROOT/.env" ]]; then
   log_error ".env not found. Copy .env.example and configure for your environment."
   exit 1
 fi
+# shellcheck disable=SC1091
 source "$REPO_ROOT/.env"
 log_step ".env loaded"
 
@@ -171,7 +173,7 @@ if bash "$REPO_ROOT/scripts/validate-eternal.sh"; then
   log_success "TRINITY ORCHESTRATION COMPLETE — ETERNAL GREEN"
   log_success "Ministry of Secrets (Carter) — ACTIVE"
   log_success "Ministry of Whispers (Bauer) — ACTIVE"
-  log_success "Ministry of Perimeter (Suehring) — ACTIVE"
+  log_success "Ministry of Detection (Beale) — ACTIVE"
   echo ""
   log_success "Fortress is eternal. The fortress never sleeps."
   exit 0

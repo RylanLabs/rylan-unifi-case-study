@@ -1,0 +1,35 @@
+# 01-bootstrap/netplan-rylan-dc.yaml — Multi-Role DC Network Config
+# Purpose: Configure sub-interfaces for PXE on VLAN 30
+# Deploy: Copy to /etc/netplan/01-rylan-dc.yaml on rylan-dc
+# Apply: netplan apply
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens18:
+      dhcp4: false
+      addresses:
+        - 10.0.10.10/24  # Primary: Management VLAN
+      gateway4: 10.0.10.1
+      nameservers:
+        addresses:
+          - 127.0.0.1
+          - 1.1.1.1
+        search:
+          - rylan.local
+  
+  vlans:
+    # VLAN 30: Trusted devices (PXE server)
+    ens18.30:
+      id: 30
+      link: ens18
+      addresses:
+        - 10.0.30.10/24
+      # No gateway - routing handled by USG-3P
+    
+    # VLAN 20: Server zone (for NFS/LDAP services)
+    ens18.20:
+      id: 20
+      link: ens18
+      addresses:
+        - 10.0.20.10/24

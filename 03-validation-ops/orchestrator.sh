@@ -26,6 +26,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # Load .env
+# shellcheck disable=SC1091
 if [[ -f .env ]]; then
     source .env
 else
@@ -43,15 +44,18 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # Per-component timing
+# shellcheck disable=SC2034
 declare -A COMPONENT_TIMES
 declare -A COMPONENT_START
 
 component_start() { local c=$1; COMPONENT_START[$c]=$(date +%s%N); }
 component_end() {
     local c=$1
-    local end=$(date +%s%N)
+    local end
+    end=$(date +%s%N)
     local start=${COMPONENT_START[$c]:-0}
     local elapsed_ms=$(( (end - start) / 1000000 ))
+    # shellcheck disable=SC2034
     COMPONENT_TIMES[$c]=$elapsed_ms
     log_info "  ⏱️  $c: ${elapsed_ms}ms"
 }
@@ -62,10 +66,30 @@ test_restore() {
     [[ -e "$path" ]] || { log_warn "  Restore test skipped (not found)"; return; }
     log_info "  Testing restore of $component..."
     case "$component" in
-        samba|freeradius) tar -tzf "$path" >/dev/null && log_info "    ✅ $component restore test passed" || log_error "    ❌ failed" ;;
-        mariadb) grep -q "CREATE DATABASE" "$path" && log_info "    ✅ $component restore test passed" || log_error "    ❌ failed" ;;
-        qdrant) [[ -n "$(find "$path" -type f -print -quit)" ]] && log_info "    ✅ $component restore test passed" || log_error "    ❌ empty" ;;
-        *) log_warn "    Unknown component" ;;
+        samba|freeradius)
+            if tar -tzf "$path" >/dev/null; then
+                log_info "    ✅ $component restore test passed"
+            else
+                log_error "    ❌ failed"
+            fi
+            ;;
+        mariadb)
+            if grep -q "CREATE DATABASE" "$path"; then
+                log_info "    ✅ $component restore test passed"
+            else
+                log_error "    ❌ failed"
+            fi
+            ;;
+        qdrant)
+            if [[ -n "$(find "$path" -type f -print -quit)" ]]; then
+                log_info "    ✅ $component restore test passed"
+            else
+                log_error "    ❌ empty"
+            fi
+            ;;
+        *)
+            log_warn "    Unknown component"
+            ;;
     esac
 }
 

@@ -12,6 +12,7 @@ if [[ ! -f .env ]]; then
   echo "❌ .env not found"
   exit 1
 fi
+# shellcheck disable=SC1091
 source .env
 
 HOSTNAME=$(hostname)
@@ -77,7 +78,7 @@ if [[ "$HOSTNAME" == "rylan-ai" ]]; then
   echo "📝 Configuring NFS exports (/etc/exports)..."
 
   # Backup existing exports
-  sudo cp /etc/exports /etc/exports.backup.$(date +%Y%m%d)
+  sudo cp /etc/exports "/etc/exports.backup.$(date +%Y%m%d)"
 
   # Create new exports with Kerberos (sec=krb5p for integrity + privacy)
   sudo tee /etc/exports > /dev/null << EOF
@@ -193,7 +194,7 @@ EOF
     echo "   Mounting..."
     sudo mount -a 2>/dev/null || {
       echo "⚠️  Mount failed (Kerberos ticket may be needed)"
-      echo "   Run: kinit $SAMBA_DOMAIN\\admin@$REALM"
+      printf '   Run: kinit %s\admin@%s\n' "$SAMBA_DOMAIN" "$REALM"
     }
   fi
 
@@ -209,7 +210,7 @@ echo "🔐 Kerberos Setup"
 echo ""
 echo "To complete NFS Kerberos authentication, run on each client:"
 echo ""
-echo "  kinit $DOMAIN\\\\admin@$REALM"
+printf '  kinit %s\admin@%s\n' "$DOMAIN" "$REALM"
 echo "  (Enter password: $ADMIN_PASS)"
 echo ""
 echo "Or for automated mounts, create a keytab:"

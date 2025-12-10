@@ -42,19 +42,44 @@ echo ""
 echo "📋 INVENTORY MANIFEST:"
 echo ""
 
-[[ -d inventory ]] && echo "inventory/:" && ls -1 inventory/*.json 2>/dev/null | sed 's/^/  /' || echo "  (empty)"
+if [[ -d inventory ]]; then
+  echo "inventory/:"
+  find inventory -maxdepth 1 -type f -name "*.json" -printf "  %f\n" 2>/dev/null || true
+else
+  echo "  (empty)"
+fi
 echo ""
 
-[[ -d 02-declarative-config ]] && echo "02-declarative-config/:" && ls -1 02-declarative-config/*.json 2>/dev/null | sed 's/^/  /' || echo "  (empty)"
+if [[ -d 02-declarative-config ]]; then
+  echo "02-declarative-config/:"
+  find 02-declarative-config -maxdepth 1 -type f -name "*.json" -printf "  %f\n" 2>/dev/null || true
+else
+  echo "  (empty)"
+fi
 echo ""
 
-[[ -d docs/physical ]] && echo "docs/physical/:" && ls -1 docs/physical/*.csv 2>/dev/null | sed 's/^/  /' || echo "  (empty)"
+if [[ -d docs/physical ]]; then
+  echo "docs/physical/:"
+  find docs/physical -maxdepth 1 -type f -name "*.csv" -printf "  %f\n" 2>/dev/null || true
+else
+  echo "  (empty)"
+fi
 echo ""
 
-[[ -d .secrets ]] && echo ".secrets/:" && ls -1 .secrets/*.age .secrets/*.json 2>/dev/null | sed 's/^/  /' || echo "  (encrypted vaults)"
+if [[ -d .secrets ]]; then
+  echo ".secrets/:"
+  find .secrets -maxdepth 1 -type f \( -name "*.age" -o -name "*.json" \) -printf "  %f\n" 2>/dev/null || true
+else
+  echo "  (encrypted vaults)"
+fi
 echo ""
 
-[[ -d runbooks ]] && echo "runbooks/:" && ls -1 runbooks/*.json 2>/dev/null | sed 's/^/  /' || echo "  (empty)"
+if [[ -d runbooks ]]; then
+  echo "runbooks/:"
+  find runbooks -maxdepth 1 -type f -name "*.json" -printf "  %f\n" 2>/dev/null || true
+else
+  echo "  (empty)"
+fi
 echo ""
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

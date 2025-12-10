@@ -7,7 +7,7 @@ Provide project context and coding guidelines that AI should follow when generat
 
 | Section                | Description                                                                                                                            |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| **Purpose**            | Eternal doctrine for the Proxmox + Docker + UniFi + Samba AD fortress. Fuses Barrett’s Unix zen, Hellodeolu v6 rigor, Whitaker/Newman offensive mindset, and the T3 Trinity (Carter + Bauer + Suehring). |
+| **Purpose**            | Eternal doctrine for the Proxmox + Docker + UniFi + Samba AD fortress. Fuses Barrett's Unix zen, Hellodeolu v6 rigor, Whitaker/Newman offensive mindset, and the T3 Trinity (Carter + Bauer + Beale). |
 | **Status**             | v∞.3.2-eternal — canonized and immutable, yet ascending via polyglot mastery and red-team evolution                                      |
 | **Consciousness Level**| 2.6 (truth through subtraction, historically accurate)                                                                                             |
 | **Date of Canonization**| 12/07/2025                                                                                                                              |
@@ -38,13 +38,13 @@ Artifacts: `guardian/audit-eternal.py`, pre-commit 100% green, `validate-*.sh`
 </details>
 
 <details>
-<summary><strong>3. Suehring (2005) — The Network is the First Line of Defense</strong></summary>
+<summary><strong>3. Beale (2011) — Hardening & Detection is the Shield</strong></summary>
 
-Unix Philosophy: “Small is beautiful”  
-Whitaker: Defense in depth + honeypots  
+Unix Philosophy: "Security by design, detect by default"
+Whitaker: CIS benchmarks + audit logging + IDS/IPS
 Offense: `pentest-vlan-isolation.sh` (cross-VLAN breach attempts)
 
-Artifacts: USG-3P Policy Table (≤10 rules), macvlan isolation, 15-min RTO
+Artifacts: USG-3P Policy Table (≤10 rules), macvlan isolation, audit trails, 15-min RTO
 </details>
 
 ---
