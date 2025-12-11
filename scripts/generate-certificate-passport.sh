@@ -23,17 +23,17 @@ CERTS="[]"
 
 for CERT_DIR in "${CERT_PATHS[@]}"; do
   [[ -d "${CERT_DIR}" ]] || continue
-  
+
   while IFS= read -r -d '' CERT_FILE; do
     CN=$(openssl x509 -in "${CERT_FILE}" -noout -subject 2>/dev/null | sed -n 's/.*CN[[:space:]]*=[[:space:]]*\([^,]*\).*/\1/p' || echo "")
     ISSUER=$(openssl x509 -in "${CERT_FILE}" -noout -issuer 2>/dev/null | sed -n 's/.*CN[[:space:]]*=[[:space:]]*\([^,]*\).*/\1/p' || echo "")
     EXPIRY=$(openssl x509 -in "${CERT_FILE}" -noout -enddate 2>/dev/null | cut -d= -f2 || echo "")
-    
+
     [[ -n "${CN}" ]] || continue
-    
+
     EXPIRY_EPOCH=$(date -d "${EXPIRY}" +%s 2>/dev/null || echo "0")
-    DAYS_REMAINING=$(( (EXPIRY_EPOCH - $(date +%s)) / 86400 ))
-    
+    DAYS_REMAINING=$(((EXPIRY_EPOCH - $(date +%s)) / 86400))
+
     CERTS=$(echo "${CERTS}" | jq --arg path "${CERT_FILE}" --arg cn "${CN}" \
       --arg issuer "${ISSUER}" --arg expiry "${EXPIRY}" --arg days "${DAYS_REMAINING}" \
       '. += [{path: $path, common_name: $cn, issuer: $issuer, expiry_date: $expiry, days_remaining: ($days | tonumber)}]')
@@ -42,7 +42,7 @@ done
 
 CERTS=$(echo "${CERTS}" | jq 'sort_by(.days_remaining)')
 
-cat > "${OUTPUT}" <<EOF
+cat >"${OUTPUT}" <<EOF
 {
   "schema_version": "1.0.0-eternal",
   "generated_at": "${TIMESTAMP}",
@@ -53,7 +53,10 @@ cat > "${OUTPUT}" <<EOF
 }
 EOF
 
-jq empty "${OUTPUT}" || { echo "❌ Invalid JSON"; exit 1; }
+jq empty "${OUTPUT}" || {
+  echo "❌ Invalid JSON"
+  exit 1
+}
 
 EXPIRING=$(echo "${CERTS}" | jq '[.[] | select(.days_remaining < 30)] | length')
 [[ "${EXPIRING}" -eq 0 ]] || echo "⚠️  ${EXPIRING} certificate(s) expiring <30 days"

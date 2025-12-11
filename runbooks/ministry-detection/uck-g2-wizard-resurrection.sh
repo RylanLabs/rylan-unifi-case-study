@@ -12,7 +12,10 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly SCRIPT_NAME
 
 log() { printf '%b\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
-die() { log "ERROR: $*" >&2; exit 1; }
+die() {
+  log "ERROR: $*" >&2
+  exit 1
+}
 
 readonly UNIFI_DATA_DIR="/usr/lib/unifi/data"
 readonly SETUP_FLAG_FILE="${UNIFI_DATA_DIR}/is-setup-complete.json"
@@ -23,7 +26,7 @@ readonly YELLOW='\033[1;33m'
 readonly NC='\033[0m'
 
 banner() {
-  cat << 'EOF'
+  cat <<'EOF'
 ╔═══════════════════════════════════════════════════════════╗
 ║        UCK-G2 WIZARD RESURRECTION — Beale Ministry       ║
 ║  Fix: Setup wizard corruption on Cloud Key Gen2/Gen2+    ║
@@ -35,17 +38,17 @@ EOF
 
 preflight_checks() {
   log "Running preflight checks..."
-  
+
   [[ $EUID -eq 0 ]] || die "Must run as root (use sudo)"
-  
+
   [[ -d "${UNIFI_DATA_DIR}" ]] || die "UniFi data directory not found: ${UNIFI_DATA_DIR}"
-  
+
   if systemctl is-active --quiet unifi; then
     log "UniFi service is running"
   else
     log "${YELLOW}WARN${NC}: UniFi service not running (will start after fix)"
   fi
-  
+
   log "${GREEN}✓${NC} Preflight checks passed"
 }
 
@@ -62,10 +65,10 @@ backup_existing_flag() {
 
 apply_resurrection_fix() {
   log "Applying resurrection fix..."
-  
+
   # Create the magic flag file
-  echo '{"isReadyForSetup":false}' > "${SETUP_FLAG_FILE}"
-  
+  echo '{"isReadyForSetup":false}' >"${SETUP_FLAG_FILE}"
+
   # Verify write
   if [[ -f "${SETUP_FLAG_FILE}" ]]; then
     local content
@@ -78,7 +81,7 @@ apply_resurrection_fix() {
   else
     die "Failed to create flag file: ${SETUP_FLAG_FILE}"
   fi
-  
+
   # Set ownership (UniFi runs as 'unifi' user on Cloud Key)
   chown unifi:unifi "${SETUP_FLAG_FILE}" 2>/dev/null || log "${YELLOW}WARN${NC}: Could not chown to unifi:unifi (may not exist)"
   chmod 644 "${SETUP_FLAG_FILE}"
@@ -87,7 +90,7 @@ apply_resurrection_fix() {
 restart_unifi_service() {
   log "Restarting UniFi service..."
   systemctl restart unifi || die "Failed to restart UniFi service"
-  
+
   log "Waiting for UniFi to become ready..."
   local max_wait=60
   local elapsed=0
@@ -99,21 +102,21 @@ restart_unifi_service() {
     sleep 2
     elapsed=$((elapsed + 2))
   done
-  
+
   die "UniFi did not become ready within ${max_wait}s"
 }
 
 validate_fix() {
   log "Validating resurrection..."
-  
+
   # Check if wizard redirect is gone
   local response
   response="$(curl -k -s -L https://localhost:8443 2>/dev/null || true)"
-  
+
   if echo "${response}" | grep -qi "Welcome to your new controller"; then
     die "Setup wizard still active — resurrection failed"
   fi
-  
+
   if echo "${response}" | grep -qi "login\|manage"; then
     log "${GREEN}✓${NC} Setup wizard bypassed — normal login screen active"
   else
@@ -122,7 +125,7 @@ validate_fix() {
 }
 
 victory_banner() {
-  cat << 'EOF'
+  cat <<'EOF'
 
 ╔═══════════════════════════════════════════════════════════╗
 ║                THE FORTRESS HAS RISEN AGAIN               ║
@@ -149,7 +152,7 @@ main() {
   restart_unifi_service
   validate_fix
   victory_banner
-  
+
   log "${GREEN}SUCCESS${NC}: UCK-G2 wizard resurrection complete"
 }
 

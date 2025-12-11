@@ -9,29 +9,29 @@ services:
   unifi-controller:
     image: jacobalberty/unifi:latest
     container_name: unifi-controller
-    
+
     # CRITICAL: privileged: true is the ONLY working configuration in 2025
     # Defeats AppArmor + Java NIO socket binding issues on macvlan interfaces
     # Reference: rylan-IoT-predeloy/docs/adr/009-unifi-privileged-mode-2025.md
     privileged: true
-    
+
     network_mode: host
-    
+
     environment:
       # Memory configuration (Proxmox host has 64GB)
       MONGO_HEAP: 512
       UNIFI_HEAP: 1024
       UNIFI_MAX_MEMORY: 2048
-      
+
       # Logging (persistent via bind mount)
       TZ: UTC
-    
+
     volumes:
       # Data persistence (RW owned by UID 1000)
       - /opt/unifi/data:/unifi/data
       - /opt/unifi/log:/unifi/log
       - /opt/unifi/cert:/unifi/cert:ro
-    
+
     # Port mapping (all required for UniFi discovery, adoption, mgmt)
     ports:
       - "8443:8443/tcp"      # HTTPS mgmt console
@@ -40,9 +40,9 @@ services:
       - "8880:8880/tcp"      # HTTP device mgmt (redirect to 8843)
       - "3478:3478/udp"      # STUN (device discover)
       - "6789:6789/tcp"      # Speed test (optional)
-    
+
     restart: always
-    
+
     # Health check: Query /status endpoint
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "https://localhost:8443/status"]
@@ -50,7 +50,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    
+
     # Resource limits (Proxmox enforces via cgroup)
     deploy:
       resources:
@@ -60,7 +60,7 @@ services:
         reservations:
           cpus: '2'
           memory: 2G
-    
+
     logging:
       driver: "json-file"
       options:

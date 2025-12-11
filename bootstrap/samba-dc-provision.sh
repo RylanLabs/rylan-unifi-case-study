@@ -11,54 +11,54 @@ set -euo pipefail
 
 # Hellodeolu v4 guard: enforce Ubuntu/WSL2
 if ! grep -qi ubuntu /etc/os-release 2>/dev/null; then
-    echo "❌ This script requires Ubuntu 24.04 or WSL2 Ubuntu"
-    echo "   Windows users: run 'wsl' first, then execute from WSL shell"
-    exit 1
+  echo "❌ This script requires Ubuntu 24.04 or WSL2 Ubuntu"
+  echo "   Windows users: run 'wsl' first, then execute from WSL shell"
+  exit 1
 fi
 
 # Configuration (GitOps declarative)
 DOMAIN="rylan.internal"
 REALM="RYLAN.INTERNAL"
 NETBIOS="RYLAN"
-ADMIN_PASS="${SAMBA_ADMIN_PASS:-Passw0rd123!}"  # Override via env var
+ADMIN_PASS="${SAMBA_ADMIN_PASS:-Passw0rd123!}" # Override via env var
 DC_IP="${DC_IP:-10.0.10.10}"
 DC_GATEWAY="${DC_GATEWAY:-10.0.10.1}"
-DNS_FORWARDER="${DNS_FORWARDER:-1.1.1.1}"  # Cloudflare; use "none" for air-gapped
+DNS_FORWARDER="${DNS_FORWARDER:-1.1.1.1}" # Cloudflare; use "none" for air-gapped
 DRY_RUN="${1:-}"
 
 echo "=== Samba AD/DC Provisioning (Canonical Bash) ==="
 echo "Domain: $DOMAIN ($REALM) | IP: $DC_IP"
 
 if [[ "$DRY_RUN" == "--dry-run" ]]; then
-    echo "[DRY-RUN MODE] Configuration would be:"
-    echo "  DOMAIN: $DOMAIN"
-    echo "  REALM: $REALM"
-    echo "  NETBIOS: $NETBIOS"
-    echo "  DC_IP: $DC_IP"
-    echo "  DC_GATEWAY: $DC_GATEWAY"
-    echo "  DNS_FORWARDER: $DNS_FORWARDER"
-    echo "  Steps 0-8 would execute in sequence"
-    exit 0
+  echo "[DRY-RUN MODE] Configuration would be:"
+  echo "  DOMAIN: $DOMAIN"
+  echo "  REALM: $REALM"
+  echo "  NETBIOS: $NETBIOS"
+  echo "  DC_IP: $DC_IP"
+  echo "  DC_GATEWAY: $DC_GATEWAY"
+  echo "  DNS_FORWARDER: $DNS_FORWARDER"
+  echo "  Steps 0-8 would execute in sequence"
+  exit 0
 fi
 
 # Pre-flight checks
 echo "[Pre-flight] Checking prerequisites..."
 if ! command -v samba-tool &>/dev/null; then
-    echo "❌ samba-tool not found. Install Samba packages first:"
-    echo "   sudo apt update && sudo apt install -y samba winbind krb5-user"
-    exit 1
+  echo "❌ samba-tool not found. Install Samba packages first:"
+  echo "   sudo apt update && sudo apt install -y samba winbind krb5-user"
+  exit 1
 fi
 
 if ! command -v sudo &>/dev/null; then
-    echo "❌ sudo not available. Run as regular user with sudo access."
-    exit 1
+  echo "❌ sudo not available. Run as regular user with sudo access."
+  exit 1
 fi
 
 # Check if already provisioned (idempotent)
 if [[ -f /var/lib/samba/private/sam.ldb ]]; then
-    echo "⚠️  Samba already provisioned (sam.ldb exists)"
-    echo "   To re-provision, run: sudo rm -rf /var/lib/samba/* /var/cache/samba/* /etc/samba/smb.conf"
-    exit 0
+  echo "⚠️  Samba already provisioned (sam.ldb exists)"
+  echo "   To re-provision, run: sudo rm -rf /var/lib/samba/* /var/cache/samba/* /etc/samba/smb.conf"
+  exit 0
 fi
 
 # Step 0: Pre-cleanup (idempotent - safe to re-run)
@@ -71,7 +71,7 @@ sudo rm -rf /var/cache/samba/*
 
 # Step 1: Configure static IP (simulate VLAN 10 servers network)
 echo "[1/8] Configuring static IP $DC_IP..."
-cat > /tmp/netplan-rylan-dc.yaml << EOF
+cat >/tmp/netplan-rylan-dc.yaml <<EOF
 network:
   version: 2
   renderer: networkd
@@ -96,10 +96,10 @@ sleep 3
 
 # Verify network
 if ! ip addr show | grep -q "$DC_IP"; then
-    echo "❌ Static IP assignment failed"
-    echo "   Available IPs:"
-    ip addr show | grep "inet " | awk '{print "     " $2}'
-    exit 1
+  echo "❌ Static IP assignment failed"
+  echo "   Available IPs:"
+  ip addr show | grep "inet " | awk '{print "     " $2}'
+  exit 1
 fi
 echo "✅ Static IP configured successfully"
 
@@ -107,21 +107,21 @@ echo "✅ Static IP configured successfully"
 echo "[2/8] Installing Samba AD/DC packages..."
 sudo apt update
 sudo DEBIAN_FRONTEND=noninteractive apt install -y \
-    samba winbind krb5-user python3-setproctitle \
-    sssd sssd-ad attr acl smbclient ldap-utils
+  samba winbind krb5-user python3-setproctitle \
+  sssd sssd-ad attr acl smbclient ldap-utils
 
 # Step 3: Provision AD/DC (NON-INTERACTIVE - all params scripted)
 echo "[3/8] Provisioning Samba AD/DC (non-interactive)..."
 if ! sudo samba-tool domain provision \
-    --use-rfc2307 \
-    --realm="$REALM" \
-    --domain="$NETBIOS" \
-    --server-role=dc \
-    --dns-backend=SAMBA_INTERNAL \
-    --adminpass="$ADMIN_PASS" \
-    --option="dns forwarder = $DNS_FORWARDER"; then
-    echo "❌ Samba domain provision failed"
-    exit 1
+  --use-rfc2307 \
+  --realm="$REALM" \
+  --domain="$NETBIOS" \
+  --server-role=dc \
+  --dns-backend=SAMBA_INTERNAL \
+  --adminpass="$ADMIN_PASS" \
+  --option="dns forwarder = $DNS_FORWARDER"; then
+  echo "❌ Samba domain provision failed"
+  exit 1
 fi
 echo "✅ Domain provisioned successfully"
 
@@ -129,7 +129,7 @@ echo "✅ Domain provisioned successfully"
 echo "[4/8] Configuring Kerberos and DNS..."
 sudo cp /var/lib/samba/private/krb5.conf /etc/krb5.conf
 
-cat > /tmp/resolv.conf << EOF
+cat >/tmp/resolv.conf <<EOF
 search $DOMAIN
 nameserver $DC_IP
 nameserver $DNS_FORWARDER
@@ -145,18 +145,18 @@ sudo systemctl enable samba-ad-dc
 sleep 5
 
 if ! sudo systemctl is-active --quiet samba-ad-dc; then
-    echo "❌ Samba AD/DC service failed to start"
-    echo "   Logs:"
-    sudo journalctl -u samba-ad-dc -n 50 | tail -20
-    exit 1
+  echo "❌ Samba AD/DC service failed to start"
+  echo "   Logs:"
+  sudo journalctl -u samba-ad-dc -n 50 | tail -20
+  exit 1
 fi
 echo "✅ Samba AD/DC service running"
 
 # Step 6: Validate DNS
 echo "[6/8] Validating DNS configuration..."
 if ! host -t SRV "_ldap._tcp.$DOMAIN" 127.0.0.1 &>/dev/null; then
-    echo "⚠️  WARNING: DNS SRV records not immediately available"
-    echo "   (May need a few seconds to propagate)"
+  echo "⚠️  WARNING: DNS SRV records not immediately available"
+  echo "   (May need a few seconds to propagate)"
 fi
 
 # Step 7: Run validation tests

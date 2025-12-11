@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-PROXMOX_IP="${PROXMOX_IP:-192.168.1.10}"  # Override via env var
+PROXMOX_IP="${PROXMOX_IP:-192.168.1.10}" # Override via env var
 PASS=0
 FAIL=0
 
@@ -96,7 +96,7 @@ if [[ "$CONFLICTS" -eq 0 ]]; then
   ((PASS++))
 else
   echo "⚠️  Test 9: Found $CONFLICTS potential conflicts (review manually)"
-  ((PASS++))  # Non-critical if 99-bauer-eternal.conf overrides
+  ((PASS++)) # Non-critical if 99-bauer-eternal.conf overrides
 fi
 
 # Test 10: File permissions correct
@@ -147,7 +147,7 @@ if [[ "$PVE_STATUS" -eq 3 ]]; then
   ((PASS++))
 else
   echo "⚠️  Test 14: Some Proxmox services not active ($PVE_STATUS/3)"
-  ((PASS++))  # Non-critical for SSH hardening
+  ((PASS++)) # Non-critical for SSH hardening
 fi
 
 # Test 15: No plaintext secrets in config

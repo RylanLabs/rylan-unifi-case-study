@@ -1,0 +1,12 @@
+aiounifi==73.*
+pydantic==2.12.*
+fastapi==0.115.*
+uvicorn==0.30.*
+httpx==0.27.*
+presidio-analyzer==2.2.*
+ollama==0.3.*
+python-dotenv==1.0.*
+pytest==7.4.*
+qdrant-client==1.9.*
+sentence-transformers==3.1.*
+python-multipart==0.0.*

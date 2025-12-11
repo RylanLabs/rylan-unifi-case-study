@@ -12,7 +12,7 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 mkdir -p "$(dirname "${OUTPUT}")"
 
-cat > "${OUTPUT}" <<EOF
+cat >"${OUTPUT}" <<EOF
 patch_panel_port,switch_port,room_label,jack_label,cable_type,length_ft,tested_date,notes
 PP-01,SW01-P01,Room-101,J-101A,Cat6A,25,${TIMESTAMP},Uplink to core
 PP-02,SW01-P02,Room-102,J-102A,Cat6A,30,${TIMESTAMP},AP-01 connection

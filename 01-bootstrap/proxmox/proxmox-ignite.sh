@@ -103,7 +103,7 @@ parse_arguments() {
 }
 
 print_usage() {
-  cat << 'EOF'
+  cat <<'EOF'
 Usage: proxmox-ignite.sh [OPTIONS]
 
 Required Options:
@@ -139,12 +139,12 @@ validate_arguments() {
     print_usage
     exit 1
   fi
-  
+
   if ! validate_cidr_format "$TARGET_IP"; then
     fail_with_context 1 "Invalid IP/CIDR format: $TARGET_IP" \
       "Expected format: 10.0.10.10/26"
   fi
-  
+
   if ! validate_ip_format "$GATEWAY_IP"; then
     fail_with_context 1 "Invalid gateway IP format: $GATEWAY_IP" \
       "Expected format: 10.0.10.1"
@@ -159,41 +159,41 @@ main() {
   # Parse and validate arguments
   parse_arguments "$@"
   validate_arguments
-  
+
   # Initialize logging
   mkdir -p "$(dirname "$LOG_FILE")"
-  echo "Proxmox Ignite started: $(date)" > "$LOG_FILE"
-  
+  echo "Proxmox Ignite started: $(date)" >"$LOG_FILE"
+
   log_info "=== PROXMOX IGNITION SEQUENCE INITIATED ==="
   log_info "Hostname: $HOSTNAME"
   log_info "IP/CIDR: $TARGET_IP"
   log_info "Gateway: $GATEWAY_IP"
   log_info "SSH Key Source: $SSH_KEY_SOURCE"
-  
+
   # Execute phases sequentially
-  "${SCRIPT_DIR}/phases/phase0-validate.sh" || \
+  "${SCRIPT_DIR}/phases/phase0-validate.sh" ||
     fail_with_context 1 "Phase 0 validation failed" "Review logs"
-  
+
   hostnamectl set-hostname "$HOSTNAME" || log_warn "Failed to set hostname"
-  
-  "${SCRIPT_DIR}/phases/phase1-network.sh" || \
+
+  "${SCRIPT_DIR}/phases/phase1-network.sh" ||
     fail_with_context 1 "Phase 1 network configuration failed" "Review logs"
-  
-  "${SCRIPT_DIR}/phases/phase2-harden.sh" || \
+
+  "${SCRIPT_DIR}/phases/phase2-harden.sh" ||
     fail_with_context 1 "Phase 2 security hardening failed" "Review logs"
-  
-  "${SCRIPT_DIR}/phases/phase3-bootstrap.sh" || \
+
+  "${SCRIPT_DIR}/phases/phase3-bootstrap.sh" ||
     fail_with_context 1 "Phase 3 tooling installation failed" "Review logs"
-  
-  "${SCRIPT_DIR}/phases/phase4-resurrect.sh" || \
+
+  "${SCRIPT_DIR}/phases/phase4-resurrect.sh" ||
     log_warn "Phase 4 had issues (non-fatal, continuing)"
-  
+
   # Collect system metrics
   collect_system_metrics
-  
+
   # Run Whitaker offensive security validation
   if run_whitaker_offensive_suite "$HOSTNAME" "$TARGET_IP" "$GATEWAY_IP" \
-       "$FALLBACK_DNS"; then
+    "$FALLBACK_DNS"; then
     finalize_metrics
     log_success "=== PROXMOX IGNITION COMPLETE ==="
     log_success "Fortress operational. RTO compliance achieved."

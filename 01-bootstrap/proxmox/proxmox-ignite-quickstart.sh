@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Quick Start Script: Proxmox Ignite Deployment
-# 
+#
 # This script automates the entire proxmox-ignite.sh deployment
 # with sensible defaults for a quick lab environment setup.
 #
@@ -35,7 +35,7 @@ prompt_text() {
   local prompt="$1"
   local default="$2"
   local input
-  
+
   if [ -n "$default" ]; then
     read -r -p "$(echo -e "${CYAN}${prompt}${NC}") [${default}]: " input
     echo "${input:-$default}"
@@ -46,7 +46,7 @@ prompt_text() {
 }
 
 print_banner() {
-  cat << 'EOF'
+  cat <<'EOF'
 
 ████████████████████████████████████████████████████████████████████████████████
 █                                                                              █
@@ -64,8 +64,8 @@ print_configuration() {
   local ip="$2"
   local gateway="$3"
   local ssh_key="$4"
-  
-  cat << EOF
+
+  cat <<EOF
 
 ${BOLD}Deployment Configuration:${NC}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -84,41 +84,41 @@ EOF
 
 main() {
   print_banner
-  
+
   # Check prerequisites
   echo -e "${CYAN}📋 Checking prerequisites...${NC}"
-  
+
   if [[ $EUID -ne 0 ]]; then
     echo "❌ This script must be run as root or with sudo"
     exit 1
   fi
   echo "✅ Running as root"
-  
+
   if [ ! -f "$IGNITE_SCRIPT" ]; then
     echo "❌ proxmox-ignite.sh not found at: $IGNITE_SCRIPT"
     exit 1
   fi
   echo "✅ proxmox-ignite.sh found"
-  
+
   # Collect user input
   echo ""
   echo -e "${CYAN}${BOLD}Enter Proxmox Host Configuration:${NC}"
   echo ""
-  
+
   local hostname
   hostname=$(prompt_text "Hostname" "rylan-dc")
-  
+
   local ip
   ip=$(prompt_text "IP Address (CIDR)" "10.0.10.10/26")
-  
+
   local gateway
   gateway=$(prompt_text "Gateway IP" "10.0.10.1")
-  
+
   # SSH key handling
   echo ""
   echo -e "${CYAN}SSH Key Configuration:${NC}"
   local default_key="$HOME/.ssh/id_ed25519.pub"
-  
+
   local ssh_key
   if [ -f "$default_key" ]; then
     ssh_key=$(prompt_text "SSH Public Key Path" "$default_key")
@@ -126,40 +126,40 @@ main() {
     echo "No SSH key found at $default_key"
     ssh_key=$(prompt_text "SSH Public Key Path" "")
   fi
-  
+
   if [ -z "$ssh_key" ]; then
     echo "❌ SSH key path required"
     exit 1
   fi
-  
+
   if [ ! -f "$ssh_key" ]; then
     echo "❌ SSH key not found: $ssh_key"
     exit 1
   fi
-  
+
   # Review configuration
   echo ""
   print_configuration "$hostname" "$ip" "$gateway" "$ssh_key"
-  
+
   # Confirm before proceeding
   read -r -p "$(echo -e "${YELLOW}Proceed with deployment? [y/N]: ${NC}")" confirm
-  
+
   if [[ ! "$confirm" =~ ^[yY]$ ]]; then
     echo "Deployment cancelled"
     exit 0
   fi
-  
+
   # Execute ignition script
   echo ""
   echo -e "${CYAN}🔥 Starting Proxmox Ignition...${NC}"
   echo ""
-  
+
   if bash "$IGNITE_SCRIPT" \
     --hostname "$hostname" \
     --ip "$ip" \
     --gateway "$gateway" \
     --ssh-key "$ssh_key"; then
-    
+
     echo ""
     echo -e "${GREEN}${BOLD}✅ Deployment Successful!${NC}"
     echo ""

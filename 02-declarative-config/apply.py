@@ -1,3 +1,4 @@
+# Declarative → Imperative Renderer (Carter)
 #!/usr/bin/env python3
 """
 YAML-driven UniFi network reconciler with proper dry-run support.
@@ -284,3 +285,34 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# Eternal Renderer: YAML Desired → JSON Runtime (Carter → Execution)
+import yaml
+import json
+from pathlib import Path
+
+def render_desired_to_runtime(yaml_file, json_out):
+    """Idempotent: Render YAML to JSON for migration engine."""
+    yaml_path = Path(yaml_file)
+    if not yaml_path.exists():
+        print(f"⚠️ {yaml_file} missing – skipping render")
+        return
+    with open(yaml_path) as f:
+        data = yaml.safe_load(f)
+    # Convert YAML list to JSON dict (e.g., vlans: [items] → {"1": item})
+    if isinstance(data, dict) and data:
+        json_data = {str(i+1): item for i, item in enumerate(data[list(data.keys())[0]])}
+    else:
+        json_data = {}
+    with open(json_out, 'w') as f:
+        json.dump(json_data, f, indent=2)
+    print(f"✅ Rendered {yaml_file} → {json_out}")
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--render-only", action="store_true")
+    args = parser.parse_args()
+    if args.render_only:
+        render_desired_to_runtime("vlans.yaml", "../05-network-migration/configs/vlans.json")
+        render_desired_to_runtime("firewall-rules.yaml", "../05-network-migration/configs/firewall-rules.json")

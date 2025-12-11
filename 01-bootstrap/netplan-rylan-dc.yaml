@@ -17,7 +17,7 @@ network:
           - 1.1.1.1
         search:
           - rylan.local
-  
+
   vlans:
     # VLAN 30: Trusted devices (PXE server)
     ens18.30:
@@ -26,7 +26,7 @@ network:
       addresses:
         - 10.0.30.10/24
       # No gateway - routing handled by USG-3P
-    
+
     # VLAN 20: Server zone (for NFS/LDAP services)
     ens18.20:
       id: 20

@@ -31,10 +31,9 @@ log_success "SSH access confirmed"
 
 # Trigger backup on Cloud Key
 log_info "Triggering backup on Cloud Key..."
-if ! ssh "$BACKUP_USER@$CLOUDKEY_IP" > /tmp/cloudkey-backup.tmp 2>&1 << 'BACKUP_CMD'
+if ! ssh "$BACKUP_USER@$CLOUDKEY_IP" >/tmp/cloudkey-backup.tmp 2>&1 <<'BACKUP_CMD'; then
   unifi-os backup
 BACKUP_CMD
-then
   log_error "Backup trigger failed"
   exit 1
 fi
@@ -52,7 +51,7 @@ log_info "Backup file: $BACKUP_FILE"
 # Download backup
 log_info "Downloading backup..."
 scp "$BACKUP_USER@$CLOUDKEY_IP:/data/autobackup/$BACKUP_FILE" \
-    "$BACKUP_DIR/cloudkey-$(date +%Y%m%d-%H%M%S).unf" || {
+  "$BACKUP_DIR/cloudkey-$(date +%Y%m%d-%H%M%S).unf" || {
   log_error "SCP failed"
   exit 1
 }

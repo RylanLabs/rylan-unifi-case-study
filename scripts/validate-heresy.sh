@@ -5,7 +5,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 readonly TARGET="${1:-}"
-[[ -f "${TARGET}" ]] || { echo "Usage: $0 path/to/wrapper.sh"; exit 1; }
+[[ -f "${TARGET}" ]] || {
+  echo "Usage: $0 path/to/wrapper.sh"
+  exit 1
+}
 
 echo "Validating heresy wrapper: ${TARGET}"
 

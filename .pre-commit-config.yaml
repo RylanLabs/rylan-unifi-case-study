@@ -8,37 +8,12 @@ repos:
         files: ^(02-declarative-config|shared)/.*\.ya?ml$
         types: [yaml]
         stages: [commit, push]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
-      - id: check-yaml
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
-  - repo: local
-    hooks:
-      - id: eternal-rule-count
-        name: Policy Rule Validator (≤10 rules)
-        entry: >-
-          python -c "
-import sys, json
-try:
-    with open('02-declarative-config/policy-table-rylan-v5.json') as f:
-        rules = json.load(f)['rules']
-    count = len(rules)
-    print(f'Policy rules: {count}')
-    sys.exit(1 if count > 10 else 0)
-except Exception as e:
-    print('Error reading policy table:', e)
-    sys.exit(1)
-"
-        files: ^02-declarative-config/policy-table-rylan-v5\.json$
-        language: system
-        stages: [push]
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
         args: ['--unsafe']
@@ -50,6 +25,15 @@ repos:
       - id: detect-private-key
       - id: mixed-line-ending
         args: ['--fix=lf']
+
+  - repo: local
+    hooks:
+      - id: eternal-rule-count
+        name: Policy Rule Validator (≤10 rules)
+        entry: "python -c \"import sys, json; rules = json.load(open('02-declarative-config/policy-table-rylan-v5.json'))['rules']; print(f'Policy rules: {len(rules)}'); sys.exit(1 if len(rules) > 10 else 0)\""
+        files: ^02-declarative-config/policy-table-rylan-v5\.json$
+        language: system
+        stages: [push]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4

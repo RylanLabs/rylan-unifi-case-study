@@ -1,0 +1,6 @@
+[
+  {"vlan":10,"name":"Management","subnet":"10.0.10.0/24"},
+  {"vlan":30,"name":"Workstations","subnet":"10.0.30.0/24"},
+  {"vlan":40,"name":"Servers","subnet":"10.0.40.0/24"},
+  {"vlan":90,"name":"IoT","subnet":"10.0.90.0/24"}
+]

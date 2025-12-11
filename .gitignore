@@ -183,3 +183,5 @@ logs/
 # Temporary files
 tmp/
 temp/
+05-network-migration/configs/*.json
+05-network-migration/configs/*.json

@@ -1,0 +1,6 @@
+[
+  {"rule":"1","action":"drop","src":"10.0.30.0/24","dst":"10.0.40.0/24"},
+  {"rule":"2","action":"drop","src":"10.0.90.0/24","dst":"any"},
+  {"rule":"3","action":"allow","src":"10.0.10.0/24","dst":"any"},
+  {"rule":"4","action":"drop","src":"any","dst":"10.0.10.13:80"}
+]

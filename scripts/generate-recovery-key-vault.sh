@@ -26,7 +26,7 @@ UNIFI_API_KEY=$(cat /opt/rylan/.secrets/unifi-api-key 2>/dev/null || echo "MISSI
 LUKS_KEY=$(cat /opt/rylan/.secrets/luks-recovery-key 2>/dev/null || echo "MISSING")
 
 # Build JSON
-cat > "${TEMP_JSON}" <<EOF
+cat >"${TEMP_JSON}" <<EOF
 {
   "schema_version": "1.0.0-eternal",
   "generated_at": "${TIMESTAMP}",
@@ -43,7 +43,11 @@ EOF
 
 # Encrypt if age available
 if command -v age >/dev/null 2>&1 && [[ -n "${AGE_RECIPIENT:-}" ]]; then
-  age -r "${AGE_RECIPIENT}" -o "${OUTPUT}" "${TEMP_JSON}" || { echo "❌ Encryption failed"; rm -f "${TEMP_JSON}"; exit 1; }
+  age -r "${AGE_RECIPIENT}" -o "${OUTPUT}" "${TEMP_JSON}" || {
+    echo "❌ Encryption failed"
+    rm -f "${TEMP_JSON}"
+    exit 1
+  }
   shred -u "${TEMP_JSON}" 2>/dev/null || rm -f "${TEMP_JSON}"
   chmod 600 "${OUTPUT}"
   echo "✓ ${OUTPUT} (encrypted, YubiKey required)"

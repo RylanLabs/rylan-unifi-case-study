@@ -20,105 +20,105 @@ FIREWALL="10.0.30.1"
 
 # Logging
 log() {
-printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
+  printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
 }
 
 log_pass() {
-log " $*"
+  log " $*"
 }
 
 log_fail() {
-log " $*"
+  log " $*"
 }
 
 # NMAP probe function
 run_nmap_test() {
-local target_ip="$1"
-local port="$2"
-local expected="$3"
-local description="$4"
+  local target_ip="$1"
+  local port="$2"
+  local expected="$3"
+  local description="$4"
 
-log "  Testing: ${description} (${target_ip}:${port} expecting ${expected})"
+  log "  Testing: ${description} (${target_ip}:${port} expecting ${expected})"
 
-if nmap -p "${port}" -T5 --open "${target_ip}" 2>/dev/null | grep -q "open"; then
-if [[ "${expected}" == "open" ]]; then
-log_pass "   ${description} ALLOWED (expected)"
-return 0
-else
-log_fail "   ${description} ALLOWED (UNEXPECTED  isolation breach!)"
-return 1
-fi
-else
-if [[ "${expected}" == "closed" ]]; then
-log_pass "   ${description} BLOCKED (expected)"
-return 0
-else
-log_fail "  → ${description} BLOCKED (UNEXPECTED  connectivity failure)"
-return 1
-fi
-fi
+  if nmap -p "${port}" -T5 --open "${target_ip}" 2>/dev/null | grep -q "open"; then
+    if [[ "${expected}" == "open" ]]; then
+      log_pass "   ${description} ALLOWED (expected)"
+      return 0
+    else
+      log_fail "   ${description} ALLOWED (UNEXPECTED  isolation breach!)"
+      return 1
+    fi
+  else
+    if [[ "${expected}" == "closed" ]]; then
+      log_pass "   ${description} BLOCKED (expected)"
+      return 0
+    else
+      log_fail "  → ${description} BLOCKED (UNEXPECTED  connectivity failure)"
+      return 1
+    fi
+  fi
 }
 
 # Main test suite
 main() {
-	log ""
-	log "  VLAN ISOLATION VALIDATION  Whitaker Offensive Trinity"
-	log ""
+  log ""
+  log "  VLAN ISOLATION VALIDATION  Whitaker Offensive Trinity"
+  log ""
 
-	# CI_MODE: Skip nmap probes (no live network in CI)
-	if [[ "${CI_MODE:-}" == "1" ]]; then
-		log "⚠ CI_MODE: Skipping nmap probes (no live infrastructure)"
-		log "  In production, this validates:"
-		log "  - IoT→DNS (open), IoT→SSH (closed)"
-		log "  - Guest→DNS (open), Guest→SSH (closed)"
-		log "  - Trusted→LDAP (open), Trusted→SSH (closed)"
-		log "  - VoIP→LDAP (open), VoIP→NFS (closed)"
-		log "  - Cross-VLAN→SMB (closed)"
-		log ""
-		log_pass "CI_MODE: Isolation tests deferred to live environment"
-		return 0
-	fi
+  # CI_MODE: Skip nmap probes (no live network in CI)
+  if [[ "${CI_MODE:-}" == "1" ]]; then
+    log "⚠ CI_MODE: Skipping nmap probes (no live infrastructure)"
+    log "  In production, this validates:"
+    log "  - IoT→DNS (open), IoT→SSH (closed)"
+    log "  - Guest→DNS (open), Guest→SSH (closed)"
+    log "  - Trusted→LDAP (open), Trusted→SSH (closed)"
+    log "  - VoIP→LDAP (open), VoIP→NFS (closed)"
+    log "  - Cross-VLAN→SMB (closed)"
+    log ""
+    log_pass "CI_MODE: Isolation tests deferred to live environment"
+    return 0
+  fi
 
-	local tests_passed=0
-	local tests_failed=0
+  local tests_passed=0
+  local tests_failed=0
 
-	# Test 1: IoT  Mgmt DNS (allow)
-	log "\n[TEST 1] IoT VLAN  Mgmt DC (DNS+SSH)"
-	run_nmap_test "10.0.10.10" "53" "open" "IoTMgmt DNS" && ((tests_passed++)) || ((tests_failed++))
-	run_nmap_test "10.0.10.10" "22" "closed" "IoTMgmt SSH" && ((tests_passed++)) || ((tests_failed++))
+  # Test 1: IoT  Mgmt DNS (allow)
+  log "\n[TEST 1] IoT VLAN  Mgmt DC (DNS+SSH)"
+  run_nmap_test "10.0.10.10" "53" "open" "IoTMgmt DNS" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.10.10" "22" "closed" "IoTMgmt SSH" && ((tests_passed++)) || ((tests_failed++))
 
-	# Test 2: Guest → Mgmt DNS (allow), SSH (deny)
-	log "\n[TEST 2] Guest VLAN → Mgmt DC"
-	run_nmap_test "10.0.10.10" "53" "open" "GuestMgmt DNS" && ((tests_passed++)) || ((tests_failed++))
-	run_nmap_test "10.0.10.10" "22" "closed" "GuestMgmt SSH" && ((tests_passed++)) || ((tests_failed++))
+  # Test 2: Guest → Mgmt DNS (allow), SSH (deny)
+  log "\n[TEST 2] Guest VLAN → Mgmt DC"
+  run_nmap_test "10.0.10.10" "53" "open" "GuestMgmt DNS" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.10.10" "22" "closed" "GuestMgmt SSH" && ((tests_passed++)) || ((tests_failed++))
 
-	# Test 3: Trusted → Servers LDAP (allow), SSH (deny)
-	log "\n[TEST 3] Trusted VLAN → Servers"
-	run_nmap_test "10.0.20.30" "389" "open" "TrustedServers LDAP" && ((tests_passed++)) || ((tests_failed++))
-	run_nmap_test "10.0.20.30" "22" "closed" "TrustedServers SSH" && ((tests_passed++)) || ((tests_failed++))
+  # Test 3: Trusted → Servers LDAP (allow), SSH (deny)
+  log "\n[TEST 3] Trusted VLAN → Servers"
+  run_nmap_test "10.0.20.30" "389" "open" "TrustedServers LDAP" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.20.30" "22" "closed" "TrustedServers SSH" && ((tests_passed++)) || ((tests_failed++))
 
-	# Test 4: VoIP → Servers LDAP (allow), NFS (deny)
-	log "\n[TEST 4] VoIP VLAN → Servers"
-	run_nmap_test "10.0.20.20" "389" "open" "VoIPFreePBX LDAP" && ((tests_passed++)) || ((tests_failed++))
-	run_nmap_test "10.0.20.30" "2049" "closed" "VoIPServers NFS" && ((tests_passed++)) || ((tests_failed++))
+  # Test 4: VoIP → Servers LDAP (allow), NFS (deny)
+  log "\n[TEST 4] VoIP VLAN → Servers"
+  run_nmap_test "10.0.20.20" "389" "open" "VoIPFreePBX LDAP" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.20.30" "2049" "closed" "VoIPServers NFS" && ((tests_passed++)) || ((tests_failed++))
 
-	# Test 5: Cross-VLAN attempt (IoT → Servers, should fail)
-	log "\n[TEST 5] Cross-VLAN Block (IoT → Servers)"
-	run_nmap_test "10.0.20.30" "445" "closed" "IoTServers SMB" && ((tests_passed++)) || ((tests_failed++))
+  # Test 5: Cross-VLAN attempt (IoT → Servers, should fail)
+  log "\n[TEST 5] Cross-VLAN Block (IoT → Servers)"
+  run_nmap_test "10.0.20.30" "445" "closed" "IoTServers SMB" && ((tests_passed++)) || ((tests_failed++))
 
-	# Summary
-	log ""
-	log "════════════════════════"
-	log "RESULTS: ${tests_passed} passed, ${tests_failed} failed"
-	log "════════════════════════"
+  # Summary
+  log ""
+  log "════════════════════════"
+  log "RESULTS: ${tests_passed} passed, ${tests_failed} failed"
+  log "════════════════════════"
 
-	if [[ ${tests_failed} -eq 0 ]]; then
-		log_pass "ALL ISOLATION TESTS PASSED"
-		return 0
-	else
-		log_fail "${tests_failed} ISOLATION BREACHES DETECTED"
-		return 1
-	fi
+  if [[ ${tests_failed} -eq 0 ]]; then
+    log_pass "ALL ISOLATION TESTS PASSED"
+    return 0
+  else
+    log_fail "${tests_failed} ISOLATION BREACHES DETECTED"
+    return 1
+  fi
 }
 
 main "$@"

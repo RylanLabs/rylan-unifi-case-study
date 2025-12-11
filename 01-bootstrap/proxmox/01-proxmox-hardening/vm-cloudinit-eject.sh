@@ -11,7 +11,10 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly SCRIPT_DIR SCRIPT_NAME
 
 log() { printf '%b\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
-die() { log "ERROR: $*" >&2; exit 1; }
+die() {
+  log "ERROR: $*" >&2
+  exit 1
+}
 
 main() {
   local vm_id cloud_init_iso cicustom_user vm_name vm_ip
@@ -49,7 +52,8 @@ main() {
     --cores 2 --memory 4096 \
     --net0 virtio,bridge=vmbr0 \
     --scsi0 rpool:32 \
-    --boot order=scsi0;ide2 \
+    --boot order=scsi0
+  ide2 \
     --ide2 "${cloud_init_iso},media=cdrom" \
     --cicustom user="${cicustom_user}" \
     --ipconfig0 ip="${vm_ip}"/26,gw=10.0.10.1 \

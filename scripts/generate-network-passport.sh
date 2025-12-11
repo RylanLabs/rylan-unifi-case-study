@@ -12,7 +12,10 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 mkdir -p "$(dirname "${OUTPUT}")"
 
-[[ -f /opt/rylan/.secrets/unifi-api-key ]] || { echo "❌ UniFi API key missing"; exit 1; }
+[[ -f /opt/rylan/.secrets/unifi-api-key ]] || {
+  echo "❌ UniFi API key missing"
+  exit 1
+}
 
 UNIFI_KEY=$(cat /opt/rylan/.secrets/unifi-api-key)
 UNIFI_HOST="https://10.0.10.10:8443"
@@ -25,7 +28,7 @@ FIREWALL=$(curl -sk -H "Authorization: Bearer ${UNIFI_KEY}" \
 
 DNS_ZONES=$(samba-tool dns zonelist -U administrator 2>/dev/null | grep -v "pszZoneName" | awk '{print $1}' | jq -R '.' | jq -s '.' 2>/dev/null || echo '[]')
 
-cat > "${OUTPUT}" <<EOF
+cat >"${OUTPUT}" <<EOF
 {
   "schema_version": "1.0.0-eternal",
   "generated_at": "${TIMESTAMP}",
@@ -37,7 +40,10 @@ cat > "${OUTPUT}" <<EOF
 }
 EOF
 
-jq empty "${OUTPUT}" || { echo "❌ Invalid JSON"; exit 1; }
+jq empty "${OUTPUT}" || {
+  echo "❌ Invalid JSON"
+  exit 1
+}
 
 cd "${REPO_ROOT}"
 git add "${OUTPUT}" 2>/dev/null || true

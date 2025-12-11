@@ -26,7 +26,10 @@ NC='\033[0m'
 # Logging
 log_info() { echo -e "${BLUE}[RESURRECT]${NC} $1"; }
 log_success() { echo -e "${GREEN}[RESURRECT]${NC} ✅ $1"; }
-log_error() { echo -e "${RED}[RESURRECT]${NC} ❌ $1"; exit 1; }
+log_error() {
+  echo -e "${RED}[RESURRECT]${NC} ❌ $1"
+  exit 1
+}
 log_warn() { echo -e "${YELLOW}[RESURRECT]${NC} ⚠️  $1"; }
 
 # Start banner
@@ -79,13 +82,13 @@ DATA_OWNER=$(stat -f '%Ou' "$DATA_DIR" 2>/dev/null || stat -c '%U:%G' "$DATA_DIR
 log_info "Data directory owner: $DATA_OWNER (expected 1000:1000)"
 
 # Check: Docker daemon
-if ! command -v docker &> /dev/null; then
+if ! command -v docker &>/dev/null; then
   log_error "Docker not installed. Install from https://get.docker.com"
 fi
 log_success "Docker installed"
 
 # Check: docker-compose
-if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null; then
+if ! command -v docker &>/dev/null || ! docker compose version &>/dev/null; then
   log_error "docker compose not available"
 fi
 log_success "docker compose installed"
@@ -97,7 +100,7 @@ log_success "docker compose installed"
 log_info "Phase 1: Network Validation (30 sec)"
 
 # Check: macvlan interface exists and is up
-if ! ip link show macvlan-unifi &> /dev/null; then
+if ! ip link show macvlan-unifi &>/dev/null; then
   log_error $'macvlan-unifi interface not found. Run:\n  sudo cp bootstrap/unifi/macvlan-unifi.netdev /etc/systemd/network/\n  sudo cp bootstrap/unifi/macvlan-unifi.network /etc/systemd/network/\n  sudo systemctl restart systemd-networkd'
 fi
 log_success "macvlan-unifi interface found"
@@ -118,7 +121,7 @@ fi
 log_success "macvlan-unifi is UP"
 
 # Check: Gateway reachable
-if ! ping -c 1 -W 2 10.0.1.1 &> /dev/null; then
+if ! ping -c 1 -W 2 10.0.1.1 &>/dev/null; then
   log_warn "Cannot ping gateway (10.0.1.1), but continuing anyway"
 else
   log_success "Gateway reachable: 10.0.1.1"
@@ -149,14 +152,14 @@ log_success "Container started"
 # Step 3: Wait for container to be healthy
 log_info "Waiting for container to initialize (up to ${MAX_RETRIES}s)..."
 ATTEMPT=0
-while (( ATTEMPT < MAX_RETRIES )); do
+while ((ATTEMPT < MAX_RETRIES)); do
   CONTAINER_STATE=$(docker container inspect unifi-controller --format='{{.State.Running}}' 2>/dev/null || echo "false")
-  
+
   if [[ "$CONTAINER_STATE" == "true" ]]; then
     log_success "Container is running"
     break
   fi
-  
+
   log_warn "Container starting... ($ATTEMPT/$MAX_RETRIES)"
   sleep $RETRY_DELAY
   ((ATTEMPT++))
@@ -175,12 +178,12 @@ log_info "Phase 3: Health Verification (5 min)"
 # Step 1: Wait for TCP port to be open
 log_info "Waiting for port $CONTROLLER_PORT to be open..."
 ATTEMPT=0
-while (( ATTEMPT < MAX_RETRIES )); do
+while ((ATTEMPT < MAX_RETRIES)); do
   if timeout 2 bash -c "cat < /dev/null > /dev/tcp/$CONTROLLER_IP/$CONTROLLER_PORT" 2>/dev/null; then
     log_success "Port $CONTROLLER_PORT is open"
     break
   fi
-  
+
   log_warn "Port not open yet... ($ATTEMPT/$MAX_RETRIES)"
   sleep $RETRY_DELAY
   ((ATTEMPT++))
@@ -193,20 +196,20 @@ fi
 # Step 2: Query /status endpoint
 log_info "Verifying controller /status endpoint..."
 ATTEMPT=0
-while (( ATTEMPT < MAX_RETRIES )); do
-  if curl -sf -k "https://$CONTROLLER_IP:$CONTROLLER_PORT/status" &> /dev/null; then
+while ((ATTEMPT < MAX_RETRIES)); do
+  if curl -sf -k "https://$CONTROLLER_IP:$CONTROLLER_PORT/status" &>/dev/null; then
     STATUS_RESPONSE=$(curl -s -k "https://$CONTROLLER_IP:$CONTROLLER_PORT/status")
     log_success "Controller is healthy"
     echo "   Response: $STATUS_RESPONSE"
     break
   fi
-  
+
   log_warn "Endpoint not responding yet... ($ATTEMPT/$MAX_RETRIES)"
   sleep $RETRY_DELAY
   ((ATTEMPT++))
 done
 
-if ! curl -sf -k "https://$CONTROLLER_IP:$CONTROLLER_PORT/status" &> /dev/null; then
+if ! curl -sf -k "https://$CONTROLLER_IP:$CONTROLLER_PORT/status" &>/dev/null; then
   log_warn "Endpoint not responding yet, but container is running"
 fi
 

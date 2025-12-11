@@ -81,7 +81,7 @@ if [[ "$HOSTNAME" == "rylan-ai" ]]; then
   sudo cp /etc/exports "/etc/exports.backup.$(date +%Y%m%d)"
 
   # Create new exports with Kerberos (sec=krb5p for integrity + privacy)
-  sudo tee /etc/exports > /dev/null << EOF
+  sudo tee /etc/exports >/dev/null <<EOF
 # NFS Kerberos Exports — Phase 3 Endgame
 # sec=krb5p: Kerberos authentication + integrity + privacy (encryption)
 # rw: read-write for backup clients
@@ -135,7 +135,7 @@ if [[ "$HOSTNAME" == "rylan-dc" ]] || [[ "$HOSTNAME" == "rylan-pi" ]] || [[ "$HO
   echo "🔐 Configuring Kerberos client..."
 
   # Create/update /etc/krb5.conf
-  sudo tee /etc/krb5.conf > /dev/null << EOF
+  sudo tee /etc/krb5.conf >/dev/null <<EOF
 [libdefaults]
   default_realm = $REALM
   dns_lookup_realm = false
@@ -173,7 +173,7 @@ EOF
       MOUNT_SRC="$NFS_SERVER_IP:$NFS_BACKUP_PATH"
       ;;
     rylan-ai)
-      MOUNT_PATH=""  # NFS server doesn't need to mount its own exports
+      MOUNT_PATH="" # NFS server doesn't need to mount its own exports
       MOUNT_SRC=""
       ;;
   esac
@@ -187,7 +187,7 @@ EOF
     # Check if already in fstab
     if ! grep -q "$MOUNT_SRC" /etc/fstab; then
       echo "   Adding to /etc/fstab..."
-      echo "$FSTAB_ENTRY" | sudo tee -a /etc/fstab > /dev/null
+      echo "$FSTAB_ENTRY" | sudo tee -a /etc/fstab >/dev/null
     fi
 
     # Mount now

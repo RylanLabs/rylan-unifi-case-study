@@ -68,19 +68,19 @@ fail_with_context() {
   local error_code="$1"
   local error_msg="$2"
   local remediation="${3:-}"
-  
+
   echo ""
   log_error "FAILURE [ERR-${error_code}]: ${error_msg}"
-  
+
   if [ -n "$remediation" ]; then
     echo -e "${YELLOW}Remediation:${NC} ${remediation}"
   fi
-  
+
   echo ""
   echo -e "${BLUE}Logs:${NC} ${LOG_FILE}"
   echo -e "${BLUE}Support:${NC} https://github.com/T-Rylander/rylan-unifi-case-study/issues"
   echo ""
-  
+
   exit "$error_code"
 }
 
@@ -91,17 +91,17 @@ fail_with_context() {
 # backup_config: Create timestamped backup of config file
 backup_config() {
   local file="$1"
-  
+
   if [ ! -f "$file" ]; then
     return 0
   fi
-  
+
   mkdir -p "${BACKUP_DIR}"
-  
+
   local backup_name
   backup_name="$(basename "$file").$(date +%Y%m%d_%H%M%S).bak"
   cp -a "$file" "${BACKUP_DIR}/${backup_name}"
-  
+
   log_info "Backed up: $file → ${backup_name}"
   touch "${ROLLBACK_MARKER}"
 }
@@ -112,11 +112,11 @@ rollback_all() {
     log_error "No rollback available"
     return 1
   fi
-  
+
   log_warn "ROLLING BACK ALL CHANGES"
-  
+
   # Restore all .bak files (reverse chronological order)
-  find "${BACKUP_DIR}" -name "*.bak" -type f -printf '%T@\t%p\n' | \
+  find "${BACKUP_DIR}" -name "*.bak" -type f -printf '%T@\t%p\n' |
     sort -rn | cut -f2 | while read -r backup; do
     local original
     original=$(echo "$backup" | sed 's/\.[0-9]*\.bak$//')
@@ -125,10 +125,10 @@ rollback_all() {
       log_info "Restored: $(basename "$original")"
     fi
   done
-  
+
   # Restart affected services
   systemctl restart sshd networking pveproxy || true
-  
+
   log_success "Rollback complete"
 }
 
@@ -138,7 +138,7 @@ trap 'rollback_prompt $LINENO' ERR
 rollback_prompt() {
   local line_no="${1:-0}"
   log_error "IGNITION FAILED at line ${line_no}"
-  
+
   if [ -f "${ROLLBACK_MARKER}" ]; then
     read -p "Rollback changes? [y/N]: " -n 1 -r
     echo
@@ -146,7 +146,7 @@ rollback_prompt() {
       rollback_all
     fi
   fi
-  
+
   exit 1
 }
 
@@ -161,23 +161,23 @@ retry_cmd() {
   shift 2
   local cmd="$*"
   local attempt=1
-  
+
   while [ $attempt -le "$max_attempts" ]; do
     log_info "Attempt ${attempt}/${max_attempts}: ${cmd}"
-    
+
     if eval "$cmd"; then
       return 0
     fi
-    
+
     if [ $attempt -lt "$max_attempts" ]; then
       log_warn "Command failed, retrying in ${delay}s..."
       sleep "$delay"
-      delay=$((delay * 2))  # Exponential backoff
+      delay=$((delay * 2)) # Exponential backoff
     fi
-    
+
     attempt=$((attempt + 1))
   done
-  
+
   fail_with_context 99 "Command failed after ${max_attempts} attempts: ${cmd}" \
     "Check network connectivity and try again"
 }
@@ -191,10 +191,10 @@ elapsed_time() {
   local start="$1"
   local end="$2"
   local elapsed=$((end - start))
-  
+
   local minutes=$((elapsed / 60))
   local seconds=$((elapsed % 60))
-  
+
   printf "%02d:%02d" "$minutes" "$seconds"
 }
 
@@ -209,7 +209,7 @@ validate_root() {
 # validate_prerequisite_command: Check if command exists
 validate_prerequisite_command() {
   local cmd="$1"
-  
+
   if ! command -v "$cmd" &>/dev/null; then
     fail_with_context 2 "Required command not found: $cmd" \
       "Install via: apt-get install $cmd"
@@ -221,17 +221,17 @@ detect_primary_interface() {
   # Find interface with default route
   local primary_if
   primary_if=$(ip route | grep default | awk '{print $5}' | head -n1)
-  
+
   if [ -z "$primary_if" ]; then
     # Fallback: First non-loopback interface that's UP
     primary_if=$(ip link show | grep -v "lo:" | grep "state UP" | head -n1 | awk -F: '{print $2}' | xargs)
   fi
-  
+
   if [ -z "$primary_if" ]; then
     fail_with_context 101 "No network interface detected" \
       "Verify physical network cable is connected"
   fi
-  
+
   echo "$primary_if"
 }
 
@@ -244,15 +244,15 @@ update_config_line() {
   local file="$1"
   local key="$2"
   local value="$3"
-  
+
   # Backup before modifying
   backup_config "$file"
-  
+
   # Update existing line or append
   if grep -q "^${key}" "$file" 2>/dev/null; then
     sed -i "s|^${key}.*|${key}${value}|g" "$file"
   else
-    echo "${key}${value}" >> "$file"
+    echo "${key}${value}" >>"$file"
   fi
 }
 
@@ -264,22 +264,22 @@ update_config_line() {
 validate_ip_format() {
   local ip="$1"
   local ip_only="${ip%/*}"
-  
+
   if ! echo "$ip_only" | grep -qE '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
     return 1
   fi
-  
+
   return 0
 }
 
 # validate_cidr_format: Check if CIDR notation is valid
 validate_cidr_format() {
   local cidr="$1"
-  
+
   if ! echo "$cidr" | grep -qE '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$'; then
     return 1
   fi
-  
+
   return 0
 }
 
