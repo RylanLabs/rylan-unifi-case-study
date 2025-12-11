@@ -1,10 +1,13 @@
 #!/bin/bash
 # 05-network-migration/migrate.sh
 # Purpose: Master migration orchestrator (Hellodeolu: <15 min RTO)
-
+# Author: DT/Luke canonical
+# Date: 2025-12-10
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 echo "════════════════════════════════════════════════════════════"
 echo "ETERNAL RESURRECTION: Network Migration Orchestrator"

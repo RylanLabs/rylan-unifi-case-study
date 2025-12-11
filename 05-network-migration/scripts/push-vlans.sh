@@ -1,11 +1,14 @@
 #!/bin/bash
 # 05-network-migration/scripts/push-vlans.sh
 # Purpose: Push VLAN configuration to controller
-
+# Author: DT/Luke canonical
+# Date: 2025-12-10
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+readonly SCRIPT_DIR REPO_ROOT
+readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 source "$REPO_ROOT/lib/unifi-api/client.sh"
 

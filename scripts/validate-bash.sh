@@ -28,95 +28,95 @@ EXIT_CODE=0
 # LOGGING
 # =============================================================================
 log() {
-	printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
+  printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
 }
 
 log_pass() {
-	log "✓ $*"
+  log "✓ $*"
 }
 
 log_fail() {
-	log "✗ $*"
+  log "✗ $*"
 }
 
 log_warn() {
-	log "⚠ $*"
+  log "⚠ $*"
 }
 
 # =============================================================================
 # MAIN VALIDATION
 # =============================================================================
 main() {
-	log "════════════════════════════════════════════════════════════════"
-	log "  BASH CANON VALIDATION — ShellCheck + shfmt (Leo's Glue v2.6)"
-	log "════════════════════════════════════════════════════════════════"
+  log "════════════════════════════════════════════════════════════════"
+  log "  BASH CANON VALIDATION — ShellCheck + shfmt (Leo's Glue v2.6)"
+  log "════════════════════════════════════════════════════════════════"
 
-	# Allow collection of all failures without aborting on first one
-	set +e
+  # Allow collection of all failures without aborting on first one
+  set +e
 
-	# Find all bash scripts (shebang #!/usr/bin/env bash or #!/bin/bash)
-	local bash_scripts
-	bash_scripts=$(find "${REPO_ROOT}" \
-		-type f \
-		\( -name "*.sh" -o -path "*/scripts/*" \) \
-		-exec grep -l "^#!/.*bash" {} \; | sort -u)
+  # Find all bash scripts (shebang #!/usr/bin/env bash or #!/bin/bash)
+  local bash_scripts
+  bash_scripts=$(find "${REPO_ROOT}" \
+    -type f \
+    \( -name "*.sh" -o -path "*/scripts/*" \) \
+    -exec grep -l "^#!/.*bash" {} \; | sort -u)
 
-	if [[ -z "${bash_scripts}" ]]; then
-		log_warn "No bash scripts found"
-		set -e
-		return 0
-	fi
+  if [[ -z "${bash_scripts}" ]]; then
+    log_warn "No bash scripts found"
+    set -e
+    return 0
+  fi
 
-	# Count stats
-	local total_scripts=0
-	local passed_scripts=0
-	local failed_scripts=0
+  # Count stats
+  local total_scripts=0
+  local passed_scripts=0
+  local failed_scripts=0
 
-	# Validate each script
-	while IFS= read -r script; do
-		((total_scripts++))
-		local script_name="${script#"${REPO_ROOT}"/}"
+  # Validate each script
+  while IFS= read -r script; do
+    ((total_scripts++))
+    local script_name="${script#"${REPO_ROOT}"/}"
 
-		# ShellCheck validation
-		if shellcheck "${SHELLCHECK_ARGS[@]}" "${script}" | tee -a /tmp/shellcheck-output.log; then
-			log_pass "ShellCheck: ${script_name}"
-			((passed_scripts++))
-		else
-			log_fail "ShellCheck: ${script_name}"
-			shellcheck "${SHELLCHECK_ARGS[@]}" "${script}" | tee -a /tmp/shellcheck-output.log || true
-			((failed_scripts++))
-			EXIT_CODE=1
-		fi
+    # ShellCheck validation
+    if shellcheck "${SHELLCHECK_ARGS[@]}" "${script}" | tee -a /tmp/shellcheck-output.log; then
+      log_pass "ShellCheck: ${script_name}"
+      ((passed_scripts++))
+    else
+      log_fail "ShellCheck: ${script_name}"
+      shellcheck "${SHELLCHECK_ARGS[@]}" "${script}" | tee -a /tmp/shellcheck-output.log || true
+      ((failed_scripts++))
+      EXIT_CODE=1
+    fi
 
-		# shfmt check (dry-run, no modifications)
-		if shfmt "${SHFMT_ARGS[@]}" -d "${script}" | tee -a /tmp/shfmt-output.log | grep -q .; then
-			log_fail "shfmt format issue: ${script_name}"
-			shfmt "${SHFMT_ARGS[@]}" -d "${script}" | tee -a /tmp/shfmt-output.log || true
-			((failed_scripts++))
-			EXIT_CODE=1
-		else
-			log_pass "shfmt format: ${script_name}"
-		fi
-	done <<<"${bash_scripts}"
+    # shfmt check (dry-run, no modifications)
+    if shfmt "${SHFMT_ARGS[@]}" -d "${script}" | tee -a /tmp/shfmt-output.log | grep -q .; then
+      log_fail "shfmt format issue: ${script_name}"
+      shfmt "${SHFMT_ARGS[@]}" -d "${script}" | tee -a /tmp/shfmt-output.log || true
+      ((failed_scripts++))
+      EXIT_CODE=1
+    else
+      log_pass "shfmt format: ${script_name}"
+    fi
+  done <<<"${bash_scripts}"
 
-	# Summary
-	log ""
-	log "════════════════════════════════════════════════════════════════"
-	log "BASH VALIDATION SUMMARY"
-	log "  Total scripts: ${total_scripts}"
-	log "  Passed: ${passed_scripts}"
-	log "  Failed: ${failed_scripts}"
-	log "════════════════════════════════════════════════════════════════"
+  # Summary
+  log ""
+  log "════════════════════════════════════════════════════════════════"
+  log "BASH VALIDATION SUMMARY"
+  log "  Total scripts: ${total_scripts}"
+  log "  Passed: ${passed_scripts}"
+  log "  Failed: ${failed_scripts}"
+  log "════════════════════════════════════════════════════════════════"
 
-	if [[ ${EXIT_CODE} -eq 0 ]]; then
-		log_pass "ALL BASH SCRIPTS VALID"
-	else
-		log_fail "BASH VALIDATION FAILED"
-	fi
+  if [[ ${EXIT_CODE} -eq 0 ]]; then
+    log_pass "ALL BASH SCRIPTS VALID"
+  else
+    log_fail "BASH VALIDATION FAILED"
+  fi
 
-	# Restore strict mode and return aggregated status
-	set -e
-	return ${EXIT_CODE}
+  # Restore strict mode and return aggregated status
+  set -e
+  return ${EXIT_CODE}
 }
 
 main "$@"

@@ -1,6 +1,9 @@
 #!/bin/bash
 # Migrate: Render Desired → Backup → Push → Verify
+# Author: DT/Luke canonical
+# Date: 2025-12-10
 set -euo pipefail
+readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 cd "$(dirname "$0")/.."
 
 # Pre-flight: Backup (Hellodeolu: RTO <15 min)
