@@ -46,7 +46,3 @@ vlans:
     dns_servers: [1.1.1.1, 1.0.0.1]
     purpose: "Untrusted IoT devices (Traeger grill)"
     isolation: true
-- name: 0 vlan: 10 subnet: 10.0.10.0/24
-- name: 1 vlan: 30 subnet: 10.0.30.0/24
-- name: 2 vlan: 40 subnet: 10.0.40.0/24
-- name: 3 vlan: 90 subnet: 10.0.90.0/24
