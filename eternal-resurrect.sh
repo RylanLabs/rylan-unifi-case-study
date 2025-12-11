@@ -15,10 +15,14 @@ if [ "$CI_MODE" = "1" ] || [ "$CI_MODE" = "true" ]; then
   echo "🤖 CI mode: Mocking services, skipping external calls" >&2
 fi
 
-# Carter → Bauer → Beale
-runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
-runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
-runbooks/ministry-detection/rylan-beale-eternal-one-shot.sh
+# Carter → Bauer → Beale (skip in DRY_RUN smoke test; validate in prod)
+if [ "$DRY_RUN" != "1" ] && [ "$DRY_RUN" != "true" ]; then
+  runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+  runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
+  runbooks/ministry-detection/rylan-beale-eternal-one-shot.sh
+else
+  echo "⏭️  Trinity mocked in DRY_RUN (validation deferred to prod)" >&2
+fi
 
 # Bootstrap + Migration (skip in DRY_RUN)
 if [ "$DRY_RUN" != "1" ] && [ "$DRY_RUN" != "true" ]; then
