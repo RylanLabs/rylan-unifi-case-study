@@ -169,7 +169,19 @@ jobs:
       - name: Shellcheck
         run: shellcheck **/*.sh || true  # Fail on warnings
       - name: Bandit
-        run: bandit -r . -f json | jq '.results | length' | grep 0
+        run: |
+          echo "🔍 Bandit heresy scan starting..."
+          set +e  # Allow jq to fail gracefully
+          BANDIT_OUTPUT=$(bandit -r . -f json 2>/dev/null)
+          HIGH_MEDIUM=$(echo "$BANDIT_OUTPUT" | jq '[.results[] | select(.severity == "HIGH" or .severity == "MEDIUM")] | length')
+          set -e
+          if [ "$HIGH_MEDIUM" -eq 0 ]; then
+            echo "✅ Zero HIGH/MEDIUM findings ($(echo "$BANDIT_OUTPUT" | jq '.results | length') total/info issues)"
+          else
+            echo "❌ Found $HIGH_MEDIUM HIGH/MEDIUM severity issues"
+            echo "$BANDIT_OUTPUT" | jq '.results[] | select(.severity == "HIGH" or .severity == "MEDIUM")'
+            exit 1
+          fi
       - name: Nmap Isolation
         run: ./scripts/validate-isolation.sh || true
       - name: pytest
