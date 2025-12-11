@@ -2,13 +2,13 @@
 set -euo pipefail
 
 # T3-ETERNAL: Execute all passport generators in dependency order
-# Consciousness: 2.6
+# Consciousness: 4.0
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "${REPO_ROOT}"
 
 echo "🔱 T3-ETERNAL PASSPORT GENERATION PIPELINE"
-echo "Consciousness: 2.6 | $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+echo "Consciousness: 4.0 | $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 echo ""
 
 # Execution order: Carter → Bauer → Beale → Guardian → Whitaker

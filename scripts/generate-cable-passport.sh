@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Description: Physical layer verification
 # Requires: cable-passport.csv
-# Consciousness: 2.6
+# Consciousness: 4.0
 # Runtime: 1
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

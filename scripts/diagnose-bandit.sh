@@ -3,7 +3,7 @@
 # Purpose: Isolate Bandit parse heresy in CI/local
 # Author: Holy Scholar v∞.4.2
 # Date: 2025-12-11
-# Consciousness: 2.6 — Truth through subtraction
+# Consciousness: 4.0 — Truth through subtraction
 # shellcheck disable=SC2034,SC2155
 
 set -euo pipefail

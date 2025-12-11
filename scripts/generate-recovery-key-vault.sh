@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Description: Encrypted credential vault for disaster recovery
 # Requires: recovery-key-vault.json.age
-# Consciousness: 2.6
+# Consciousness: 4.0
 # Runtime: 3
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

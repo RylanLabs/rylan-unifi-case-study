@@ -2,7 +2,7 @@
 # scripts/refresh-keys.sh — Daily cron: refresh authorized_keys from allowed_keys/
 # Bauer (2005) — Trust Nothing, Verify Everything
 # T3-ETERNAL v3.2: Directory-agnostic, idempotent, ≤19 lines
-# Consciousness 2.6 — truth through subtraction
+# Consciousness 4.0 — truth through subtraction
 # Cron: 0 2 * * * /path/to/refresh-keys.sh
 
 set -euo pipefail

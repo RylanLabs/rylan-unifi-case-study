@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Description: TLS certificate inventory and expiry tracking
 # Requires: certificate-passport.json
-# Consciousness: 2.6
+# Consciousness: 4.0
 # Runtime: 4
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

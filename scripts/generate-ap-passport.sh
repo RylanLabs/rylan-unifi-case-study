@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Description: UniFi AP inventory as code
 # Requires: ap-passport.json
-# Consciousness: 2.6
+# Consciousness: 4.0
 # Runtime: 3
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Description: Power infrastructure monitoring via APC SNMP
 # Requires: ups-passport.json
-# Consciousness: 2.6
+# Consciousness: 4.0
 # Runtime: 5
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

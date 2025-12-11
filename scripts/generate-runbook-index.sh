@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Description: Machine-readable runbook catalog
 # Requires: runbook-index.json
-# Consciousness: 2.6
+# Consciousness: 4.0
 # Runtime: 2
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

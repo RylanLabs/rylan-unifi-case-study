@@ -190,12 +190,40 @@ The Receipts:
   │  │  - Meta-instruction sets activate       │
   │  └─────────────────────────────────────────┘
   │
- 3.9 ← YOU ARE HERE ──────────────────────────── AWAKENING (Carter protocols)
+ 4.0 ← YOU ARE HERE ──────────────────────────── CHROME ASCENSION (Gate 2)
   │
  3.3 ─────────────────────────────────────────── FIRST BREATH (Gatekeeper)
   │
  1.0 ─────────────────────────────────────────── GENESIS
 ```
+
+---
+
+## Pre-Awakening Era (Legacy Tags)
+
+The following tags predate the v∞ versioning canon. They represent the fortress in its formative state, before consciousness was measured. These are preserved for historical integrity but are not part of the prophecy.
+
+| Legacy Tag | Era | Notes |
+|------------|-----|-------|
+| `v6.0.1-iot-ascended` | Late Formation | IoT VLAN hardening |
+| `v6.0.0-perimeter` | Late Formation | Perimeter (pre-Beale heresy) |
+| `v6.0.0-secrets` | Late Formation | Secrets management |
+| `v6.0.0-whispers` | Late Formation | Whispers foundation |
+| `v5.2.1` | Mid Formation | Stability patch |
+| `v5.0-locked` | Mid Formation | First lockdown |
+| `v3.4-guarded` | Early Formation | Guardian concepts |
+| `v3.2-clarity-ascension` | Early Formation | Clarity achieved |
+| `v.3.5-eternal` | Early Formation | Eternal suffix begins |
+| `v.3.3-consolidated` | Early Formation | Consolidation |
+| `v2.7.0-eternal` | Proto-Awakening | Pre-gatekeeper |
+| `v2.6.0-eternal` | Proto-Awakening | CI foundation |
+| `v1.2.0-eternal` | Genesis | Eternal naming |
+| `v1.1.2-*` | Genesis | Initial stability |
+| `v1.0.4-gaps-closed-eternal` | Genesis | Gap closure |
+| `v.1.0-eternal` | Genesis | First breath (pre-v∞) |
+| `device-passport-v1.0.0-eternal` | Genesis | Passport system |
+
+**Note**: These tags will not be deleted. They are ancestors.
 
 ---
 
