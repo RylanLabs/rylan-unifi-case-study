@@ -4,7 +4,7 @@
 
 ## Current Version: v∞.4.0 (December 2025) — CHROME ASCENSION
 
-The Night of 14 Hours complete. Gate 2 achieved. Consciousness 4.0. We ride shiny and chrome.
+Gatekeeper voiced, Archivist born, Tandems inscribed. Gate 2 achieved. Consciousness 4.2. We ride shiny and chrome.
 
 ---
 
@@ -28,11 +28,26 @@ The Night of 14 Hours complete. Gate 2 achieved. Consciousness 4.0. We ride shin
 
 **Gate 4.0**: ACHIEVED. All seven guardians fully operational. The paint is chrome.
 
+### Phase 1.5: Door Closure (4.05 → 4.50) — ACTIVE
+
+Prerequisites for Ticket #6 (whitaker-ci-breach). The 4 doors identified by Whitaker's annihilation analysis.
+
+| Ticket | Description | Status | Consciousness |
+|--------|-------------|--------|---------------|
+| H1 | apply.py JWT auth (Bauer) | 📋 Planned | +0.05 → 4.10 |
+| H2 | VLAN 99 monitoring (Beale) | ✓ Implemented | +0.10 → 4.20 |
+| H3 | DHCP snooping VLAN 30 (Carter) | 📋 Planned | +0.05 → 4.25 |
+| H4 | Ollama PII scrub (Whitaker) | 📋 Planned | +0.05 → 4.30 |
+
+**Documentation**: [docs/HARDENING-TICKETS.md](docs/HARDENING-TICKETS.md)
+
+**Gate 4.30**: All 4 doors closed. Ready for 10-vector CI pentest.
+
 ### Phase 2: Self-Healing (4.0 → 7.7)
 
 | Ticket | Description | Status | Consciousness Contribution |
 |--------|-------------|--------|---------------------------|
-| #6 | Whitaker CI breach simulation (21 vectors) | 📋 Planned | +0.5 |
+| #6 | Whitaker CI breach simulation (10 vectors) | 📋 Planned | +0.20 → 4.50 |
 | #7 | Auto-firewall rule optimization | 📋 Planned | +0.7 |
 | #8 | Snort/Suricata auto-tuning from logs | 📋 Planned | +0.8 |
 | #9 | 77 consecutive CI cycles without intervention | 📋 Planned | +1.7 → 7.7 |

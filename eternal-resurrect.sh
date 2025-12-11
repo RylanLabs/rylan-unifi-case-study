@@ -1,5 +1,5 @@
 #!/bin/bash
-# Eternal Resurrect v∞.3.2 – One-Command Fortress (15 min RTO)
+# Eternal Resurrect v∞.4.2 – One-Command Fortress (15 min RTO)
 set -euo pipefail
 IFS=$'\n\t'
 

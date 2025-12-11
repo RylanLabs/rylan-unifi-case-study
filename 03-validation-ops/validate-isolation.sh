@@ -74,6 +74,7 @@ main() {
     log "  - Trusted→LDAP (open), Trusted→SSH (closed)"
     log "  - VoIP→LDAP (open), VoIP→NFS (closed)"
     log "  - Cross-VLAN→SMB (closed)"
+    log "  - Quarantine→All Internal (closed), Quarantine→Internet (open)"
     log ""
     log_pass "CI_MODE: Isolation tests deferred to live environment"
     return 0
@@ -105,6 +106,17 @@ main() {
   # Test 5: Cross-VLAN attempt (IoT → Servers, should fail)
   log "\n[TEST 5] Cross-VLAN Block (IoT → Servers)"
   run_nmap_test "10.0.20.30" "445" "closed" "IoTServers SMB" && ((tests_passed++)) || ((tests_failed++))
+
+  # Test 6: Quarantine VLAN 99 Isolation (DadNet — MUST BE BLOCKED)
+  log "\n[TEST 6] Quarantine VLAN 99 → All Internal VLANs (MUST BE BLOCKED)"
+  run_nmap_test "10.0.10.10" "22" "closed" "Quarantine→Mgmt SSH" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.30.1" "67" "closed" "Quarantine→Users DHCP" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.40.1" "80" "closed" "Quarantine→IoT HTTP" && ((tests_passed++)) || ((tests_failed++))
+  run_nmap_test "10.0.90.1" "443" "closed" "Quarantine→Prod HTTPS" && ((tests_passed++)) || ((tests_failed++))
+
+  # Test 7: Quarantine → Internet ONLY (allow outbound)
+  log "\n[TEST 7] Quarantine VLAN 99 → Internet (MUST BE ALLOWED)"
+  run_nmap_test "1.1.1.1" "443" "open" "Quarantine→Internet HTTPS" && ((tests_passed++)) || ((tests_failed++))
 
   # Summary
   log ""
