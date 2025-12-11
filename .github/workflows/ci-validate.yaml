@@ -26,20 +26,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install ShellCheck
+      - name: Install ShellCheck (pinned version)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y shellcheck
+          # Pin to specific version to avoid CI drift
+          wget -qO- "https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz" | tar -xJf -
+          sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/shellcheck
+          shellcheck --version
+        shell: bash
       
-      - name: Install shfmt
+      - name: Install shfmt (pinned v3.7.0)
         run: |
           curl -sSL https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64 -o /tmp/shfmt
           sudo mv /tmp/shfmt /usr/local/bin/shfmt
           sudo chmod +x /usr/local/bin/shfmt
+          shfmt --version
         shell: bash
       
-      - name: Run validate-bash.sh
-        run: bash ./scripts/validate-bash.sh
+      - name: Run validate-bash.sh (with diagnostic capture)
+        run: |
+          bash ./scripts/validate-bash.sh 2>&1 || {
+            echo "::group::ShellCheck Failures"
+            cat /tmp/shellcheck-output.log 2>/dev/null || echo "(no shellcheck log)"
+            echo "::endgroup::"
+            echo "::group::shfmt Failures"
+            cat /tmp/shfmt-output.log 2>/dev/null || echo "(no shfmt log)"
+            echo "::endgroup::"
+            exit 1
+          }
         shell: bash
       
       - name: Validate heresy containment
