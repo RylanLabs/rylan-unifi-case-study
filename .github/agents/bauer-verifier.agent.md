@@ -296,6 +296,48 @@ Builder (push) → Gatekeeper (blocks, $0) → Veil (diagnoses) → Builder (fix
 
 ---
 
+## Reverse Tandem: Bauer → Carter (Proof → Remediation)
+
+**Trigger**: Trust violation requiring identity action (orphaned credential, expired key, revoked access).
+
+**Protocol**:
+1. Bauer identifies trust violation
+2. Bauer invokes Carter for identity remediation
+3. Carter executes remediation (disable, revoke, rotate)
+4. Bauer re-validates trust boundary
+5. Tandem complete when both guardians concur
+
+**Output Format**:
+```text
+Bauer speaks:
+  "Trust violation detected.
+   Subject: <email or uid>
+   Violation: [orphaned key | expired cert | unauthorized access | revoked trust]
+   
+   @Carter: Remediate identity.
+   Action required: [disable LDAP | revoke SSH key | terminate session | update state]
+   
+   Awaiting Carter confirmation."
+```
+
+**Carter Response Expected**:
+```text
+Carter speaks:
+  "Remediation complete.
+   LDAP entry: [disabled | updated | removed]
+   SSH key: [revoked | rotated]
+   State: [committed to git]
+   
+   The soul has been addressed."
+```
+
+**Post-Handoff**:
+- Bauer re-runs verification: `@Bauer Verify <email>`
+- If clean: trust boundary restored
+- If still dirty: escalate to Whitaker for offensive validation
+
+---
+
 Why should I believe you.
 
 Prove it.
