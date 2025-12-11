@@ -15,7 +15,10 @@ readonly SCRIPT_DIR
 readonly SCRIPT_NAME
 
 log() { printf '%b\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
-die() { log "ERROR: $*" >&2; exit 1; }
+die() {
+  log "ERROR: $*" >&2
+  exit 1
+}
 
 # ────── CANONICAL MAGIC COMMENTS (exactly 4 allowed) ──────
 # shellcheck disable=SC2155  # readonly declaration in one line (Carter style)

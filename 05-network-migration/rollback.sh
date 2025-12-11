@@ -47,15 +47,15 @@ if [ -f "$LATEST_BACKUP/networks.json" ]; then
     NET_ID=$(echo "$network" | jq -r '._id')
     NET_NAME=$(echo "$network" | jq -r '.name')
     echo "  Restoring: $NET_NAME"
-    
+
     RESULT_FILE=$(unifi_api_call "rest/networkconf/$NET_ID" PUT "$network")
-    
+
     if jq -e '.meta.rc == "ok"' "$RESULT_FILE" >/dev/null 2>&1; then
       echo "    ✅ Restored"
     else
       echo "    ⚠️  Failed"
     fi
-    
+
     rm -f "$RESULT_FILE"
   done
   echo "  ✅ Networks restored"

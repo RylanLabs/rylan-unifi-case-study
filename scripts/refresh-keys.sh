@@ -16,6 +16,6 @@ readonly REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 readonly IDENTITY_FILE="${REPO_DIR}/identity/${HOSTNAME_SHORT}/authorized_keys"
 
 [[ -d "${REPO_DIR}/allowed_keys" ]] || exit 0
-cat "${REPO_DIR}"/allowed_keys/*.pub 2>/dev/null | sort -u > "${IDENTITY_FILE}"
+cat "${REPO_DIR}"/allowed_keys/*.pub 2>/dev/null | sort -u >"${IDENTITY_FILE}"
 chmod 600 "${IDENTITY_FILE}"
 systemctl reload sshd

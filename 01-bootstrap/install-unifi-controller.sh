@@ -9,8 +9,8 @@ echo "Target: 10.0.1.20 (Management VLAN)"
 echo ""
 # Verify Ubuntu 24.04
 if ! grep -q "24.04" /etc/os-release; then
-    echo "ERROR: Requires Ubuntu 24.04 LTS"
-    exit 1
+  echo "ERROR: Requires Ubuntu 24.04 LTS"
+  exit 1
 fi
 # Update system
 echo "[1/6] Updating system packages..."
@@ -20,11 +20,11 @@ echo "[2/6] Installing dependencies..."
 apt-get install -y ca-certificates apt-transport-https gnupg curl
 # Add MongoDB 7.0 repository
 echo "[3/6] Adding MongoDB 7.0 repository..."
-curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
-    gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc |
+  gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
 echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] \
-https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/7.0 multiverse" | \
-    tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/7.0 multiverse" |
+  tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 # Install MongoDB
 echo "[4/6] Installing MongoDB 7.0..."
 apt-get update
@@ -33,16 +33,16 @@ systemctl enable mongod
 systemctl start mongod
 # Verify MongoDB
 if ! systemctl is-active --quiet mongod; then
-    echo "ERROR: MongoDB failed to start"
-    exit 1
+  echo "ERROR: MongoDB failed to start"
+  exit 1
 fi
 # Add UniFi repository
 echo "[5/6] Adding UniFi Network repository..."
-curl -fsSL https://dl.ui.com/unifi/unifi-repo.gpg | \
-    gpg --dearmor -o /usr/share/keyrings/ubiquiti-archive-keyring.gpg
+curl -fsSL https://dl.ui.com/unifi/unifi-repo.gpg |
+  gpg --dearmor -o /usr/share/keyrings/ubiquiti-archive-keyring.gpg
 echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/ubiquiti-archive-keyring.gpg ] \
-https://www.ui.com/downloads/unifi/debian stable ubiquiti" | \
-    tee /etc/apt/sources.list.d/100-ubiquiti-unifi.list
+https://www.ui.com/downloads/unifi/debian stable ubiquiti" |
+  tee /etc/apt/sources.list.d/100-ubiquiti-unifi.list
 # Install UniFi Controller 8.5.93
 echo "[6/6] Installing UniFi Network 8.5.93..."
 apt-get update
@@ -52,7 +52,7 @@ apt-mark hold unifi
 # Configure binding to 0.0.0.0
 echo "Configuring controller to bind 0.0.0.0..."
 mkdir -p /usr/lib/unifi/data
-cat > /usr/lib/unifi/data/system.properties <<EOF
+cat >/usr/lib/unifi/data/system.properties <<EOF
 # Rylan v5.0 - Bind to all interfaces for VLAN 1 access
 system_ip=0.0.0.0
 EOF
@@ -63,8 +63,8 @@ echo "Waiting for controller to initialize..."
 sleep 30
 # Verify service
 if ! systemctl is-active --quiet unifi; then
-    echo "ERROR: UniFi controller failed to start"
-    exit 1
+  echo "ERROR: UniFi controller failed to start"
+  exit 1
 fi
 # Get controller URL
 CONTROLLER_IP=$(hostname -I | awk '{print $1}')

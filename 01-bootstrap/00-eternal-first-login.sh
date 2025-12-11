@@ -13,20 +13,20 @@ apt install -y pwgen qemu-guest-agent git 2>/dev/null || true
 
 # Only generate/inject password if .env does not already have a real one
 if grep -qE 'ADMIN_PASSWORD=(ChangeMe123!|""|$)' .env 2>/dev/null || ! grep -q '^ADMIN_PASSWORD=' .env 2>/dev/null; then
-    ADMIN_PASSWORD=$(pwgen -s 32 1)
-    cp .env.example .env 2>/dev/null || true
-    sed -i "s/^ADMIN_PASSWORD=.*/ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"/" .env
+  ADMIN_PASSWORD=$(pwgen -s 32 1)
+  cp .env.example .env 2>/dev/null || true
+  sed -i "s/^ADMIN_PASSWORD=.*/ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"/" .env
 
-    chmod 600 .env
-    git update-index --assume-unchanged .env 2>/dev/null || true
+  chmod 600 .env
+  git update-index --assume-unchanged .env 2>/dev/null || true
 
-    echo "===================================================================="
-    echo "ETERNAL PASSWORD FOR THIS HOST (vault it now):"
-    echo "$ADMIN_PASSWORD"
-    echo "→ Injected into $REPO/.env as ADMIN_PASSWORD"
-    echo "===================================================================="
+  echo "===================================================================="
+  echo "ETERNAL PASSWORD FOR THIS HOST (vault it now):"
+  echo "$ADMIN_PASSWORD"
+  echo "→ Injected into $REPO/.env as ADMIN_PASSWORD"
+  echo "===================================================================="
 else
-    echo ".env already contains a real ADMIN_PASSWORD – skipping generation"
+  echo ".env already contains a real ADMIN_PASSWORD – skipping generation"
 fi
 
 systemctl enable --now qemu-guest-agent >/dev/null 2>&1 || true

@@ -11,7 +11,10 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly SCRIPT_DIR SCRIPT_NAME
 
 log() { printf '%b\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
-die() { log "ERROR: $*" >&2; exit 1; }
+die() {
+  log "ERROR: $*" >&2
+  exit 1
+}
 
 # shellcheck disable=SC2155
 # shellcheck disable=SC1091

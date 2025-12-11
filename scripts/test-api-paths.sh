@@ -24,17 +24,17 @@ echo "Testing different API paths..."
 echo "1. Testing /proxy/network/v2/api/site/default/stat/device"
 curl -sk -b "$COOKIES" \
   "https://${UNIFI_IP}/proxy/network/v2/api/site/default/stat/device" \
-  > /tmp/test1.json
-echo "Response size: $(wc -c < /tmp/test1.json) bytes"
+  >/tmp/test1.json
+echo "Response size: $(wc -c </tmp/test1.json) bytes"
 head -c 200 /tmp/test1.json
 echo ""
 
-# Test path 2: v1 API  
+# Test path 2: v1 API
 echo "2. Testing /proxy/network/api/s/default/stat/device"
 curl -sk -b "$COOKIES" \
   "https://${UNIFI_IP}/proxy/network/api/s/default/stat/device" \
-  > /tmp/test2.json
-echo "Response size: $(wc -c < /tmp/test2.json) bytes"
+  >/tmp/test2.json
+echo "Response size: $(wc -c </tmp/test2.json) bytes"
 head -c 200 /tmp/test2.json
 echo ""
 
@@ -42,8 +42,8 @@ echo ""
 echo "3. Testing /api/s/default/stat/device"
 curl -sk -b "$COOKIES" \
   "https://${UNIFI_IP}/api/s/default/stat/device" \
-  > /tmp/test3.json
-echo "Response size: $(wc -c < /tmp/test3.json) bytes"
+  >/tmp/test3.json
+echo "Response size: $(wc -c </tmp/test3.json) bytes"
 head -c 200 /tmp/test3.json
 echo ""
 

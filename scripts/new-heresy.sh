@@ -7,7 +7,10 @@ IFS=$'\n\t'
 readonly TEMPLATE="templates/heresy-wrapper.sh"
 readonly TARGET="${1:-}"
 
-[[ -f "${TEMPLATE}" ]] || { echo "ERROR: Run from repo root"; exit 1; }
+[[ -f "${TEMPLATE}" ]] || {
+  echo "ERROR: Run from repo root"
+  exit 1
+}
 [[ -n "${TARGET}" ]] || {
   echo "Usage: $0 path/to/new-wrapper.sh"
   echo "Example: $0 runbooks/ministry-carter/adopt-flex-mini.sh"

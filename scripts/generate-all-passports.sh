@@ -27,7 +27,7 @@ FAILED=0
 for GENERATOR in "${GENERATORS[@]}"; do
   [[ -x "${GENERATOR}" ]] || chmod +x "${GENERATOR}"
   echo "→ Executing: ${GENERATOR}"
-  
+
   if bash "${GENERATOR}"; then
     echo "  ✓ Success"
   else
@@ -90,7 +90,7 @@ if [[ ${FAILED} -eq 0 ]]; then
   echo ""
   echo "🔱 WHITAKER OFFENSIVE VALIDATION"
   echo ""
-  
+
   if bash scripts/validate-passports.sh; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

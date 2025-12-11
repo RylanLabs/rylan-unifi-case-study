@@ -24,40 +24,40 @@ UPS_DATA="[]"
 for TARGET in "${UPS_TARGETS[@]}"; do
   UPS_IP="${TARGET%%:*}"
   UPS_MODEL="${TARGET##*:}"
-  
+
   # APC MIB OIDs (PowerNet-MIB)
   LOAD=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.4.2.3.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.4.2.3.0 2>/dev/null |
     awk -F': ' '{print $2}' | tr -d ' %' || echo "0")
-  
+
   RUNTIME=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.2.2.3.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.2.2.3.0 2>/dev/null |
     awk -F': ' '{print $2}' | awk '{print int($1/6000)}' || echo "0")
-  
+
   BATTERY_TEMP=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.2.2.2.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.2.2.2.0 2>/dev/null |
     awk -F': ' '{print $2}' | tr -d ' C' || echo "0")
-  
+
   BATTERY_STATUS=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.2.1.1.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.2.1.1.0 2>/dev/null |
     awk -F': ' '{print $2}' | sed 's/[^0-9]//g' || echo "1")
-  
+
   BATTERY_REPLACE=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.2.2.4.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.2.2.4.0 2>/dev/null |
     awk -F': ' '{print $2}' | sed 's/[^0-9]//g' || echo "1")
-  
+
   INPUT_VOLTAGE=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.3.2.1.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.3.2.1.0 2>/dev/null |
     awk -F': ' '{print $2}' | tr -d ' V' || echo "0")
-  
+
   OUTPUT_VOLTAGE=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.4.2.1.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.4.2.1.0 2>/dev/null |
     awk -F': ' '{print $2}' | tr -d ' V' || echo "0")
-  
+
   LAST_TEST=$(snmpget -v2c -c "${SNMP_COMMUNITY}" "${UPS_IP}" \
-    .1.3.6.1.4.1.318.1.1.1.7.2.3.0 2>/dev/null | \
+    .1.3.6.1.4.1.318.1.1.1.7.2.3.0 2>/dev/null |
     awk -F': ' '{print $2}' | tr -d '"' || echo "never")
-  
+
   # Battery status mapping (1=unknown, 2=normal, 3=low, 4=depleted)
   case "${BATTERY_STATUS}" in
     2) STATUS_TEXT="normal" ;;
@@ -65,10 +65,10 @@ for TARGET in "${UPS_TARGETS[@]}"; do
     4) STATUS_TEXT="depleted" ;;
     *) STATUS_TEXT="unknown" ;;
   esac
-  
+
   # Battery replacement indicator (1=no, 2=yes)
   REPLACE_TEXT=$([[ "${BATTERY_REPLACE}" == "2" ]] && echo "true" || echo "false")
-  
+
   UPS_DATA=$(echo "${UPS_DATA}" | jq --arg ip "${UPS_IP}" \
     --arg model "${UPS_MODEL}" \
     --arg load "${LOAD}" \
@@ -93,7 +93,7 @@ for TARGET in "${UPS_TARGETS[@]}"; do
     }]')
 done
 
-cat > "${OUTPUT}" <<EOF
+cat >"${OUTPUT}" <<EOF
 {
   "schema_version": "1.0.0-eternal",
   "generated_at": "${TIMESTAMP}",
@@ -109,7 +109,10 @@ cat > "${OUTPUT}" <<EOF
 }
 EOF
 
-jq empty "${OUTPUT}" || { echo "❌ Invalid JSON"; exit 1; }
+jq empty "${OUTPUT}" || {
+  echo "❌ Invalid JSON"
+  exit 1
+}
 
 # Alert on critical conditions
 CRITICAL=$(echo "${UPS_DATA}" | jq '[.[] | select(.runtime_minutes < 10 or .load_percent > 80 or .battery_replace_needed == true)] | length')
