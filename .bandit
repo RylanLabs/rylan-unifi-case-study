@@ -1,2 +1,2 @@
 ﻿[bandit]
-exclude: inventory
+exclude = inventory
