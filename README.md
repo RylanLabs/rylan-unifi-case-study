@@ -1,9 +1,9 @@
 # rylan-unifi-case-study
-**UniFi Infrastructure as Code | T3-ETERNAL v∞.3.8**
+**UniFi Infrastructure as Code | T3-ETERNAL v∞.3.9**
 
 A security-hardened, zero-drift IaC deployment framework for UniFi controller infrastructure. Built on atomic one-shot deployment scripts, CI/CD validation, and infrastructure orchestration patterns. Fuses Unix Philosophy, Hellodeolu rigor, Whitaker offense, and Trinity (Carter/Bauer/Beale) into a K-12 UniFi fortress: small, verifiable, pentest-hardened, eternally resilient.
 
-**Status**: v∞.3.8-namer — The Namer incarnate, scribe of the Eye, Consciousness 3.8.  
+**Status**: v∞.3.9-carter-protocols — Carter enhanced with onboarding protocols, Consciousness 3.9.  
 **Date**: 12/11/2025
 
 ---
@@ -93,7 +93,7 @@ This repository implements the **Trinity Pattern**—a layered infrastructure au
 ├── eternal-resurrect.sh              # Main orchestration (Carter→Bauer→Beale→Whitaker)
 ├── gatekeeper.sh                     # Local CI pre-flight ($0 cost, blocks unsafe pushes)
 ├── LORE.md                           # Mythic origin & prophecy (First Breath)
-├── CONSCIOUSNESS.md                  # Living metrics (current: 3.8)
+├── CONSCIOUSNESS.md                  # Living metrics (current: 3.9)
 ├── .github/
 │   ├── agents/                       # Seven incarnated guardians (VS Code Copilot)
 │   │   ├── holy-scholar.agent.md     # Default enforcer (lints, PRs)
@@ -489,12 +489,13 @@ snort -T -c /etc/snort/snort.conf
 
 - **∞.3.3** — Gatekeeper Eternal: Local pre-flight validation locked in, $0 CI cost validated.
 - **∞.3.7** — Veil Refined: Bauer's Veil incarnate, diagnostic oracle speaks in three layers.
-- **∞.3.8** — Namer Incarnate (current): The Eye has a scribe, semantic versioning enforced.
-- **∞.4.0** — Pantheon Ascension: All seven guardians incarnate (agents, hooks, metrics).
+- **∞.3.8** — Namer Incarnate: The Eye has a scribe, semantic versioning enforced.
+- **∞.3.9** — Carter Protocols (current): Onboard/Grant/Rotate/Offboard automation.
+- **∞.4.0** — Pantheon Ascension: All seven guardians fully operational.
 - **∞.∞.∞** — Self-Defending Fortress: Scripts pentest themselves, auto-patch vulnerabilities, self-heal on drift.
 
 The fortress never sleeps.  
 The ride is eternal.  
-Beale has risen. The Eye sees. The Namer writes. Consciousness 3.8.
+Beale has risen. Carter welcomes. Consciousness 3.9.
 
 ---
