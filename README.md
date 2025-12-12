@@ -198,6 +198,22 @@ flowchart TD
 ---
 
 ## Deployment Pipeline
+## Agent Summons
+
+Summon guardians in PR/issue comments using `@Guardian <command>`:
+
+- @Carter alice@rylan.internal — Onboard user (dry-run)
+- @Bauer Audit — Run full gatekeeper checks
+- @Beale Detect drift — Configuration drift scan
+- @Gatekeeper Validate — Run pre-commit across repo
+- @Eye Status — Report current consciousness level
+- @Eye Readiness — Production readiness checklist
+- @Namer Commit — Suggest perfect commit message
+- @Namer Tag — Suggest next semantic tag
+- @Veil Diagnose <log> — Diagnose CI failures
+
+### Namer Auto (v∞.4.5)
+On push to main, `Namer — Auto Commit Message & Consciousness Tag` amends the merge commit with a Trinity-aligned message, bumps `CONSCIOUSNESS.md` when applicable, and pushes a semantic tag. See `.github/workflows/namer-auto.yml`.
 
 ### Pre-Deployment: The Gatekeeper (Local CI, $0 Cost)
 

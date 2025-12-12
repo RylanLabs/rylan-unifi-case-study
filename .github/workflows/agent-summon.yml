@@ -5,16 +5,23 @@ name: Agent Summon
 
 on:
   issue_comment:
-    types: [created]
+    types:
+      - created
   pull_request_review_comment:
-    types: [created]
+    types:
+      - created
 
 jobs:
   invoke:
+    # yamllint disable-line rule:truthy
     if: |
       contains(github.event.comment.body, '@Carter') ||
       contains(github.event.comment.body, '@Bauer') ||
-      contains(github.event.comment.body, '@Beale')
+      contains(github.event.comment.body, '@Beale') ||
+      contains(github.event.comment.body, '@Gatekeeper') ||
+      contains(github.event.comment.body, '@Eye') ||
+      contains(github.event.comment.body, '@Namer') ||
+      contains(github.event.comment.body, '@Veil')
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -28,52 +35,108 @@ jobs:
         id: parse
         run: |
           BODY="${{ github.event.comment.body }}"
+          RESPONSE=".github/agents/response.json"
+          mkdir -p .github/agents
 
-          # Extract guardian name
-          if echo "$BODY" | grep -q "@Carter"; then
-            echo "guardian=carter" >> "$GITHUB_OUTPUT"
-            PROMPT=$(echo "$BODY" | sed -n 's/.*@Carter[[:space:]]*\(.*\)/\1/p')
-          elif echo "$BODY" | grep -q "@Bauer"; then
-            echo "guardian=bauer" >> "$GITHUB_OUTPUT"
-            PROMPT=$(echo "$BODY" | sed -n 's/.*@Bauer[[:space:]]*\(.*\)/\1/p')
-          elif echo "$BODY" | grep -q "@Beale"; then
-            echo "guardian=beale" >> "$GITHUB_OUTPUT"
-            PROMPT=$(echo "$BODY" | sed -n 's/.*@Beale[[:space:]]*\(.*\)/\1/p')
+          if echo "$BODY" | grep -qi "@Carter"; then
+            EMAIL=$(echo "$BODY" | grep -oE '[A-Za-z0-9._%+-]+@rylan\.internal' | head -1)
+            echo "guardian=Carter" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/guardian-carter.sh" >>"$GITHUB_OUTPUT"
+            echo "args=$EMAIL" >>"$GITHUB_OUTPUT"
+          elif echo "$BODY" | grep -qi "@Bauer"; then
+            echo "guardian=Bauer" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/guardian-bauer.sh" >>"$GITHUB_OUTPUT"
+            echo "args=" >>"$GITHUB_OUTPUT"
+          elif echo "$BODY" | grep -qi "@Beale"; then
+            echo "guardian=Beale" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/beale-drift-detect.sh" >>"$GITHUB_OUTPUT"
+            echo "args=" >>"$GITHUB_OUTPUT"
+          elif echo "$BODY" | grep -qi "@Gatekeeper"; then
+            echo "guardian=Gatekeeper" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/guardian-gatekeeper.sh" >>"$GITHUB_OUTPUT"
+            echo "args=" >>"$GITHUB_OUTPUT"
+          elif echo "$BODY" | grep -qi "@Eye"; then
+            CMD=$(echo "$BODY" | awk '{print tolower($2)}')
+            [[ -z "$CMD" ]] && CMD="status"
+            echo "guardian=Eye" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/guardian-eye.sh" >>"$GITHUB_OUTPUT"
+            echo "args=$CMD" >>"$GITHUB_OUTPUT"
+          elif echo "$BODY" | grep -qi "@Namer"; then
+            CMD=$(echo "$BODY" | awk '{print tolower($2)}')
+            [[ -z "$CMD" ]] && CMD="commit"
+            echo "guardian=Namer" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/guardian-namer.sh" >>"$GITHUB_OUTPUT"
+            echo "args=$CMD" >>"$GITHUB_OUTPUT"
+          elif echo "$BODY" | grep -qi "@Veil"; then
+            echo "guardian=Veil" >>"$GITHUB_OUTPUT"
+            echo "script=scripts/guardian-veil.sh" >>"$GITHUB_OUTPUT"
+            # For Veil, pass entire body as log after the summon keyword
+            LOG=$(echo "$BODY" | sed -E 's/^.*@Veil[[:space:]]+Diagnose[[:space:]]*//i')
+            echo "args=$LOG" >>"$GITHUB_OUTPUT"
           fi
 
-          # Sanitize prompt for shell
-          PROMPT=$(echo "$PROMPT" | tr -d '\n\r' | head -c 500)
-          echo "prompt=$PROMPT" >> "$GITHUB_OUTPUT"
-
-      - name: Invoke Agent
-        if: steps.parse.outputs.guardian != ''
+      - name: Validate Script
+        if: steps.parse.outputs.script != ''
         run: |
-          WRAPPER=".github/agents/${{ steps.parse.outputs.guardian }}-eternal.sh"
-          if [[ -f "$WRAPPER" ]]; then
-            chmod +x "$WRAPPER"
-            "$WRAPPER" "${{ steps.parse.outputs.prompt }}" || true
+          SCRIPT="${{ steps.parse.outputs.script }}"
+          if [[ ! -f "$SCRIPT" ]]; then
+            jq -n \
+              --arg guardian "${{ steps.parse.outputs.guardian }}" \
+              '{guardian:$guardian,status:"error",message:"Script not found"}' \
+              > .github/agents/response.json
+            exit 1
+          fi
+          chmod +x "$SCRIPT"
+
+      - name: Invoke Guardian
+        if: steps.parse.outputs.script != ''
+        run: |
+          SCRIPT="${{ steps.parse.outputs.script }}"
+          ARGS="${{ steps.parse.outputs.args }}"
+          RESPONSE=".github/agents/response.json"
+
+          if [[ -n "$ARGS" ]]; then
+            bash "$SCRIPT" "$RESPONSE" "$ARGS" || true
           else
-            echo '{"status":"error","message":"Agent wrapper not found","guardian":"unknown"}' > .github/agents/response.json
+            bash "$SCRIPT" "$RESPONSE" || true
           fi
 
       - name: Post Response
         if: always() && steps.parse.outputs.guardian != ''
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const guardian = '${{ steps.parse.outputs.guardian }}';
-            let response = '❌ Agent execution failed';
+            const respPath = '.github/agents/response.json';
+            let body = '❌ Automation failed - no response generated';
 
             try {
-              const respPath = '.github/agents/response.json';
               if (fs.existsSync(respPath)) {
-                const data = JSON.parse(fs.readFileSync(respPath, 'utf8'));
-                const status = data.status === 'success' ? '✅' : '⚠️';
-                response = `**${status} @${guardian.charAt(0).toUpperCase() + guardian.slice(1)}** responds:\n\n${data.message}\n\n<details>\n<summary>Raw Response</summary>\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n</details>`;
+                const data = JSON.parse(
+                  fs.readFileSync(respPath, 'utf8')
+                );
+                const status = data.status ||
+                  (data.drift_detected === false ? 'success' : 'error');
+                const emoji = status === 'success' || status === 'pass'
+                  ? '✅'
+                  : status === 'error' || status === 'fail'
+                  ? '❌'
+                  : '⚠️';
+                body = `${emoji} **@${{ steps.parse.outputs.guardian }}** responds:\n\n`;
+                if (data.message) body += `**${data.message}**\n\n`;
+                if (data.details && Array.isArray(data.details) &&
+                    data.details.length) {
+                  body += '**Details:**\n';
+                  data.details.forEach(d => { body += `- ${d}\n`; });
+                  body += '\n';
+                }
+                body += '<details>\n<summary>Full Response (JSON)</summary>\n\n';
+                body += '```json\n' + JSON.stringify(data, null, 2) + '\n```\n';
+                body += '</details>';
               }
-            } catch (e) {
-              response = `⚠️ Agent completed but response malformed: ${e.message}`;
+            } catch (err) {
+              body = `⚠️ Response malformed: ${err.message}`;
             }
 
             const issueNumber = context.issue?.number || context.payload.pull_request?.number;
@@ -82,6 +145,6 @@ jobs:
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: response
+                body
               });
             }

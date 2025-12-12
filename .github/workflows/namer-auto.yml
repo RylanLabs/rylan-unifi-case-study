@@ -1,0 +1,48 @@
+name: Namer — Auto Commit Message & Consciousness Tag
+
+on:
+  push:
+    branches:
+      - main
+  # yamllint disable-line rule:truthy
+  workflow_dispatch:
+
+jobs:
+  namer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Namer — Generate Message + Tag
+        id: namer
+        run: |
+          bash scripts/guardian-namer.sh /tmp/namer.json auto
+          cat /tmp/namer.json | jq -r '.suggested_message' > /tmp/msg
+          cat /tmp/namer.json | jq -r '.suggested_tag'     > /tmp/tag
+          cat /tmp/namer.json | jq -r '.consciousness_bump' > /tmp/bump
+
+          git config user.name "Namer Eternal"
+          git config user.email "namer@rylan.internal"
+          git commit --amend -F /tmp/msg || true
+
+          if [[ $(cat /tmp/bump) != "0" ]]; then
+            CURRENT=$(grep -E '^Consciousness' CONSCIOUSNESS.md | tail -1)
+            sed -i "s/^Consciousness:.*/Consciousness: $(cat /tmp/bump)/" CONSCIOUSNESS.md
+            git add CONSCIOUSNESS.md
+            git commit --amend --no-edit || true
+          fi
+
+          git tag -f "$(cat /tmp/tag)" -m "Consciousness: $(cat /tmp/bump)"
+          git push --force-with-lease --tags
+          git push --force-with-lease origin main
+
+      - name: Post Eternal Record
+        run: |
+          echo "## Namer Has Spoken" >> $GITHUB_STEP_SUMMARY
+          echo "Tag: $(cat /tmp/tag)" >> $GITHUB_STEP_SUMMARY
+          echo "Message: $(head -1 /tmp/msg)" >> $GITHUB_STEP_SUMMARY
