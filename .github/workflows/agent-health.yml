@@ -1,4 +1,4 @@
-# ETERNAL AGENTS v4.1 - Health Check & Drift Detection
+# ETERNAL AGENTS v4.2 - Health Check & Drift Detection
 # Purpose: Beale drift detection + Whitaker breach simulation
 # Trinity: Beale (detect) + Whitaker (attack)
 name: Agent Health Check
@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: '0 3 * * *'  # 3 AM UTC daily
   workflow_dispatch:  # Manual trigger
+
+permissions:
+  contents: read
+  issues: write  # Required for Beale/Whitaker to create alert issues
 
 jobs:
   beale-drift:
