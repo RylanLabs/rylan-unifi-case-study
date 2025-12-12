@@ -1,0 +1,4 @@
+# firewall.txt - Firewall rules baseline
+# Format: iptables-save output
+# Update with: iptables-save > firewall.txt
+# Max rules: 10 (Hellodeolu compliance)

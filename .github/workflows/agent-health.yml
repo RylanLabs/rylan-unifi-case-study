@@ -1,0 +1,172 @@
+# ETERNAL AGENTS v4.1 - Health Check & Drift Detection
+# Purpose: Beale drift detection + Whitaker breach simulation
+# Trinity: Beale (detect) + Whitaker (attack)
+name: Agent Health Check
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC daily
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  beale-drift:
+    name: Beale Drift Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Beale Drift Scan
+        id: drift
+        run: |
+          echo "[Beale] Scanning for configuration drift..."
+          DRIFT_FOUND=false
+
+          # Check for default SSH port references
+          if grep -rI "Port 22$" scripts/ 02-declarative-config/ 2>/dev/null | head -3; then
+            echo "WARNING: Default SSH port (22) reference detected"
+            DRIFT_FOUND=true
+          fi
+
+          # Check for hardcoded IPs that should be variables
+          if grep -rIE "10\.0\.(10|30|40|90)\.[0-9]+" scripts/ --include="*.sh" 2>/dev/null | \
+             grep -v "# Expected" | head -3; then
+            echo "WARNING: Hardcoded VLAN IPs detected"
+          fi
+
+          # Verify firewall rule count
+          if [[ -f "02-declarative-config/policy-table.yaml" ]]; then
+            RULE_COUNT=$(grep -c "^  - " 02-declarative-config/policy-table.yaml 2>/dev/null || echo "0")
+            if [[ "$RULE_COUNT" -gt 10 ]]; then
+              echo "WARNING: Firewall rules exceed Hellodeolu limit (${RULE_COUNT} > 10)"
+              DRIFT_FOUND=true
+            fi
+          fi
+
+          # Check for password patterns in code
+          if grep -rIE "(password|secret)\s*=\s*['\"][^'\"]+['\"]" \
+             --include="*.py" --include="*.sh" \
+             app/ scripts/ 2>/dev/null | grep -v ".pyc" | head -3; then
+            echo "WARNING: Potential hardcoded credentials detected"
+            DRIFT_FOUND=true
+          fi
+
+          if [[ "$DRIFT_FOUND" == "true" ]]; then
+            echo "drift_detected=true" >> "$GITHUB_OUTPUT"
+            echo "## Beale Alert: Drift Detected" >> "$GITHUB_STEP_SUMMARY"
+            echo "Configuration drift found. Review required." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
+            echo "## Beale: No Drift Detected" >> "$GITHUB_STEP_SUMMARY"
+            echo "Fortress configuration stable." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Create Drift Alert Issue
+        if: steps.drift.outputs.drift_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '⚔️ Beale Alert: Configuration Drift Detected';
+            const body = `**Guardian**: Beale
+            **Timestamp**: ${new Date().toISOString()}
+            **Severity**: High
+
+            Configuration drift detected during automated scan.
+
+            **Recommended Actions**:
+            1. Summon @Bauer to verify findings
+            2. Summon @Carter to remediate identity issues
+            3. Review CONSCIOUSNESS.md for Trinity alignment
+
+            **Trinity Alignment**:
+            - Carter: Identity drift
+            - Bauer: Verification failure
+            - Beale: Detection triggered`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'drift', 'beale-alert']
+            });
+
+  whitaker-breach-sim:
+    name: Whitaker Breach Simulation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Whitaker Security Scan
+        id: breach
+        run: |
+          echo "[Whitaker] Running breach simulations..."
+          VULN_FOUND=false
+
+          # Check for promiscuous binds
+          if grep -rI "0\.0\.0\.0" scripts/ app/ 2>/dev/null | \
+             grep -v ".pyc" | grep -v "__pycache__" | head -3; then
+            echo "WARNING: Promiscuous bind (0.0.0.0) detected"
+            VULN_FOUND=true
+          fi
+
+          # Check for weak authentication patterns
+          if grep -riE "auth.*=.*false|verify.*=.*false" \
+             --include="*.py" --include="*.yaml" \
+             app/ 02-declarative-config/ 2>/dev/null | head -3; then
+            echo "WARNING: Disabled authentication detected"
+            VULN_FOUND=true
+          fi
+
+          # Check for debug mode in production configs
+          if grep -riE "debug.*=.*true|DEBUG.*=.*1" \
+             --include="*.py" --include="*.yaml" --include="*.sh" \
+             app/ scripts/ 2>/dev/null | head -3; then
+            echo "WARNING: Debug mode enabled in configs"
+            VULN_FOUND=true
+          fi
+
+          # Check for world-readable permissions in scripts
+          if find scripts/ -name "*.sh" -perm /o+w 2>/dev/null | head -3; then
+            echo "WARNING: World-writable scripts detected"
+            VULN_FOUND=true
+          fi
+
+          if [[ "$VULN_FOUND" == "true" ]]; then
+            echo "vuln_detected=true" >> "$GITHUB_OUTPUT"
+            echo "## Whitaker Alert: Vulnerabilities Found" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "vuln_detected=false" >> "$GITHUB_OUTPUT"
+            echo "## Whitaker: Breach Sim Passed" >> "$GITHUB_STEP_SUMMARY"
+            echo "No attack vectors detected." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Create Vulnerability Alert
+        if: steps.breach.outputs.vuln_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🩸 Whitaker Alert: Vulnerability Detected';
+            const body = `**Guardian**: Whitaker
+            **Timestamp**: ${new Date().toISOString()}
+            **Severity**: Medium
+
+            Breach simulation detected potential attack vectors.
+
+            **Recommended Actions**:
+            1. Review promiscuous binds (0.0.0.0)
+            2. Verify authentication settings
+            3. Disable debug modes
+
+            **Offensive Vectors Tested**:
+            - Network bind analysis
+            - Authentication bypass check
+            - Debug mode exposure
+            - Permission audit`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'vulnerability', 'whitaker-alert']
+            });

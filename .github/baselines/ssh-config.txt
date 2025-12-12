@@ -1,0 +1,7 @@
+# ssh-config.txt - SSH daemon configuration baseline
+# Format: sshd_config key-value pairs
+# Update with: grep -v "^#" /etc/ssh/sshd_config | grep -v "^$" > ssh-config.txt
+# Required settings:
+#   PasswordAuthentication no
+#   PubkeyAuthentication yes
+#   PermitRootLogin no

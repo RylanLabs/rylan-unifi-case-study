@@ -1,0 +1,3 @@
+# .github/breach-reports - Whitaker simulation logs
+# Format: JSON files named YYYYMMDD.json
+# All outputs must be redacted via app/redactor.py --aggressive
