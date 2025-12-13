@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: beale-firewall-vlan-ssh.sh
+# Script: beale-firewall-vlan-ssh.sh
 # Purpose: Phases 1-3 hardening (Firewall rule count, VLAN isolation, SSH config)
-# Part of: scripts/beale-harden.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 # ─────────────────────────────────────────────────────
 # Phase 1: Firewall Rule Count ≤10

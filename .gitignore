@@ -166,6 +166,11 @@ secrets/
 !runbooks/ministry-bauer/
 !runbooks/ministry-perimeter/
 
+# BUT allow modular library directories
+!scripts/lib/
+!01_bootstrap/proxmox/lib/
+!runbooks/ministry_detection/lib/
+
 # UniFi backups
 *.unf
 

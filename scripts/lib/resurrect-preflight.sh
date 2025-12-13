@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: resurrect-preflight.sh
+# Script: resurrect-preflight.sh
 # Purpose: Pre-flight and network validation (Phases 0-1)
-# Part of: scripts/eternal-resurrect-unifi.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 run_preflight_validation() {
   log_info "Phase 0: Pre-flight Checks (1 min)"

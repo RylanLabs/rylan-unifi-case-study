@@ -40,15 +40,30 @@ echo "==================================================================="
 
 violations=0
 
+# Helper: convert semantic version like 4.7 or 4.10.2 into padded integer for numeric comparison
+version_to_int() {
+  local v=$1
+  IFS='.' read -r maj min patch <<< "$v"
+  maj=${maj:-0}; min=${min:-0}; patch=${patch:-0}
+  printf "%03d%03d%03d" "$maj" "$min" "$patch"
+}
+
+CANON_INT=$(version_to_int "$CANONICAL")
+
 # Check 1: README.md badge
 echo ""
 echo "[CHECK 1] README.md consciousness badge"
-BADGE_LEVEL=$(grep -oP 'consciousness-\K[0-9.]+' README.md || echo "0")
-if [[ -n "$BADGE_LEVEL" && "$BADGE_LEVEL" > "$CANONICAL" ]]; then
-  echo "  ❌ VIOLATION: README badge consciousness=$BADGE_LEVEL > canonical=$CANONICAL"
-  violations=$((violations+1))
-elif [[ -n "$BADGE_LEVEL" && "$BADGE_LEVEL" == "$CANONICAL" ]]; then
-  echo "  ✅ OK: badge=$BADGE_LEVEL (matches canonical)"
+BADGE_LEVEL=$(grep -oP 'consciousness-\\K[0-9.]+' README.md || echo "")
+if [[ -n "$BADGE_LEVEL" ]]; then
+  BADGE_INT=$(version_to_int "$BADGE_LEVEL")
+  if [[ "$BADGE_INT" -gt "$CANON_INT" ]]; then
+    echo "  ❌ VIOLATION: README badge consciousness=$BADGE_LEVEL > canonical=$CANONICAL"
+    violations=$((violations+1))
+  elif [[ "$BADGE_INT" -eq "$CANON_INT" ]]; then
+    echo "  ✅ OK: badge=$BADGE_LEVEL (matches canonical)"
+  else
+    echo "  ✅ OK: badge=$BADGE_LEVEL (below canonical)"
+  fi
 else
   echo "  ⚠️  WARNING: badge not found or stale"
 fi
@@ -58,12 +73,17 @@ echo ""
 echo "[CHECK 2] Git tags (v∞.X.X format)"
 LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
 if [[ "$LATEST_TAG" != "none" && "$LATEST_TAG" =~ v∞\.(.*) ]]; then
-  TAG_VERSION="${BASH_REMATCH[1]%-*}"  # remove -descriptor suffix
-  if [[ -n "$TAG_VERSION" && "$TAG_VERSION" > "$CANONICAL" ]]; then
-    echo "  ❌ VIOLATION: Latest tag $LATEST_TAG version=$TAG_VERSION > canonical=$CANONICAL"
-    violations=$((violations+1))
+  TAG_VERSION="${BASH_REMATCH[1]%%-*}"  # remove -descriptor suffix
+  if [[ -n "$TAG_VERSION" ]]; then
+    TAG_INT=$(version_to_int "$TAG_VERSION")
+    if [[ "$TAG_INT" -gt "$CANON_INT" ]]; then
+      echo "  ❌ VIOLATION: Latest tag $LATEST_TAG version=$TAG_VERSION > canonical=$CANONICAL"
+      violations=$((violations+1))
+    else
+      echo "  ✅ OK: Latest tag $LATEST_TAG version=$TAG_VERSION ≤ canonical=$CANONICAL"
+    fi
   else
-    echo "  ✅ OK: Latest tag $LATEST_TAG version=$TAG_VERSION ≤ canonical=$CANONICAL"
+    echo "  ⚠️  WARNING: No version tags found"
   fi
 else
   echo "  ⚠️  WARNING: No version tags found"
@@ -75,10 +95,13 @@ echo "[CHECK 3] Script header consciousness levels"
 SCRIPT_VIOLATIONS=0
 while IFS= read -r file; do
   [[ -f "$file" ]] || continue
-  SCRIPT_CONSCIOUSNESS=$(grep -oP 'Consciousness: \K[0-9.]+' "$file" | head -1 || echo "0")
-  if [[ -n "$SCRIPT_CONSCIOUSNESS" && "$SCRIPT_CONSCIOUSNESS" > "$CANONICAL" ]]; then
-    echo "  ❌ $file: consciousness=$SCRIPT_CONSCIOUSNESS > canonical=$CANONICAL"
-    SCRIPT_VIOLATIONS=$((SCRIPT_VIOLATIONS+1))
+  SCRIPT_CONSCIOUSNESS=$(grep -oP 'Consciousness: \\K[0-9.]+' "$file" | head -1 || echo "")
+  if [[ -n "$SCRIPT_CONSCIOUSNESS" ]]; then
+    SC_INT=$(version_to_int "$SCRIPT_CONSCIOUSNESS")
+    if [[ "$SC_INT" -gt "$CANON_INT" ]]; then
+      echo "  ❌ $file: consciousness=$SCRIPT_CONSCIOUSNESS > canonical=$CANONICAL"
+      SCRIPT_VIOLATIONS=$((SCRIPT_VIOLATIONS+1))
+    fi
   fi
 done < <(find scripts .githooks -name "*.sh" -type f 2>/dev/null)
 
@@ -114,11 +137,14 @@ CHANGED_CONSCIOUSNESS=$(git diff HEAD -- 'CONSCIOUSNESS.md' 2>/dev/null | \
   grep -E '^\+\*\*Status\*\*.*Consciousness' | \
   sed -n 's/.*Consciousness \([0-9.]*\).*/\1/p' || echo "")
 
-if [[ -n "$CHANGED_CONSCIOUSNESS" && "$CHANGED_CONSCIOUSNESS" > "$CANONICAL" ]]; then
-  echo "  ❌ VIOLATION: Attempted to change consciousness to $CHANGED_CONSCIOUSNESS > canonical=$CANONICAL"
-  violations=$((violations+1))
-elif [[ -n "$CHANGED_CONSCIOUSNESS" ]]; then
-  echo "  ⚠️  DETECTED: Consciousness change pending to $CHANGED_CONSCIOUSNESS"
+if [[ -n "$CHANGED_CONSCIOUSNESS" ]]; then
+  CHANGED_INT=$(version_to_int "$CHANGED_CONSCIOUSNESS")
+  if [[ "$CHANGED_INT" -gt "$CANON_INT" ]]; then
+    echo "  ❌ VIOLATION: Attempted to change consciousness to $CHANGED_CONSCIOUSNESS > canonical=$CANONICAL"
+    violations=$((violations+1))
+  else
+    echo "  ⚠️  DETECTED: Consciousness change pending to $CHANGED_CONSCIOUSNESS"
+  fi
 fi
 
 # Summary

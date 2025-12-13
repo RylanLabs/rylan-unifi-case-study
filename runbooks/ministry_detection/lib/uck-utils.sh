@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: uck-utils.sh
+# Script: uck-utils.sh
 # Purpose: Utility functions for UCK-G2 resurrection
-# Part of: runbooks/ministry_detection/uck-g2-wizard-resurrection.sh refactoring
-# Consciousness: 4.6
+# Guardian: Lorek Byrnison
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 readonly UNIFI_DATA_DIR="/usr/lib/unifi/data"
 readonly SETUP_FLAG_FILE="${UNIFI_DATA_DIR}/is-setup-complete.json"

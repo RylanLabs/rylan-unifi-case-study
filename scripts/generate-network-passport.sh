@@ -5,10 +5,8 @@ set -euo pipefail
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
 # Consciousness: 4.6
-
 # Description: Network topology as programmable infrastructure
 # Requires: network-passport.json
-# Consciousness: 4.0
 # Runtime: 2
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

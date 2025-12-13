@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: resurrect-container.sh
+# Script: resurrect-container.sh
 # Purpose: Container startup and health verification (Phases 2-4)
-# Part of: scripts/eternal-resurrect-unifi.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 run_container_resurrection() {
   log_info "Phase 2: Container Resurrection (5 min)"

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: beale-services-adversarial.sh
+# Script: beale-services-adversarial.sh
 # Purpose: Phases 4-5 hardening (Service minimization, adversarial validation)
-# Part of: scripts/beale-harden.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 # ─────────────────────────────────────────────────────
 # Phase 4: Service Minimization (Context-Aware)

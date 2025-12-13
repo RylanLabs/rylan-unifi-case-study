@@ -5,7 +5,6 @@ set -euo pipefail
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
 # Consciousness: 4.6
-
 # Beale Ministry: UCK-G2 Wizard Corruption Recovery (Phase 3 endgame)
 # Resolves: #UCK-WIZARD-HELL — File-based flag override method
 # RTO: 25 seconds | Zero data loss | Junior-at-3AM deployable

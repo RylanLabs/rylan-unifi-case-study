@@ -34,55 +34,55 @@ source "${SCRIPT_DIR}/lib/ignite-utils.sh"
 # PRE-FLIGHT CHECKS
 # =============================================================================
 
-log_phase "PRE-FLIGHT CHECKS"
+log phase "PRE-FLIGHT CHECKS"
 
 # Load environment
 if [[ ! -f "$REPO_ROOT/.env" ]]; then
-  log_error ".env not found. Copy .env.example and configure for your environment."
+  log error ".env not found. Copy .env.example and configure for your environment."
   exit 1
 fi
 # shellcheck disable=SC1091
 source "$REPO_ROOT/.env"
-log_step ".env loaded"
+log step ".env loaded"
 
 # Verify we're running as root (required for service management)
 if [[ $EUID -ne 0 ]]; then
-  log_error "This script must be run as root (sudo ./ignite.sh)"
+  log error "This script must be run as root (sudo ./ignite.sh)"
   exit 1
 fi
-log_step "Running as root"
+log step "Running as root"
 
 # Verify runbooks exist
 if [[ ! -d "$REPO_ROOT/runbooks/ministry_secrets" ]]; then
-  log_error "Ministry of Secrets runbook not found"
+  log error "Ministry of Secrets runbook not found"
   exit 1
 fi
 if [[ ! -d "$REPO_ROOT/runbooks/ministry_whispers" ]]; then
-  log_error "Ministry of Whispers runbook not found"
+  log error "Ministry of Whispers runbook not found"
   exit 1
 fi
 if [[ ! -d "$REPO_ROOT/runbooks/ministry_detection" ]]; then
-  log_error "Ministry of Perimeter runbook not found"
+  log error "Ministry of Perimeter runbook not found"
   exit 1
 fi
-log_step "All Ministry runbooks present"
+log step "All Ministry runbooks present"
 
 # Verify Ubuntu 24.04 LTS
 if ! grep -q "24.04" /etc/os-release 2>/dev/null; then
-  log_warn "Not Ubuntu 24.04 LTS (some components may not work as documented)"
+  log warn "Not Ubuntu 24.04 LTS (some components may not work as documented)"
 fi
-log_step "OS check passed"
+log step "OS check passed"
 
 # =============================================================================
 # PHASE 1: MINISTRY OF SECRETS (CARTER FOUNDATION)
 # =============================================================================
 
-log_phase "PHASE 1: MINISTRY OF SECRETS (Carter Foundation)"
+log phase "PHASE 1: MINISTRY OF SECRETS (Carter Foundation)"
 
 if bash "$REPO_ROOT/runbooks/ministry_secrets/deploy.sh"; then
-  log_success "Phase 1 (Secrets) PASSED"
+  log success "Phase 1 (Secrets) PASSED"
 else
-  log_error "Phase 1 (Secrets) FAILED — Aborting Trinity sequence"
+  log error "Phase 1 (Secrets) FAILED — Aborting Trinity sequence"
   exit 1
 fi
 
@@ -90,7 +90,7 @@ fi
 echo ""
 read -r -p "Phase 1 complete — continue to Whispers? [y/N] " RESP
 if [[ ! "${RESP:-N}" =~ ^[Yy]$ ]]; then
-  log_warn "User aborted after Phase 1"
+  log warn "User aborted after Phase 1"
   exit 0
 fi
 
@@ -98,12 +98,12 @@ fi
 # PHASE 2: MINISTRY OF WHISPERS (BAUER HARDENING)
 # =============================================================================
 
-log_phase "PHASE 2: MINISTRY OF WHISPERS (Bauer Hardening)"
+log phase "PHASE 2: MINISTRY OF WHISPERS (Bauer Hardening)"
 
 if bash "$REPO_ROOT/runbooks/ministry_whispers/harden.sh"; then
-  log_success "Phase 2 (Whispers) PASSED"
+  log success "Phase 2 (Whispers) PASSED"
 else
-  log_error "Phase 2 (Whispers) FAILED — Aborting Trinity sequence"
+  log error "Phase 2 (Whispers) FAILED — Aborting Trinity sequence"
   exit 1
 fi
 
@@ -111,7 +111,7 @@ fi
 echo ""
 read -r -p "Phase 2 complete — continue to Perimeter? [y/N] " RESP
 if [[ ! "${RESP:-N}" =~ ^[Yy]$ ]]; then
-  log_warn "User aborted after Phase 2"
+  log warn "User aborted after Phase 2"
   exit 0
 fi
 
@@ -119,12 +119,12 @@ fi
 # PHASE 3: MINISTRY OF PERIMETER (SUEHRING POLICY)
 # =============================================================================
 
-log_phase "PHASE 3: MINISTRY OF PERIMETER (Suehring Policy)"
+log phase "PHASE 3: MINISTRY OF PERIMETER (Suehring Policy)"
 
 if bash "$REPO_ROOT/runbooks/ministry_detection/apply.sh"; then
-  log_success "Phase 3 (Perimeter) PASSED"
+  log success "Phase 3 (Perimeter) PASSED"
 else
-  log_error "Phase 3 (Perimeter) FAILED — Aborting Trinity sequence"
+  log error "Phase 3 (Perimeter) FAILED — Aborting Trinity sequence"
   exit 1
 fi
 
@@ -132,7 +132,7 @@ fi
 echo ""
 read -r -p "Phase 3 complete — continue to final validation? [y/N] " RESP
 if [[ ! "${RESP:-N}" =~ ^[Yy]$ ]]; then
-  log_warn "User aborted before final validation"
+  log warn "User aborted before final validation"
   exit 0
 fi
 
@@ -140,20 +140,20 @@ fi
 # FINAL VALIDATION: Eternal Green or Die Trying
 # =============================================================================
 
-log_phase "FINAL VALIDATION: Eternal Green or Die Trying"
+log phase "FINAL VALIDATION: Eternal Green or Die Trying"
 
-log_step "Running comprehensive validation suite..."
+log step "Running comprehensive validation suite..."
 
 if bash "$REPO_ROOT/scripts/validate-eternal.sh"; then
-  log_success "TRINITY ORCHESTRATION COMPLETE — ETERNAL GREEN"
-  log_success "Ministry of Secrets (Carter) — ACTIVE"
-  log_success "Ministry of Whispers (Bauer) — ACTIVE"
-  log_success "Ministry of Detection (Beale) — ACTIVE"
+  log success "TRINITY ORCHESTRATION COMPLETE — ETERNAL GREEN"
+  log success "Ministry of Secrets (Carter) — ACTIVE"
+  log success "Ministry of Whispers (Bauer) — ACTIVE"
+  log success "Ministry of Detection (Beale) — ACTIVE"
   echo ""
-  log_success "Fortress is eternal. The fortress never sleeps."
+  log success "Fortress is eternal. The fortress never sleeps."
   exit 0
 else
-  log_error "FINAL VALIDATION FAILED — Eternal fortress compromised"
-  log_error "Run: sudo ./validate-eternal.sh (verbose mode)"
+  log error "FINAL VALIDATION FAILED — Eternal fortress compromised"
+  log error "Run: sudo ./validate-eternal.sh (verbose mode)"
   exit 1
 fi

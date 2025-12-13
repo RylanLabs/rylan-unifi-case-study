@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: validate-output.sh
+# Script: validate-output.sh
 # Purpose: Test result output and summary formatting
-# Part of: scripts/validate-eternal.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 PASS=0
 FAIL=0

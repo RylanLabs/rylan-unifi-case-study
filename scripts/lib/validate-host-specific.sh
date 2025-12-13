@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: validate-host-specific.sh
+# Script: validate-host-specific.sh
 # Purpose: Host-specific validation tests (rylan-dc, rylan-pi, rylan-ai)
-# Part of: scripts/validate-eternal.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 # ============================================================================
 # HOST-SPECIFIC TESTS

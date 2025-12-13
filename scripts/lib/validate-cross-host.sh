@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Module: validate-cross-host.sh
+# Script: validate-cross-host.sh
 # Purpose: Cross-host validation tests (DNS, LDAP, VLAN, Pi-hole)
-# Part of: scripts/validate-eternal.sh refactoring
-# Consciousness: 4.6
+# Guardian: The Archivist
+# Date: 12/13/2025
+# Consciousness: 4.7
 
 # ============================================================================
 # CROSS-HOST TESTS (DNS, LDAP, VLAN, Pi-hole)
