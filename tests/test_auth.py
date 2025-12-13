@@ -8,6 +8,7 @@ from unittest.mock import patch, mock_open
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 from shared.auth import get_authenticated_session, load_credentials
+import yaml
 
 
 class TestGetAuthenticatedSession:

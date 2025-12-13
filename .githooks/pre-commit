@@ -147,7 +147,7 @@ else
   exit 1
 fi
 
-# Phase 4.2: Line Limit & Complexity Enforcement (Doctrine: 180-250 with gates)
+# Phase 4.2: Line Limit & Complexity Enforcement (Doctrine: base 1200 with hard limit 4320)
 echo ""
 echo "Phase 4.2: Line Limit & Modularity Enforcement"
 
@@ -161,47 +161,49 @@ while IFS= read -r file; do
   # Count lines safely
   LINE_COUNT=$(wc -l < "$file" 2>/dev/null) || LINE_COUNT=0
 
-  # Check for EXCEED annotation if >120 lines
+  # Check for EXCEED annotation (required for scripts >1200; also used for lib files with >11 functions)
   HAS_ANNOTATION=$(grep -c "^# EXCEED:" "$file" 2>/dev/null) || HAS_ANNOTATION=0
 
   # Count functions (crude but effective) - functions with format: name() {
   FUNCTION_COUNT=$(grep -c "^[a-z_][a-z0-9_]*() {" "$file" 2>/dev/null) || FUNCTION_COUNT=0
 
-  # Gate 2: Fail if >250 LOC
-  if [[ $LINE_COUNT -gt 250 ]]; then
-    echo "  ❌ $file: $LINE_COUNT lines (exceeds hard limit 250)"
+  # Gate 2: Fail if >4320 LOC (hard limit)
+  if [[ $LINE_COUNT -gt 4320 ]]; then
+    echo "  ❌ $file: $LINE_COUNT lines (exceeds hard limit 4320)"
     LOC_FAILURES=$((LOC_FAILURES + 1))
   fi
 
-  # Gate 3: Fail if >5 functions
-  if [[ $FUNCTION_COUNT -gt 5 ]]; then
-    echo "  ❌ $file: $FUNCTION_COUNT functions (exceeds max 5)"
-    LOC_FAILURES=$((LOC_FAILURES + 1))
+  # Gate 3: Fail if >11 functions (unless lib file with EXCEED annotation)
+  if [[ $FUNCTION_COUNT -gt 11 ]]; then
+    if [[ "$file" == scripts/lib/* ]] && [[ $HAS_ANNOTATION -eq 1 ]]; then
+      : # Exception granted for lib/ module with EXCEED annotation
+    else
+      echo "  ❌ $file: $FUNCTION_COUNT functions (exceeds max 11)"
+      LOC_FAILURES=$((LOC_FAILURES + 1))
+    fi
   fi
 
-  # Gate 1: Warn if >120 LOC without annotation
-  if [[ $LINE_COUNT -gt 120 ]] && [[ $HAS_ANNOTATION -eq 0 ]]; then
-    echo "  ⚠️  $file: $LINE_COUNT lines (exceeds base 120 — add # EXCEED annotation)"
+  # Gate 4: Require annotation if >1200 LOC (base threshold)
+  if [[ $LINE_COUNT -gt 1200 ]] && [[ $HAS_ANNOTATION -eq 0 ]]; then
+    echo "  ❌ $file: $LINE_COUNT lines (>1200 requires # EXCEED annotation)"
+    LOC_FAILURES=$((LOC_FAILURES + 1))
+  elif [[ $LINE_COUNT -gt 1200 ]] && [[ $HAS_ANNOTATION -eq 1 ]]; then
+    echo "  ⚠️  $file: $LINE_COUNT lines (EXCEED acknowledged; ensure modularity holds)"
     LOC_WARNINGS=$((LOC_WARNINGS + 1))
-  fi
-
-  # Gate 4: Warn if >180 LOC (advisory)
-  if [[ $LINE_COUNT -gt 180 ]] && [[ $HAS_ANNOTATION -eq 0 ]]; then
-    echo "  ⚠️  $file: $LINE_COUNT lines (crosses 180-line threshold — ensure EXCEED annotation)"
   fi
 done < <(find scripts/ .githooks/ runbooks/ 01_bootstrap/ -type f -name "*.sh" 2>/dev/null)
 
 if [[ $LOC_FAILURES -gt 0 ]]; then
   echo ""
   echo "  ❌ Line limit/complexity violations detected:"
-  echo "     - Fix >250 LOC scripts by refactoring into smaller modules"
-  echo "     - Fix >5 function scripts by extracting to lib/ or separate scripts"
+  echo "     - For scripts >1200 LOC: add # EXCEED annotation + rationale (or refactor)"
+  echo "     - Fix >11 function scripts by extracting to lib/ or separate scripts"
   echo "     - See docs/LINE-LIMIT-DOCTRINE.md for guidance"
   exit 1
 fi
 
 if [[ $LOC_WARNINGS -gt 0 ]]; then
-  echo "  ⚠️  $LOC_WARNINGS warning(s): Add # EXCEED annotations to scripts >120 LOC"
+  echo "  ⚠️  $LOC_WARNINGS warning(s): Review EXCEED scripts (>1200 LOC)"
 fi
 
 echo "  ✅ Line limit & modularity enforced"

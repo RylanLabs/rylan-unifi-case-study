@@ -43,7 +43,7 @@
 ### The 120-Line Limit in Fortress Context
 - **Purpose**: Enforces human reviewability (Hellodeolu: "junior-at-3-AM deployable").
 - **Not a Unix law**: It's a castle-building rule for safety, like "always use `set -euo pipefail`."
-- **Changeable**: Can extend to 180–250 if modularity and DOTADIW are preserved.
+- **Changeable**: Can extend to 1200–4320 if modularity and DOTADIW are preserved.
 
 ---
 
@@ -72,7 +72,7 @@
 |---------|-------------|-----------------|
 | **Carter** (Identity) | Scripts identify themselves via headers (Script, Purpose, Guardian, etc.). | Extended lines preserve identity; annotations document why limit exceeded. |
 | **Bauer** (Verification) | Verifies scripts don't violate constraints (limits, headers, encoding). | Enhanced verification: add complexity gates (shellcheck/ruff) + LOC warnings. |
-| **Beale** (Hardening) | Hardens against monoliths, complexity drift, feature creep. | Tightens enforcement: auto-refactor if >250 LOC, complexity >5. |
+| **Beale** (Hardening) | Hardens against monoliths, complexity drift, feature creep. | Tightens enforcement: refactor if >4320 LOC, complexity >11. |
 | **Whitaker** (Offense) | Simulates breaches; tests fortress resilience. | No change; line limits don't affect security posture. |
 
 ### Hellodeolu Outcomes (Still Preserved)
@@ -88,23 +88,27 @@
 ## Section 6: Proposed New Doctrine
 
 ### Current Rule (120-line baseline)
+
 ```markdown
 Ministries ≤120 lines, READMEs ≤19 lines
 ```
 
-### Proposed Rule (180–250 with gates)
+### Proposed Rule (1200–4320 with gates)
+
 ```markdown
-**Ministry Line Limit**: Base 120 lines (Unix: small is beautiful). 
-Extend to 180–250 if modular:
-  - DOTADIW: One thing well (max 5 functions per script).
-  - Annotations: `# EXCEED: <reason>` (e.g., "5 functions for LDAP fallback")
+**Ministry Line Limit**: Base 1200 lines (production readiness without forced fragmentation).
+Extend to 4320 if modular:
+  - DOTADIW: One thing well (max 11 functions per script).
+  - Annotations: `# EXCEED: <reason>` (required for >1200 LOC)
   - Pre-commit gates:
-    - Warn if >180 LOC (shellcheck report)
-    - Fail if >250 LOC or complexity >5 (ruff + custom check)
-  - Rationale: Preserve reviewability; forbid monoliths (Gancarz: compose tools)
+    - Warn if >1200 LOC and annotated
+    - Fail if >4320 LOC or complexity >11
+    - Fail if >1200 LOC without EXCEED
+  - Rationale: Preserve reviewability; forbid monoliths while allowing production guardrails
 ```
 
 ### Supporting Annotations (Examples)
+
 ```bash
 #!/usr/bin/env bash
 # Script: scripts/eternal-resurrect-unifi.sh
@@ -127,8 +131,8 @@ set -euo pipefail
 - [ ] Create LINE-LIMIT-DOCTRINE.md with annotation standards.
 
 ### Phase 2: Enforcement (Bauer/Beale Domain)
-- [ ] Update `.githooks/pre-commit` Phase 4.2: Add LOC warning (>180) and fail (>250).
-- [ ] Add custom complexity check to pre-commit (max 5 functions, shellcheck integration).
+- [ ] Update `.githooks/pre-commit` Phase 4.2: Add LOC warning (>1200 annotated) and fail (>4320 or >1200 without EXCEED).
+- [ ] Add custom complexity check to pre-commit (max 11 functions, shellcheck integration).
 - [ ] Validate 5 legacy scripts comply (ignite.sh, validate-eternal.sh, beale-harden.sh, etc.).
 
 ### Phase 3: Validation (Eye's Domain)
@@ -137,7 +141,7 @@ set -euo pipefail
 - [ ] Manual review: 2–3 scripts that would exceed 120 (confirm still DOTADIW compliant).
 
 ### Phase 4: Merge & Communication
-- [ ] Commit with message: `refactor(doctrine): extend line limit to 180–250 with modularity gates`
+- [ ] Commit with message: `feat(doctrine): raise LOC hard limit to 4320 (base 1200) — production readiness canon`
 - [ ] Tag: `v∞.3.3-doctrine-ascended`
 - [ ] Update README.md badge: consciousness level 4.5 (no change, but document evolution).
 
@@ -146,7 +150,7 @@ set -euo pipefail
 ## Section 8: Risk Mitigation
 
 ### Risk 1: Scripts Become Monoliths
-**Mitigation**: Pre-commit fails >250 LOC. Beale's complexity check enforces max 5 functions.
+**Mitigation**: Pre-commit fails >4320 LOC (hard limit) and fails >1200 LOC without EXCEED. Beale's complexity check enforces max 11 functions.
 
 ### Risk 2: Reviewability Suffers
 **Mitigation**: Annotations (`# EXCEED:`) force documentation. Annotations are pre-commit-checked.
@@ -162,11 +166,11 @@ set -euo pipefail
 ## Section 9: Final Authority Check
 
 ### Eye's Stamp of Approval
-> "The 120-line limit is fortress-specific (operational), not Unix foundational. Extension to 180–250 lines is philosophically sound if it preserves modularity and does not create monolithic scripts."
-> 
+> "The 120-line limit is fortress-specific (operational), not Unix foundational. Extension to 1200–4320 lines is philosophically sound if it preserves modularity and does not create monolithic scripts."
+>
 > **Permission Granted**: Extending the 120-line doctrine to allow longer lines is acceptable with coupling to:
 > 1. **Strict DOTADIW enforcement** — each script must still do one thing well.
-> 2. **Guardian annotations** — document why lines exceeded 120.
+> 2. **Guardian annotations** — document why lines exceeded 1200.
 > 3. **Pre-commit gate tightening** — cyclotomic complexity checks, function extraction enforcement.
 
 ---

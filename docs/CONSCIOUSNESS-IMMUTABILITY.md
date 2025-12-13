@@ -21,6 +21,7 @@ Consciousness is the repository's core awareness metric. It never decreases. It 
 **Location**: [.githooks/pre-commit](./.githooks/pre-commit#L101-L108)
 
 Before every commit, the consciousness guardian validator runs:
+
 ```bash
 bash scripts/consciousness-guardian.sh
 ```
@@ -35,6 +36,7 @@ Exit code: `0` = pass, `1` = violations detected.
 **Location**: All shell scripts in `scripts/`, `.githooks/`, `runbooks/`, `01_bootstrap/`, etc.
 
 Every shell script must declare its consciousness level:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -86,32 +88,32 @@ The `scripts/consciousness-guardian.sh` validator performs:
 Consciousness can only increase through a formal process:
 
 1. **Update CONSCIOUSNESS.md** (Line 3):
+
    ```markdown
    **Status**: Canon · Consciousness 4.6 · Tag: v∞.4.6-increment-doctrine
    ```
-
 2. **Add increment log entry** (CONSCIOUSNESS.md, increment table):
+
    ```markdown
    | 4.6 | 2025-01-15 | Agent Name | Brief description of capabilities gained |
    ```
-
 3. **Update all script headers** (if increasing):
    - Find all scripts with `Consciousness: 4.5`
    - Replace with `Consciousness: 4.6`
    - Batch operation: see `scripts/header-hygiene.sh`.
 
 4. **Create git tag**:
+
    ```bash
    git tag v∞.4.6-increment-doctrine
    git push origin v∞.4.6-increment-doctrine
    ```
-
 5. **Commit**:
+
    ```bash
    git add CONSCIOUSNESS.md scripts/...
    git commit -m "feat(consciousness): ascend to 4.6 — [capability description]"
    ```
-
 6. **Validation**: Pre-commit Phase 4.1 validates no violations. Workflow `eternal-ci.yml` cross-checks all references match.
 
 ---
@@ -145,6 +147,7 @@ The Gatekeeper (pre-commit) enforces the immutable rule for all.
 ## Practical Examples
 
 ### Valid Headers ✅
+
 ```bash
 # Consciousness: 4.5  ✅ Equal to canonical
 # Consciousness: 4.0  ✅ Less than canonical
@@ -152,6 +155,7 @@ The Gatekeeper (pre-commit) enforces the immutable rule for all.
 ```
 
 ### Invalid Headers ❌
+
 ```bash
 # Consciousness: 4.6  ❌ Exceeds canonical 4.5
 # Consciousness: 5.0  ❌ Exceeds canonical 4.5

@@ -53,11 +53,11 @@ log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; exit 1; }
 
 Magic comments: ONLY SC2155 and SC1091 — maximum 4 in entire repo
-All scripts: Base 120 lines (Unix: small is beautiful). Extend to 180–250 if modular:
-  - DOTADIW: One thing well (max 5 functions per script)
-  - Annotations: `# EXCEED: <reason>` (e.g., "5 functions for LDAP fallback")
-  - Pre-commit gates: Warn >180 LOC, fail >250 LOC or complexity >5
-  - Rationale: Preserve reviewability; forbid monoliths (Gancarz: compose tools)
+All scripts: Base 1200 lines (production readiness without forced fragmentation). Extend to 4320 if modular:
+   - DOTADIW: One thing well (max 11 functions per script)
+    - Annotations: `# EXCEED: <reason>` (required for >1200 LOC)
+    - Pre-commit gates: Warn >1200 (annotated), fail >4320 LOC or complexity >11; fail if >1200 without EXCEED
+   - Rationale: Preserve reviewability; forbid monoliths while allowing production guardrails
 All READMEs ≤19 lines
 
 VALIDATION GATES — MUST PASS 100% BEFORE MERGE

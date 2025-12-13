@@ -25,6 +25,7 @@ Operational validation scripts for the eternal fortress, implementing the Bauer 
 - Cross-VLAN blocks (IoT → Servers SMB denied)
 
 **Usage**:
+
 ```bash
 chmod +x validate-isolation.sh
 ./validate-isolation.sh

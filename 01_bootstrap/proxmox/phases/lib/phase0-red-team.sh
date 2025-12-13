@@ -7,7 +7,7 @@
 # RED-TEAM MODE: FULL OFFENSIVE AUDIT
 run_red_team_audit() {
   local skip_unifi="$1" cloudkey_ip="$2" recon_file
-  
+
   phase_start "0" "Whitaker/Newman Red-Team - Full Offensive Audit"
 
   # 1. Flatnet recon

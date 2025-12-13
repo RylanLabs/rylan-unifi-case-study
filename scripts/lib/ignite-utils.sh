@@ -26,13 +26,13 @@ exit_handler() {
   local exit_code=$?
   local end_time=$(date +%s)
   local duration=$((end_time - START_TIME))
-  
+
   if [[ $exit_code -eq 0 ]]; then
     log success "Trinity orchestration COMPLETE (${duration}s)"
   else
     log error "Trinity orchestration FAILED with exit code $exit_code"
   fi
-  
+
   exit "$exit_code"
 }
 

@@ -10,7 +10,7 @@
 # ─────────────────────────────────────────────────────
 run_firewall_phase() {
   local MAX_FIREWALL_RULES=$1 DRY_RUN=$2 AUTO_FIX=$3
-  
+
   log "Phase 1: Firewall Rule Count"
   if command -v nft &>/dev/null && [[ "$DRY_RUN" == false ]]; then
     rule_count=$(sudo nft list ruleset 2>/dev/null | grep -ciE '\b(accept|drop|reject)\b' || echo 0)
@@ -73,7 +73,7 @@ run_firewall_phase() {
 # ─────────────────────────────────────────────────────
 run_vlan_phase() {
   local VLAN_QUARANTINE=$1 VLAN_GATEWAY=$2 DRY_RUN=$3 hosts_up
-  
+
   log ""
   log "Phase 2: VLAN 99 Isolation ($VLAN_QUARANTINE)"
   if [[ "$DRY_RUN" == false ]] && timeout 3 ping -c 1 -W 1 "$VLAN_GATEWAY" &>/dev/null; then
@@ -101,7 +101,7 @@ run_vlan_phase() {
 # ─────────────────────────────────────────────────────
 run_ssh_phase() {
   local DRY_RUN=$1
-  
+
   log ""
   log "Phase 3: SSH Hardening"
   if [[ "$DRY_RUN" == false ]] && command -v sshd &>/dev/null; then

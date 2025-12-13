@@ -43,7 +43,7 @@ verify_resurrection() {
     sleep 2
     elapsed=$((elapsed + 2))
   done
-  
+
   log "Validating resurrection..."
   local response
   response="$(curl -k -s -L https://localhost:8443 2>/dev/null || true)"

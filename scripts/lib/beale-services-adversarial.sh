@@ -10,7 +10,7 @@
 # ─────────────────────────────────────────────────────
 run_services_phase() {
   local DRY_RUN=$1 running threshold context
-  
+
   log ""
   log "Phase 4: Service Minimization"
   if [[ "$DRY_RUN" == false ]] && command -v systemctl &>/dev/null; then
@@ -41,10 +41,10 @@ run_services_phase() {
 # ─────────────────────────────────────────────────────
 run_adversarial_phase() {
   local DRY_RUN=$1 code
-  
+
   log ""
   log "Phase 5: Adversarial Validation"
-  
+
   # SQLi test
   if [[ "$DRY_RUN" == false ]] && nc -z localhost 8000 2>/dev/null; then
     code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8000/api?id=1' OR '1'='1" || echo 000)
@@ -54,7 +54,7 @@ run_adversarial_phase() {
   else
     log "⚠️ No local app on :8000 → skipping SQLi"
   fi
-  
+
   # IDS trigger test
   if [[ "$DRY_RUN" == false ]] && (systemctl is-active --quiet snort || systemctl is-active --quiet suricata); then
     sudo journalctl --rotate &>/dev/null || true
@@ -68,7 +68,7 @@ run_adversarial_phase() {
   else
     log "⚠️ No IDS running → skipping"
   fi
-  
+
   audit "Phase 5" "PASS" "adversarial_checks_completed"
 }
 

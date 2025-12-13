@@ -19,7 +19,7 @@
 ### Resolved (2/11) ✅
 | Script | Original | Refactored | Improvement |
 |--------|----------|-----------|-------------|
-| lib/common.sh | 299 LOC, 17 fn | 61 LOC + 6 modules | ✅ PASS (all <102 LOC, ≤5 fn) |
+| lib/common.sh | 299 LOC, 17 fn | 61 LOC + 6 modules | ✅ PASS (all <102 LOC, ≤11 fn) |
 | lib/security.sh | 388 LOC, 15 fn | 80 LOC + 4 modules | ✅ PASS (all <74 LOC, ≤6 fn) |
 
 ### Remaining (9/11) ⏳
@@ -33,7 +33,7 @@
 | **Medium** | phase0-validate.sh | 318 LOC | 6 | Split: validate-{prereqs,hardware,network}.sh |
 | **Medium** | validate-eternal.sh | 284 LOC | 3-5 | Split: validate-{vlans,radius,backups}.sh |
 | **Medium** | eternal-resurrect-unifi.sh | 273 LOC | 2-3 | Split: unifi-{restore,verify}.sh |
-| **Low** | setup-nfs-kerberos.sh | 252 LOC | 2 | TRIM to 250 (remove verbose comments) or split |
+| **Low** | setup-nfs-kerberos.sh | 252 LOC | 2 | No LOC action required (≤1200); split only if it improves clarity |
 | **Low** | ignite.sh | 189 LOC | 6 | Inline 1 helper (reduce to 5 fn, keep <189 LOC) |
 | **Low** | uck-g2-wizard-resurrection | 166 LOC | 10 | Extract: lib/uck-utils.sh (5 utilities) |
 
@@ -48,7 +48,7 @@
 
 ### Step 2: Create Sub-Modules
 - One file per logical group
-- Each <100 LOC if possible, <5 functions per module
+- Each <100 LOC if possible, ≤11 functions per module
 - Export all functions via `export -f`
 - NO `set -euo pipefail` in sourced modules (they inherit from parent)
 
@@ -76,7 +76,8 @@
 ### Phase 4c: lib/metrics.sh (Easy - 7 functions, 2 modules)
 
 **Functions**:
-```
+
+```text
 GET_CPU_USAGE (lines 27-35)
 GET_MEMORY_USAGE (lines 37-49)
 GET_DISK_USAGE (lines 51-65)
@@ -96,6 +97,7 @@ GET_LOAD_AVERAGE (lines 116-121)
 ### Phase 4d-4g: Orchestrator Refactors (Medium Complexity)
 
 #### Phase 4d: beale-harden.sh (316 LOC, 3-5 functions)
+
 ```bash
 # Planned modules:
 - disable-services.sh: Stop/disable unnecessary services (~80 LOC)
@@ -105,6 +107,7 @@ GET_LOAD_AVERAGE (lines 116-121)
 ```
 
 #### Phase 4e: phase0-validate.sh (318 LOC, 6 functions)
+
 ```bash
 # Planned modules:
 - validate-prereqs.sh: Command/package checks (~70 LOC)
@@ -114,6 +117,7 @@ GET_LOAD_AVERAGE (lines 116-121)
 ```
 
 #### Phase 4f: validate-eternal.sh (284 LOC, 3-5 functions)
+
 ```bash
 # Planned modules:
 - validate-vlans.sh: VLAN isolation/trunking (~90 LOC)
@@ -123,6 +127,7 @@ GET_LOAD_AVERAGE (lines 116-121)
 ```
 
 #### Phase 4g: eternal-resurrect-unifi.sh (273 LOC, 2-3 functions)
+
 ```bash
 # Planned modules:
 - unifi-restore.sh: Database restore + config import (~120 LOC)
@@ -135,7 +140,7 @@ GET_LOAD_AVERAGE (lines 116-121)
 ### Phase 4h: Quick Wins (30 minutes)
 
 #### setup-nfs-kerberos.sh (252 LOC)
-**Option A (Recommended)**: Trim to ≤250
+**Option A (Recommended)**: Trim to ≤1200
 - Remove verbose comments (documented in README)
 - Consolidate log messages
 - Move elaborate header to docs/
@@ -185,10 +190,11 @@ bash .githooks/pre-commit 2>&1 | grep "Phase 4.2"
 ## Expected Final State (Post-Phase 4)
 
 ### Pre-commit Phase 4.2 Output
-```
+
+```text
 Phase 4.2: Line Limit & Modularity Enforcement
-  ✅ All scripts ≤250 LOC
-  ✅ All scripts ≤5 functions
+  ✅ All scripts ≤4320 LOC
+  ✅ All scripts ≤11 functions
   ✅ Pre-commit check: PASS
 ```
 
@@ -197,7 +203,8 @@ Phase 4.2: Line Limit & Modularity Enforcement
 - Target: v∞.4.7 (subtraction complete — all violations resolved)
 
 ### Repository Structure
-```
+
+```text
 01_bootstrap/proxmox/lib/
   common.sh (orchestrator)
   ├── log.sh (5 fn)

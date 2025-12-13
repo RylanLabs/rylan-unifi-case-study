@@ -11,7 +11,7 @@
 
 run_cross_host_tests() {
   local POLICY_FILE="$1"
-  
+
   echo ""
   echo -e "${BLUE}=== Cross-Host Tests ===${NC}"
 

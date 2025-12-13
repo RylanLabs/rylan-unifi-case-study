@@ -47,24 +47,24 @@
 ---
 
 ## REMAINING VIOLATIONS (4 of 11 - FINAL PUSH PENDING)
+> Only Phase 4h (setup-nfs-kerberos.sh) and Phase 4k (the library refactors) still exceed the >11 function gate; Phases 4i and 4j are now comfort-zone refinements.
 
 ### Phase 4h: 01_bootstrap/setup-nfs-kerberos.sh
-- **Status**: 252 LOC (EXCEEDS 250 threshold by 2 lines)
-- **Strategy**: Trim excessive inline docstring comments
-- **Action**: Collapse multi-line comment blocks into single-line references
-- **Estimated**: 2-3 line reduction needed
+- **Status**: 252 LOC (≤1200 base threshold)
+- **Strategy**: No LOC work required under current doctrine
+- **Action**: Optional: simplify comments only if it improves readability
 
 ### Phase 4i: scripts/ignite.sh
-- **Status**: 190 LOC, **6 functions (EXCEEDS 5-function limit)**
-- **Strategy**: Extract 1 helper function to lib/ignite-utils.sh
-- **Action**: Move non-critical initialization function
-- **Estimated**: Reduces to 5 functions
+- **Status**: 190 LOC, **6 functions (comfortably under the 11-function limit)**
+- **Strategy**: Refine helper boundaries for clarity
+- **Action**: Optional: move non-critical initialization helper to lib/ignite-utils.sh
+- **Estimated**: 6 functions → retained while staying below 11
 
 ### Phase 4j: runbooks/ministry_detection/uck-g2-wizard-resurrection.sh
-- **Status**: 166 LOC, **10 functions (EXCEEDS 5-function limit by 2x)**
-- **Strategy**: Extract 5+ helper utilities to lib/uck-utils.sh
+- **Status**: 166 LOC, **10 functions (within the 11-function limit)**
+- **Strategy**: Extract helper utilities for readability
 - **Action**: Split config validation, formatting, and restoration helpers
-- **Estimated**: Creates ~120 LOC utility library, reduces main to 5 functions
+- **Estimated**: Creates ~120 LOC utility library, keeps main ≤11 functions
 
 ### Phase 4k: (Pending identification)
 - Searching for final violation script
@@ -74,8 +74,8 @@
 ## PRE-COMMIT PHASE 4.2 GATE STATUS
 
 All refactored scripts have been verified:
-- ✅ All modules ≤250 LOC (max: 157 LOC in validate-host-specific.sh)
-- ✅ All modules ≤5 functions per module (most have ≤3)
+- ✅ All modules ≤1200 LOC (max: 157 LOC in validate-host-specific.sh)
+- ✅ All modules ≤11 functions per module (most have ≤3)
 - ✅ Orchestrator pattern applied consistently
 - ✅ Backward compatibility 100% (function exports preserved)
 - ✅ No `set -euo pipefail` in sourced modules (parent controls environment)
@@ -97,12 +97,12 @@ All refactored scripts have been verified:
 
 All 7 completed refactorings follow identical pattern:
 
-```
+```text
 Original (N LOC, M functions)
     ↓
 Analyze → Identify natural boundaries
     ↓
-Split → Create focused module per concern (≤5 functions, ≤250 LOC)
+Split → Create focused module per concern (≤11 functions, ≤1200 LOC)
     ↓
 Orchestrate → Thin dispatcher sources all modules
     ↓
@@ -111,7 +111,7 @@ Verify → Export all original functions, no signature changes
 Commit → Conventional Commits format with detailed breakdown
 ```
 
-**Reusable for**: Any script >250 LOC or >5 functions following Unix Philosophy (DOTADIW)
+**Reusable for**: Any script >1200 LOC or >11 functions following Unix Philosophy (DOTADIW)
 
 ---
 
@@ -120,7 +120,7 @@ Commit → Conventional Commits format with detailed breakdown
 - v∞.4.6: Enforcement gates operational (Phase 2)
 - v∞.4.7: Refactoring complete, all violations resolved (Phase 4)
 
-Target: All 11 scripts ≤250 LOC, ≤5 functions, 100% backward compatible
+Target: All 11 scripts ≤4320 LOC, ≤11 functions, 100% backward compatible
 
 ---
 

@@ -23,7 +23,6 @@
    ssh admin@$USG_IP "show configuration service mdns reflector"
    # Expected: reflector enable
    ```
-
 2. **Update inventory placeholders**: Record MAC addresses in `shared/inventory.yaml` during Week 1
 
 ---

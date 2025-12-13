@@ -9,26 +9,22 @@ Quick reference guide for executing proxmox-ignite.sh deployment.
   ```bash
   ssh-keygen -t ed25519 -C "proxmox-ignite" -f ~/.ssh/id_ed25519
   ```
-
 - [ ] Verify SSH key exists:
 
   ```bash
   cat ~/.ssh/id_ed25519.pub  # Should output: ssh-ed25519 AAAA...
   ```
-
 - [ ] Clone repository (if not already present):
 
   ```bash
   git clone https://github.com/T-Rylander/a-plus-up-unifi-case-study.git
   cd a-plus-up-unifi-case-study
   ```
-
 - [ ] Verify script exists:
 
   ```bash
   ls -la 01_bootstrap/proxmox/proxmox-ignite.sh
   ```
-
 ## Hardware Preparation
 
 - [ ] Verify hardware meets requirements:
@@ -104,7 +100,6 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   ls -la /tmp/proxmox-ignite.sh
   chmod +x /tmp/proxmox-ignite.sh
   ```
-
 - [ ] Run ignition script:
 
   ```bash
@@ -114,7 +109,6 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
     --gateway 10.0.10.1 \
     --ssh-key ~/.ssh/authorized_keys
   ```
-
 - [ ] Monitor execution:
   - Watch for phase progress indicators (Phase 0–6)
   - Typical execution time: 11–14 minutes
@@ -127,7 +121,6 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   █                    ✅ PROXMOX IGNITE: SUCCESS                 █
   ████████████████████████████████████████████████████████████████
   ```
-
 ## Post-Deployment Validation
 
 - [ ] SSH into host with key-only auth:
@@ -136,33 +129,28 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   ssh -i ~/.ssh/id_ed25519 root@rylan-dc
   # Should succeed with key, fail without
   ```
-
 - [ ] Verify hostname:
 
   ```bash
   hostname
   # Should output: rylan-dc
   ```
-
 - [ ] Verify static IP:
 
   ```bash
   ip addr show
   # Should show: inet 10.0.10.10/26
   ```
-
 - [ ] Verify gateway reachability:
 
   ```bash
   ping 10.0.10.1
   ```
-
 - [ ] Verify DNS resolution:
 
   ```bash
   nslookup google.com
   ```
-
 - [ ] Access Proxmox Web UI:
 
   ```text
@@ -170,7 +158,6 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   Username: root@pam
   Password: (temporary, from Proxmox installer)
   ```
-
 - [ ] Run fortress validation:
 
   ```bash
@@ -178,14 +165,12 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   ./validate-eternal.sh
   # Should show: 100% PASS
   ```
-
 - [ ] Review ignition log:
 
   ```bash
   tail -100 /var/log/proxmox-ignite.log
   # Should end with: Proxmox Ignite completed successfully
   ```
-
 ## Security Hardening Verification
 
 - [ ] Verify SSH hardening:
@@ -197,28 +182,24 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   sudo grep "PermitRootLogin" /etc/ssh/sshd_config
   # Should show: PermitRootLogin prohibit-password
   ```
-
 - [ ] Verify SSH key installed:
 
   ```bash
   cat ~/.ssh/authorized_keys
   # Should show your SSH public key
   ```
-
 - [ ] Verify only required ports open:
 
   ```bash
   sudo nmap localhost -p 1-10000 | grep open
   # Should only show: 22/tcp open (SSH), 8006/tcp open (Proxmox)
   ```
-
 - [ ] Attempt password login (should fail):
 
   ```bash
   ssh -o PasswordAuthentication=yes root@rylan-dc
   # Should output: Permission denied (publickey)
   ```
-
 ## Network Verification
 
 - [ ] Ping gateway:
@@ -227,28 +208,24 @@ scp 01_bootstrap/proxmox/proxmox-ignite.sh root@<proxmox-ip>:/tmp/
   ping 10.0.10.1
   # Should respond
   ```
-
 - [ ] Ping external DNS:
 
   ```bash
   ping 1.1.1.1
   # Should respond
   ```
-
 - [ ] Test DNS resolution:
 
   ```bash
   nslookup google.com
   # Should return: 142.251.x.x (or similar IP)
   ```
-
 - [ ] Verify routing table:
 
   ```bash
   route -n
   # Default route should point to 10.0.10.1
   ```
-
 ## Troubleshooting Checklist
 
 If deployment fails, verify in order:
@@ -258,39 +235,33 @@ If deployment fails, verify in order:
   ```bash
   ls -la /tmp/proxmox-ignite.sh | grep -E "^-rwx"
   ```
-
 - [ ] SSH key is valid:
 
   ```bash
   ssh-keygen -lf ~/.ssh/authorized_keys
   # Should show key fingerprint
   ```
-
 - [ ] Network is reachable:
 
   ```bash
   ping 10.0.10.1
   ```
-
 - [ ] Root access is available:
 
   ```bash
   whoami
   # Should output: root
   ```
-
 - [ ] Proxmox is installed:
 
   ```bash
   grep Proxmox /etc/os-release
   ```
-
 - [ ] Check log file for errors:
 
   ```bash
   sudo tail -200 /var/log/proxmox-ignite.log | grep -E "ERROR|Failed"
   ```
-
 - [ ] Run validation-only mode (non-destructive):
 
   ```bash
@@ -301,7 +272,6 @@ If deployment fails, verify in order:
     --ssh-key ~/.ssh/authorized_keys \
     --validate-only
   ```
-
 ## Quick Reference
 
 ### Typical deployment timeline:

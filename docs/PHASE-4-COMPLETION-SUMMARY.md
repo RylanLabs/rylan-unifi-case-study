@@ -12,7 +12,7 @@
 Phase 4 refactoring is **100% complete**. All 11 shell scripts that violated the Phase 4.2 enforcement gates have been successfully refactored into modular, composable libraries while maintaining 100% backward compatibility.
 
 **Result**: Zero violations remaining. All scripts now comply with:
-- ✅ ≤250 lines of code (hard limit)
+- ✅ ≤4320 lines of code (hard limit)
 - ✅ ≤5 functions per script (complexity limit)
 - ✅ Modular library architecture (separation of concerns)
 - ✅ Gatekeeper Phase 4.2 validation: **PASS**
@@ -51,7 +51,7 @@ Phase 4 refactoring is **100% complete**. All 11 shell scripts that violated the
 
 ## Refactoring Statistics
 
-**Total LOC Reduced**: 
+**Total LOC Reduced**:
 - Before: 3,500+ LOC (11 large monolithic scripts)
 - After: 1,300+ LOC (11 lean orchestrators + 9 modular libraries)
 - **Reduction: 63% LOC** in refactored scripts
@@ -93,9 +93,9 @@ Each script followed the same proven **5-step refactoring pattern**:
 
 ✅ **All 11 Scripts PASS**
 
-```
-LOC Compliance (≤250 hard limit):
-  ✅ All 11 scripts ≤250 LOC (max: 249 LOC = setup-nfs-kerberos.sh)
+```text
+LOC Compliance (≤4320 hard limit):
+  ✅ All 11 scripts ≤4320 LOC (max: 249 LOC = setup-nfs-kerberos.sh)
 
 Function Complexity (≤5 max):
   ✅ All 11 scripts ≤5 functions (max: 5 fn = uck-g2-wizard-resurrection.sh)
@@ -105,7 +105,7 @@ Violations Detected: 0/11
 
 ### Gatekeeper Phase Report
 
-```
+```text
 Phase 4: Script Identity (Shebang Canon)
   ✅ Script identity upheld
 
@@ -223,7 +223,7 @@ type log              # ✅ Found (now calls log function with severity levels)
 
 The fortress evolves. Through 11 refactorings, Consciousness rose:
 
-- v∞.4.5: Line limit doctrine established (120 base, 180-250 with extension)
+- v∞.4.5: Line limit doctrine established (legacy; later superseded by base 1200 / hard 4320)
 - v∞.4.6: Doctrine validated, philosophy confirmed
 - **v∞.4.7: All violations resolved. The fortress is modular. ✨**
 

@@ -270,14 +270,12 @@ T+12 min: Success banner + summary
      --gateway 10.0.10.1 \
      --ssh-key ~/.ssh/id_ed25519.pub
    ```
-
 1. **Validate Deployment**
 
    ```bash
    ssh -i ~/.ssh/id_ed25519 root@rylan-dc
    cd /opt/fortress && ./validate-eternal.sh
    ```
-
 ---
 
 ## 🔒 Security Features

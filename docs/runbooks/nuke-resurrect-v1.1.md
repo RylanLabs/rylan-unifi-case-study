@@ -201,21 +201,18 @@ bash 03_validation_ops/validate-isolation.sh  # VLAN segmentation
    Remove-Computer -UnjoinDomaincredential Administrator -Force -Restart
    Add-Computer -DomainName rylan.internal -Credential Administrator -Restart
    ```
-
 1. **Verify backup schedule**:
 
    ```bash
    crontab -l | grep orchestrator
    # Expected: 0 2 * * * /opt/rylan-unifi-case-study/03_validation_ops/orchestrator.sh
    ```
-
 1. **Run full test suite**:
 
    ```bash
    pytest tests/ -v --cov=rylan_ai_helpdesk --cov-report=term
    # Expected: 93% coverage, all tests pass
    ```
-
 ---
 
 ## Rollback Procedure (If Resurrection Fails)

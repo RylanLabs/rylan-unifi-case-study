@@ -9,14 +9,22 @@ from pathlib import Path
 def fix_fences(content: str) -> str:
     """Add blank lines before/after fenced code blocks, removing excess blanks."""
     lines = content.split("\n")
-    result = []
+    result: list[str] = []
     i = 0
 
     while i < len(lines):
         line = lines[i]
 
         # Check if current line is fence start (``` or ```lang)
-        if re.match(r"^```\w*$", line):
+        m = re.match(r"^(\s*)```(\w*)\s*$", line)
+        if m:
+            leading = m.group(1)
+            lang = m.group(2)
+            if lang == "":
+                # normalize language-less fences to text
+                line = f"{leading}```text"
+            else:
+                line = f"{leading}```{lang}"
             # Ensure exactly 1 blank before fence (if not at start)
             if result and result[-1].strip() != "":
                 result.append("")

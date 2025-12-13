@@ -21,7 +21,6 @@
 
 ## Guardian Selection Flow
 
-
 ```mermaid
 
 flowchart TD

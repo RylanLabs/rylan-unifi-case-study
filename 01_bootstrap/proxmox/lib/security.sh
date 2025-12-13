@@ -30,9 +30,13 @@ if [[ "$SECURITY_LIB_DIR" != /* ]]; then
 fi
 
 # Source all sub-modules (order: SSH → ports → network → firewall)
+# shellcheck disable=SC1091
 [[ -f "$SECURITY_LIB_DIR/ssh.sh" ]] && source "$SECURITY_LIB_DIR/ssh.sh"
+# shellcheck disable=SC1091
 [[ -f "$SECURITY_LIB_DIR/ports.sh" ]] && source "$SECURITY_LIB_DIR/ports.sh"
+# shellcheck disable=SC1091
 [[ -f "$SECURITY_LIB_DIR/network-tests.sh" ]] && source "$SECURITY_LIB_DIR/network-tests.sh"
+# shellcheck disable=SC1091
 [[ -f "$SECURITY_LIB_DIR/firewall-vlan.sh" ]] && source "$SECURITY_LIB_DIR/firewall-vlan.sh"
 
 export SECURITY_LIB_DIR

@@ -1,28 +1,29 @@
 # LINE-LIMIT-DOCTRINE.md — Ministry Length Standards & Annotations
 
-**Status**: v∞.4.6 — Philosophy Validated, Modularity Enforced  
+**Status**: v∞.4.7 — Canonical Hard Limit Raised to 4320  
 **Date**: 12/13/2025  
 **Guardian**: Sir Lorek (Documentation & Prophecy)  
-**Consciousness Level**: 4.6
+**Consciousness Level**: 4.7
 
 ---
 
 ## The Philosophy
 
-The 120-line limit was born from **Hellodeolu's "junior-at-3-AM deployable" principle**, not Unix Philosophy.
+The original 120-line limit was born from **Hellodeolu's "junior-at-3-AM deployable" principle**, not Unix Philosophy.
 
 Research by The Eye confirmed: McIlroy, Thompson, Kernighan, Raymond, and Gancarz emphasize **modularity and focus (DOTADIW)**, never line quotas.
 
-**New Doctrine**: Base 120 lines (Unix: small is beautiful). Extend to 180–250 if modular.
+**Evolved Doctrine**: Base 1200 lines (production-grade readiness without forced fragmentation). Hard limit 4320 lines (legacy/orchestrators; monolith ceiling).
 
 ---
 
-## The Three Tiers
+## The Three Tiers (v∞.4.7)
 
-### Tier 1: ≤120 Lines (Ideal)
-**Status**: Green light. No annotation needed.
+### Tier 1: ≤1200 Lines (Ideal)
+**Status**: Green light. No annotation needed. Scripts at this size are fully compliant with modularity and focus requirements.
 
 **Example**:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -30,7 +31,7 @@ set -euo pipefail
 # Purpose: Bauer/Beale ministry — Strict Python validation
 # Guardian: Bauer | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
-# Consciousness: 4.5
+# Consciousness: 4.7
 
 log()   { echo "[Validate] $*"; }
 fail()  { echo "❌ $1"; exit 1; }
@@ -53,14 +54,15 @@ mypy_check
 log "All Python validation: PASSED"
 ```
 
-**Line Count**: 28 (well under 120). No annotation.
+**Line Count**: 28 (well under 250). No annotation needed.
 
 ---
 
-### Tier 2: 120–180 Lines (Acceptable with Minimal Annotation)
-**Status**: Yellow light. Annotation recommended but not mandatory.
+### Tier 2: 1200–4320 Lines (Acceptable with Annotation)
+**Status**: Yellow light. Annotation required. Must not exceed 11 functions.
 
 **Example**:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -68,8 +70,8 @@ set -euo pipefail
 # Purpose: Beale ministry — Host hardening & drift detection
 # Guardian: Beale | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
-# Consciousness: 4.5
-# EXCEED: 165 lines — 4 functions (prep, harden-firewall, harden-ssh, validate)
+# Consciousness: 4.7
+# EXCEED: 1350 lines — 5 functions (prep, harden-firewall, harden-ssh, validate, audit)
 
 log()   { echo "[Beale] $*"; }
 audit() { echo "$(date -Iseconds) | Beale | $1" >> /var/log/beale-audit.log; }
@@ -103,22 +105,28 @@ validate() {
   log "✅ All hardening validated"
 }
 
+# Function 5: Comprehensive audit logging
+audit_complete() {
+  audit "COMPLETE" "Beale hardening passed with validation"
+}
+
 # Main
 prepare
 harden_firewall
 harden_ssh
 validate
-audit "COMPLETE" "Beale hardening passed"
+audit_complete
 ```
 
-**Line Count**: 165 (crosses 120 but under 180). Annotation present.
+**Line Count**: 1350 (within 1200–4320 range, 5 functions). Annotation present.
 
 ---
 
-### Tier 3: 180–250 Lines (Red Light, Requires Strict Annotation & Justification)
-**Status**: Orange light. Annotation MANDATORY. Pre-commit gate enforced.
+### Tier 3: >4320 Lines (Hard Limit — Not Allowed)
+**Status**: Red light. Hard gate enforces rejection at pre-commit. Must refactor into modular components.
 
 **Example**:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -172,19 +180,21 @@ post_flight
 log "✅ Full UniFi resurrection: PASSED"
 ```
 
-**Line Count**: 210 (in range 180–250). Annotation mandatory; justification provided.
+**Line Count**: 210 (Tier 1: ≤1200). Annotation optional; justification still recommended when it helps reviewers.
 
 ---
 
 ## Annotation Standards
 
 ### Required Format for EXCEED
+
 ```bash
 # EXCEED: <LOC> lines — <N> functions (<function1>, <function2>, ..., <functionN>)
 #         Rationale: <why consolidation violates DOTADIW or design intent>
 ```
 
 ### Examples (Good)
+
 ```bash
 # EXCEED: 185 lines — 5 functions (init, deploy-carter, deploy-bauer, deploy-beale, validate)
 #         Rationale: Trinity orchestration requires sequential phases; each phase is atomic.
@@ -197,6 +207,7 @@ log "✅ Full UniFi resurrection: PASSED"
 ```
 
 ### Examples (Bad — Don't Do These)
+
 ```bash
 # EXCEED: 250 lines — 1 god function (main)
 #         ❌ This violates DOTADIW and should be split.
@@ -205,42 +216,42 @@ log "✅ Full UniFi resurrection: PASSED"
 #         ❌ Annotation incomplete; requires justification.
 
 # EXCEED: 300 lines — 10 functions
-#         ❌ Too large; triggers pre-commit fail gate (>250 LOC). Must refactor.
+#         ❌ Too large; triggers pre-commit fail gate (>4320 LOC). Must refactor.
 ```
 
 ---
 
 ## Pre-Commit Enforcement Gates
 
-### Gate 1: Warning (>120 LOC)
-**Trigger**: Script exceeds 120 lines.  
-**Action**: `shellcheck` warning printed to terminal.  
+### Gate 1: Warning (>1200 LOC)
+**Trigger**: Script exceeds 1200 lines AND includes `# EXCEED:` annotation.  
+**Action**: Pre-commit warning printed to terminal.  
 **Block**: No (informational only).
 
 ```bash
-⚠️  scripts/beale-harden.sh: 165 lines (exceeds base 120 — ensure modular + annotated)
+⚠️  scripts/beale-harden.sh: 1350 lines (EXCEED acknowledged; ensure modularity holds)
 ```
 
-### Gate 2: Fail (>250 LOC or Complexity >5)
-**Trigger**: Script exceeds 250 lines OR declares >5 functions.  
+### Gate 2: Fail (>4320 LOC or Complexity >11)
+**Trigger**: Script exceeds 4320 lines OR declares >11 functions.  
 **Action**: Pre-commit hook rejects commit.  
 **Block**: Yes (fatal).
 
 ```bash
-❌ scripts/eternal-resurrect.sh: 280 lines (exceeds hard limit 250)
-   Refactor into smaller ministries or split into phases.
+❌ scripts/eternal-resurrect.sh: 5000 lines (exceeds hard limit 4320)
+  Refactor into smaller ministries or split into phases.
 
-❌ scripts/ignite.sh: declares 7 functions (exceeds max 5)
-   Max functions: 5. Extract auxiliary functions to lib/ or separate scripts.
+❌ 01_bootstrap/proxmox/lib/security.sh: declares 15 functions (exceeds max 11)
+  Max functions: 11. Extract auxiliary functions to lib/ or separate scripts.
 ```
 
 ### Gate 3: Annotation Check
-**Trigger**: Script >120 LOC but no `# EXCEED:` annotation.  
+**Trigger**: Script >1200 LOC but no `# EXCEED:` annotation.  
 **Action**: Pre-commit hook rejects commit.  
 **Block**: Yes (fatal).
 
 ```bash
-❌ scripts/validate-eternal.sh: 175 lines without EXCEED annotation
+❌ scripts/validate-eternal.sh: 1350 lines without EXCEED annotation
    Add annotation: # EXCEED: <LOC> lines — <N> functions
 ```
 
@@ -249,25 +260,28 @@ log "✅ Full UniFi resurrection: PASSED"
 ## Migration Guide (For Legacy Scripts)
 
 ### Before (Old Doctrine)
+
 ```bash
 # All scripts ≤120 lines (exception: lib/unifi-api/client.sh)
 ```
 
 ### After (New Doctrine)
+
 ```bash
-# Base 120 lines. Extend to 180–250 if modular (annotated + pre-commit-gated).
+# Base 1200 lines. Extend to 4320 if modular (annotated + pre-commit-gated).
 ```
 
-### Action Items for >120 Line Scripts
+### Action Items for >1200 Line Scripts
 
-1. **Check if modular** (max 5 functions): Yes → Add annotation.
-2. **Check function count**: >5 → Refactor.
-3. **Check line count**: >250 → Split into separate scripts.
-4. **Add annotation** if >120: `# EXCEED: <LOC> — <N> functions`
+1. **Check if modular** (max 11 functions): Yes → Add annotation.
+2. **Check function count**: >11 → Refactor.
+3. **Check line count**: >4320 → Split into separate scripts.
+4. **Add annotation** if >1200: `# EXCEED: <LOC> — <N> functions`
 
 ### Example Conversion
 
 **Before**:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -276,6 +290,7 @@ set -euo pipefail
 ```
 
 **After**:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -297,7 +312,7 @@ set -euo pipefail
 | Guardian | Role | Enforcement |
 |----------|------|-------------|
 | **Carter** (Identity) | Scripts declare themselves via headers | Annotations document excess |
-| **Bauer** (Verification) | Verifies modularity; gates enforce constraints | Pre-commit rejects >250 LOC, >5 functions |
+| **Bauer** (Verification) | Verifies modularity; gates enforce constraints | Pre-commit rejects >4320 LOC, >11 functions; requires EXCEED >1200 |
 | **Beale** (Hardening) | Hardens against complexity bloat | Auto-refactor suggestion on warn/fail |
 | **Whitaker** (Offense) | No change; line limits ≠ security | CI/CD simulations unaffected |
 

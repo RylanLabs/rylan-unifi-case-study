@@ -21,7 +21,8 @@ applyTo: "**/*"
 ## Beale (Detection)
 - Idempotency is mandatory: if ! grep -q "pattern" file; then echo >> file; fi
 - Never append without checking existence first
-- All scripts ≤120 lines, ≤19-line READMEs
+- LOC doctrine: Base ≤1200 lines; hard limit ≤4320 lines. `# EXCEED:` required for scripts >1200.
+- ≤19-line READMEs
 - Diff against .github/baselines/ for drift detection
 
 ## Whitaker (Offense)

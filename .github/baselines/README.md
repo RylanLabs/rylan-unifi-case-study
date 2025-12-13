@@ -8,6 +8,7 @@ Store current-state baselines here for Beale drift detection.
 - ssh-config.txt: SSH daemon configuration
 
 ## Usage
+
 ```bash
 # Update baseline
 beale-update-baseline.sh --approve
