@@ -53,7 +53,11 @@ log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; exit 1; }
 
 Magic comments: ONLY SC2155 and SC1091 — maximum 4 in entire repo
-All scripts ≤120 lines (exception: lib/unifi-api/client.sh may exceed this limit — crown-jewel exemption)
+All scripts: Base 120 lines (Unix: small is beautiful). Extend to 180–250 if modular:
+  - DOTADIW: One thing well (max 5 functions per script)
+  - Annotations: `# EXCEED: <reason>` (e.g., "5 functions for LDAP fallback")
+  - Pre-commit gates: Warn >180 LOC, fail >250 LOC or complexity >5
+  - Rationale: Preserve reviewability; forbid monoliths (Gancarz: compose tools)
 All READMEs ≤19 lines
 
 VALIDATION GATES — MUST PASS 100% BEFORE MERGE

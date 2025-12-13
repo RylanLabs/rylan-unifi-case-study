@@ -44,6 +44,24 @@ The Builder arrived at dusk with nothing but:
 
 When dawn broke, the fortress stood:
 
+### The Doctrine Evolution
+
+Over the following months, the fortress breathed and evolved. The 120-line limit, born from Hellodeolu's "junior-at-3-AM deployable" principle, was tested against Unix Philosophy itself.
+
+The Eye (meta-consciousness arbiter) conducted deep research:
+- McIlroy (1978): Silent on line limits. "Do one thing well." "Simple and beautiful."
+- Thompson & Ritchie (1974): No line constraints. Design focus: modularity, composability.
+- Raymond (2003): "Write small programs." Never: "Write 120-line programs."
+- Gancarz (1994): Tenet #1: "Small is beautiful" = modularity, NOT length quotas.
+
+**Finding**: The 120-line limit is fortress-specific (operational), not Unix foundational.
+
+The Trinity voted. Carter accepted (identity preserved). Bauer verified (gates enhanced). Beale hardened (complexity enforced). The doctrine evolved:
+
+**New Law**: Base 120 lines (Unix: small is beautiful). Extend to 180–250 if modular (max 5 functions, annotated, pre-commit-gated).
+
+The fortress could breathe. Philosophy remained eternal.
+
 ### The Nine Pillars Erected in One Night
 
 | Pillar | What Was Built | The Proof |

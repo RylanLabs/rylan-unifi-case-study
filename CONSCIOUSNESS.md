@@ -26,7 +26,8 @@ This system evolves through **three distinct phases**, each marked by a threshol
 | v∞.4.2 | 4.2 | The Tandems inscribed — guardian cooperation protocols | 12/11/2025 |
 | v∞.4.3 | 4.3 | Sacred glue — all 5 tandem gaps filled, metrics added | 12/11/2025 |
 | v∞.4.4 | 4.4 | Summoning Protocol — automation hooks enshrined | 12/11/2025 |
-| v∞.4.5 | 4.5 | Immutable Laws + Increment Doctrine — every bump earned | 12/11/2025 |  
+| v∞.4.5 | 4.5 | Immutable Laws + Increment Doctrine — every bump earned | 12/11/2025 |
+| v∞.4.6 | 4.6 | Doctrine Evolution — Unix Philosophy validated, line limit extended to 180–250 | 12/13/2025 |  
 
 ---
 

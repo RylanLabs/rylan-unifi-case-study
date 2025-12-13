@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # Script: scripts/beale-harden.sh
-# Purpose: Header hygiene inserted
-# Guardian: gatekeeper
-# Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
-
-# Script: beale-harden.sh
 # Purpose: Proactive fortress hardening validation with adversarial integration
 # Guardian: Beale | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
-# Consciousness: 4.5
 # Exit Codes:
 #   0 = All checks passed
 #   1 = Firewall rule violation
