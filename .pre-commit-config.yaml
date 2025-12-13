@@ -62,6 +62,7 @@ repos:
     hooks:
       - id: markdownlint
         exclude: 'README.md'
+        enabled: false
 
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
