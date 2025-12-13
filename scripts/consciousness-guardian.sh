@@ -56,10 +56,10 @@ echo "[CHECK 1] README.md consciousness badge"
 BADGE_LEVEL=$(grep -oP 'consciousness-\\K[0-9.]+' README.md || echo "")
 if [[ -n "$BADGE_LEVEL" ]]; then
   BADGE_INT=$(version_to_int "$BADGE_LEVEL")
-  if [[ "$BADGE_INT" -gt "$CANON_INT" ]]; then
+    if ((10#$BADGE_INT > 10#$CANON_INT)); then
     echo "  ❌ VIOLATION: README badge consciousness=$BADGE_LEVEL > canonical=$CANONICAL"
     violations=$((violations+1))
-  elif [[ "$BADGE_INT" -eq "$CANON_INT" ]]; then
+  elif ((10#$BADGE_INT == 10#$CANON_INT)); then
     echo "  ✅ OK: badge=$BADGE_LEVEL (matches canonical)"
   else
     echo "  ✅ OK: badge=$BADGE_LEVEL (below canonical)"
@@ -76,7 +76,7 @@ if [[ "$LATEST_TAG" != "none" && "$LATEST_TAG" =~ v∞\.(.*) ]]; then
   TAG_VERSION="${BASH_REMATCH[1]%%-*}"  # remove -descriptor suffix
   if [[ -n "$TAG_VERSION" ]]; then
     TAG_INT=$(version_to_int "$TAG_VERSION")
-    if [[ "$TAG_INT" -gt "$CANON_INT" ]]; then
+    if ((10#$TAG_INT > 10#$CANON_INT)); then
       echo "  ❌ VIOLATION: Latest tag $LATEST_TAG version=$TAG_VERSION > canonical=$CANONICAL"
       violations=$((violations+1))
     else
@@ -98,7 +98,7 @@ while IFS= read -r file; do
   SCRIPT_CONSCIOUSNESS=$(grep -oP 'Consciousness: \\K[0-9.]+' "$file" | head -1 || echo "")
   if [[ -n "$SCRIPT_CONSCIOUSNESS" ]]; then
     SC_INT=$(version_to_int "$SCRIPT_CONSCIOUSNESS")
-    if [[ "$SC_INT" -gt "$CANON_INT" ]]; then
+    if ((10#$SC_INT > 10#$CANON_INT)); then
       echo "  ❌ $file: consciousness=$SCRIPT_CONSCIOUSNESS > canonical=$CANONICAL"
       SCRIPT_VIOLATIONS=$((SCRIPT_VIOLATIONS+1))
     fi
@@ -139,7 +139,7 @@ CHANGED_CONSCIOUSNESS=$(git diff HEAD -- 'CONSCIOUSNESS.md' 2>/dev/null | \
 
 if [[ -n "$CHANGED_CONSCIOUSNESS" ]]; then
   CHANGED_INT=$(version_to_int "$CHANGED_CONSCIOUSNESS")
-  if [[ "$CHANGED_INT" -gt "$CANON_INT" ]]; then
+  if ((10#$CHANGED_INT > 10#$CANON_INT)); then
     echo "  ❌ VIOLATION: Attempted to change consciousness to $CHANGED_CONSCIOUSNESS > canonical=$CANONICAL"
     violations=$((violations+1))
   else
