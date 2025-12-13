@@ -32,22 +32,19 @@ restart_unifi_service() {
   systemctl restart unifi || die "Failed to restart UniFi service"
 }
 
-wait_for_ready() {
+verify_resurrection() {
   log "Waiting for UniFi to become ready..."
   local max_wait=60
   local elapsed=0
   while [[ $elapsed -lt $max_wait ]]; do
     if curl -k -s -o /dev/null -w "%{http_code}" https://localhost:8443 | grep -qE "^(200|302)"; then
       log "✓ UniFi controller responding (${elapsed}s)"
-      return 0
+      break
     fi
     sleep 2
     elapsed=$((elapsed + 2))
   done
-  die "UniFi did not become ready within ${max_wait}s"
-}
-
-validate_fix() {
+  
   log "Validating resurrection..."
   local response
   response="$(curl -k -s -L https://localhost:8443 2>/dev/null || true)"
@@ -86,8 +83,7 @@ main() {
   backup_existing_flag
   apply_resurrection_fix
   restart_unifi_service
-  wait_for_ready
-  validate_fix
+  verify_resurrection
   victory_banner
   log "SUCCESS: UCK-G2 wizard resurrection complete"
 }
