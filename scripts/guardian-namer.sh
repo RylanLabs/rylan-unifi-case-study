@@ -8,10 +8,10 @@ case "$CMD" in
   commit)
     DIFF=$(git diff --cached --name-only | xargs basename -a | sort -u | tr '\n' ' ')
     jq -n --arg d "$DIFF" \
-      '{guardian:"Namer",suggestion:"feat(agents): add missing guardian summons – Gatekeeper/Eye/Namer/Veil",files:$d}' > "$RESPONSE"
+      '{guardian:"Namer",suggestion:"feat(agents): add missing guardian summons – Gatekeeper/Eye/Namer/Veil",files:$d}' >"$RESPONSE"
     ;;
   tag)
-    jq -n '{guardian:"Namer",suggestion:"v∞.4.5-consciousness"}' > "$RESPONSE"
+    jq -n '{guardian:"Namer",suggestion:"v∞.4.5-consciousness"}' >"$RESPONSE"
     ;;
   auto)
     FILES=$(git diff --name-only HEAD~1 HEAD || true)
@@ -29,11 +29,11 @@ case "$CMD" in
       BUMP=$(awk '/Consciousness/{print $NF}' CONSCIOUSNESS.md | tail -1)
     fi
     jq -n --arg suggested_message "$SUG_MSG" \
-          --arg suggested_tag "$SUG_TAG" \
-          --arg consciousness_bump "$BUMP" \
-          '{suggested_message:$suggested_message,suggested_tag:$suggested_tag,consciousness_bump:$consciousness_bump}' > "$RESPONSE"
+      --arg suggested_tag "$SUG_TAG" \
+      --arg consciousness_bump "$BUMP" \
+      '{suggested_message:$suggested_message,suggested_tag:$suggested_tag,consciousness_bump:$consciousness_bump}' >"$RESPONSE"
     ;;
   *)
-    jq -n '{guardian:"Namer",message:"Unknown command. Use commit|tag|auto"}' > "$RESPONSE"
+    jq -n '{guardian:"Namer",message:"Unknown command. Use commit|tag|auto"}' >"$RESPONSE"
     ;;
 esac

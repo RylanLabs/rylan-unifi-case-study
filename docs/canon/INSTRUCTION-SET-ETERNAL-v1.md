@@ -45,6 +45,7 @@ The Eternal Fortress is not just resilient — it is **eternal**. Every componen
 ### Deployment Commands
 
 #### Bootstrap (Clean Install)
+
 ```bash
 # Clone repository
 git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
@@ -52,25 +53,30 @@ cd rylan-unifi-case-study
 
 # Run eternal resurrection
 sudo ./eternal-resurrect.sh
-```
+
+```text
 
 #### Validation (Post-Bootstrap)
+
 ```bash
 # Comprehensive validation suite
 sudo ./validate-eternal.sh
 
 # Expected output: 100% PASS (all checks green)
 # Exit code: 0
-```
+
+```text
 
 #### Backup & Restore
+
 ```bash
 # Multi-host backup with RTO validation
 sudo ./03-validation-ops/orchestrator.sh
 
 # Dry-run mode (CI testing)
 sudo ./03-validation-ops/orchestrator.sh --dry-run
-```
+
+```text
 
 ### Architecture Principles
 
@@ -98,7 +104,7 @@ sudo ./03-validation-ops/orchestrator.sh --dry-run
 
 ### File Structure
 
-```
+```text
 eternal-resurrect.sh        # Master bootstrap (one command)
 validate-eternal.sh         # Comprehensive validation suite
 PHASE-1-COMPLETION.md       # Phase 1 audit remediation summary
@@ -132,7 +138,8 @@ docs/                       # Enterprise documentation
   freepbx-macvlan-setup.md  # VoIP isolation + routing
   kernel-tuning-guide.md    # Performance optimization
   validation/               # VM validation logs
-```
+
+```text
 
 ### Phase Roadmap
 
@@ -182,6 +189,7 @@ Before tagging any production release:
 ### Emergency Procedures
 
 #### Full System Loss
+
 ```bash
 # 1. Provision new Ubuntu 24.04 VM
 # 2. Clone repository
@@ -196,16 +204,19 @@ sudo ./03-validation-ops/orchestrator.sh --restore
 
 # 5. Validate
 sudo ./validate-eternal.sh
-```
+
+```text
 
 #### Partial Service Failure
+
 ```bash
 # Check service status
 sudo ./validate-eternal.sh
 
 # Identify failed service
 # Re-run specific bootstrap section in eternal-resurrect.sh
-```
+
+```text
 
 ### Support & Maintenance
 

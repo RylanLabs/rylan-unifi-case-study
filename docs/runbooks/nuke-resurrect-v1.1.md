@@ -16,7 +16,7 @@ bash 03-validation-ops/orchestrator.sh --verbose
 # Verify backup exists
 ls -lh /srv/nfs/backups/$(date +%Y%m%d)*
 # Expected: samba/, freeradius/, unifi/, qdrant/, mariadb/
-```
+```text
 
 ---
 
@@ -36,7 +36,7 @@ sudo apt update && sudo apt install -y git python3 python3-pip python3-venv \
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 newgrp docker
-```
+```text
 
 ---
 
@@ -63,7 +63,7 @@ chmod +x eternal-resurrect.sh
 # 3. Validate policy-table.yaml (≤10 rules)
 # 4. Run pytest suite (93% coverage threshold)
 # 5. Verify orchestrator.sh syntax
-```
+```text
 
 **Expected Output:**
 
@@ -75,7 +75,7 @@ chmod +x eternal-resurrect.sh
 🧪 Running test suite...
 ============================= 9 passed in 62.53s =============================
 ✅ All checks passed — junior-at-3-AM deployable
-```
+```text
 
 ---
 
@@ -105,7 +105,7 @@ docker-compose -f compose-templates/unifi-controller.yml up -d
 # Wait 60s for startup
 curl -k https://localhost:8443
 # Expected: UniFi login page
-```
+```text
 
 ### For rylan-pi (Pi-hole)
 
@@ -117,7 +117,7 @@ docker exec pihole pihole -g  # Rebuild gravity
 # Verify DNS
 dig @localhost google.com
 # Expected: ANSWER section with IP
-```
+```text
 
 ### For rylan-ai (AI Triage + Qdrant)
 
@@ -143,7 +143,7 @@ curl -X POST http://localhost:8000/triage \
   -H "Content-Type: application/json" \
   -d '{"text":"Password reset","vlan_source":"10.0.30.0","user_role":"employee"}'
 # Expected: {"confidence":0.9X,"action":"auto-close"}
-```
+```text
 
 ---
 
@@ -163,7 +163,7 @@ python apply.py            # Apply VLANs, firewall rules
 # ✅ VLAN 95 (iot-isolated) created  # v∞.1.2
 # ✅ VLAN historical references removed    # v∞.3.3-consolidated
 # ✅ Policy rule 1-9 applied (9/10, offload safe)
-```
+```text
 
 ---
 
@@ -181,7 +181,7 @@ bash 03-validation-ops/validate-isolation.sh  # VLAN segmentation
 # Verify RTO
 # Total time from git clone to operational:
 # Expected: <15 minutes ✅
-```
+```text
 
 ---
 
@@ -194,7 +194,7 @@ bash 03-validation-ops/validate-isolation.sh  # VLAN segmentation
    # Update MAC addresses for new hardware
    ```
 
-2. **Rejoin devices to domain** (if Samba AD restored):
+1. **Rejoin devices to domain** (if Samba AD restored):
 
    ```bash
    # From Windows workstation
@@ -202,14 +202,14 @@ bash 03-validation-ops/validate-isolation.sh  # VLAN segmentation
    Add-Computer -DomainName rylan.internal -Credential Administrator -Restart
    ```
 
-3. **Verify backup schedule**:
+1. **Verify backup schedule**:
 
    ```bash
    crontab -l | grep orchestrator
    # Expected: 0 2 * * * /opt/rylan-unifi-case-study/03-validation-ops/orchestrator.sh
    ```
 
-4. **Run full test suite**:
+1. **Run full test suite**:
 
    ```bash
    pytest tests/ -v --cov=rylan_ai_helpdesk --cov-report=term
@@ -229,7 +229,7 @@ git checkout <commit-hash>
 # If all fails, restore from v∞.1.0-eternal release
 git checkout tags/v∞.1.0-eternal
 ./eternal-resurrect.sh
-```
+```text
 
 ---
 

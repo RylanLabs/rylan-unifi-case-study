@@ -27,7 +27,7 @@ python apply.py  # Re-applies config.gateway.json with mDNS
 
 # Restart USG to ensure mDNS active
 ssh admin@$USG_IP "reboot"
-```
+```text
 
 ### Verification:
 
@@ -39,14 +39,14 @@ avahi-browse -a -t | grep -i heos
 # If still not visible, check firewall
 ssh admin@$USG_IP "show firewall statistics"
 # Look for dropped mDNS packets (UDP 5353)
-```
+```text
 
 ### Alternative: Manual IP Entry
 
 ```bash
 # In HEOS app → Settings → Advanced → Manual IP Entry
 # Enter soundbar IP: 10.0.90.XXX (from DHCP leases)
-```
+```text
 
 ---
 
@@ -73,7 +73,7 @@ grep -A5 "iot-isolated" 02-declarative-config/policy-table.yaml
 # Check USG firewall logs
 ssh admin@$USG_IP "show log firewall" | grep 10.0.95
 # Look for BLOCKED packets to traeger-cloud.io
-```
+```text
 
 ### Verification:
 
@@ -82,7 +82,7 @@ ssh admin@$USG_IP "show log firewall" | grep 10.0.95
 # Navigate to: UniFi Controller → Insights → Deep Packet Inspection
 # Filter: VLAN 95, Destination: traeger-cloud.io
 # Expected: HTTPS (443) + MQTT (8883) traffic allowed
-```
+```text
 
 ### Alternative: Factory Reset Traeger
 
@@ -90,7 +90,7 @@ ssh admin@$USG_IP "show log firewall" | grep 10.0.95
 # Hold ignite button 10 seconds until LED flashes
 # Re-pair via Traeger app
 # Ensure phone on "IoT-Isolated" WiFi during pairing
-```
+```text
 
 ---
 
@@ -116,7 +116,7 @@ ip addr show | grep inet
 
 # If IP changed, update printer static IP or CUPS
 sudo lpadmin -p printer01 -v socket://10.0.30.<NEW_IP>:9100
-```
+```text
 
 ### Verification:
 
@@ -127,7 +127,7 @@ nc -zv 10.0.30.50 9100
 
 # Test print
 echo "Test page $(date)" | lp -d printer01
-```
+```text
 
 ---
 
@@ -155,7 +155,7 @@ tshark -r denon-update.pcap -T fields -e ip.dst -e tcp.dstport | sort -u
 # Identify blocked destination ports
 
 # Add port to policy-table.yaml if legitimate
-```
+```text
 
 ### Temporary Workaround:
 
@@ -166,7 +166,7 @@ tshark -r denon-update.pcap -T fields -e ip.dst -e tcp.dstport | sort -u
 # 2. Settings → Network → Override to VLAN 30
 # 3. Perform firmware update
 # 4. Revert to VLAN 90 after update completes
-```
+```text
 
 ---
 
@@ -193,7 +193,7 @@ ip link show | grep '@' | wc -l
 # Check firewall rule count
 python -c "import yaml; print(len(yaml.safe_load(open('02-declarative-config/policy-table.yaml'))['rules']))"
 # Expected: 9 rules (within ≤10 limit)
-```
+```text
 
 ### Mitigation:
 
@@ -212,7 +212,7 @@ commit ; save ; exit
 # Verify offload re-enabled
 show system offload
 # Expected: ipv4: enabled
-```
+```text
 
 ---
 
@@ -240,7 +240,7 @@ ssh admin@$USG_IP "ps aux | grep mdns"
 
 # Restart mDNS service if needed
 ssh admin@$USG_IP "sudo /etc/init.d/mdns restart"
-```
+```text
 
 ---
 
@@ -267,7 +267,7 @@ python guardian/audit-eternal.py
 
 # Check USG hardware offload
 ssh admin@$USG_IP "show system offload"
-```
+```text
 
 ---
 

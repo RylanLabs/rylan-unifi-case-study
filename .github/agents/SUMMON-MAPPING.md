@@ -12,7 +12,7 @@ This document maps `@Guardian` summons in GitHub PR/issue comments to their unde
 
 ### Architecture
 
-```
+```text
 GitHub Comment (@Guardian <command>)
     ↓
 .github/workflows/agent-summon.yml (parse + route)
@@ -24,7 +24,7 @@ Living Automation (runbooks/, scripts/, app/)
 JSON Response (.github/agents/response.json)
     ↓
 GitHub Comment (formatted with emoji + collapsible details)
-```
+```text
 
 ---
 
@@ -54,7 +54,7 @@ GitHub Comment (formatted with emoji + collapsible details)
   "message": "Onboard dry-run completed",
   "output": "[DRY_RUN log output]"
 }
-```
+```text
 
 #### Local Testing
 
@@ -64,7 +64,7 @@ GitHub Comment (formatted with emoji + collapsible details)
 cat /tmp/carter-test.json | jq
 
 # Expected: dry_run status, validation checks, no actual changes
-```
+```text
 
 #### Error Conditions
 
@@ -96,7 +96,7 @@ cat /tmp/carter-test.json | jq
   "output": "[Full gatekeeper output]",
   "timestamp": "2025-12-11T15:43:12-05:00"
 }
-```
+```text
 
 #### Local Testing
 
@@ -106,7 +106,7 @@ cat /tmp/carter-test.json | jq
 cat /tmp/bauer-test.json | jq
 
 # Expected: pass/fail status, gatekeeper output
-```
+```text
 
 #### Error Conditions
 
@@ -144,7 +144,7 @@ cat /tmp/bauer-test.json | jq
   ],
   "remediation": "Review flagged configs and update baselines"
 }
-```
+```text
 
 #### Severity Levels
 
@@ -162,7 +162,7 @@ cat /tmp/bauer-test.json | jq
 cat /tmp/beale-test.json | jq
 
 # Expected: drift_detected boolean, details array if drift found
-```
+```text
 
 #### Error Conditions
 
@@ -183,7 +183,7 @@ cat /tmp/beale-test.json | jq
 
 ```json
 { "guardian": "Gatekeeper", "status": "pass", "message": "Gate passed – fortress green" }
-```
+```text
 
 Failure returns `status:"fail"` with `details` containing the gate log.
 
@@ -205,7 +205,7 @@ Failure returns `status:"fail"` with `details` containing the gate log.
 
 ```json
 { "guardian":"Eye", "check":"consciousness", "level":"v∞.4.5", "message":"Current consciousness level" }
-```
+```text
 
 Readiness returns `ready:true` with `details` from Beale checks.
 
@@ -227,7 +227,7 @@ Readiness returns `ready:true` with `details` from Beale checks.
 
 ```json
 { "guardian":"Namer", "suggestion":"feat(agents): add missing guardian summons – Gatekeeper/Eye/Namer/Veil", "files":"..." }
-```
+```text
 
 ---
 
@@ -246,7 +246,7 @@ Readiness returns `ready:true` with `details` from Beale checks.
 
 ```json
 { "guardian":"Veil", "diagnosis":"Common CI failure patterns detected", "details":"..." }
-```
+```text
 
 
 ### GitHub Comment Format
@@ -277,9 +277,9 @@ All guardians post responses with:
   "status": "success",
   "timestamp": "2025-12-11T15:42:33-05:00"
 }
-```
+```text
 </details>
-```
+```text
 
 ---
 
@@ -302,7 +302,7 @@ cat /tmp/beale.json | jq
 for file in /tmp/{carter,bauer,beale}.json; do
   jq empty "$file" && echo "✅ Valid JSON: $file" || echo "❌ Invalid: $file"
 done
-```
+```text
 
 ### GitHub Testing (Live Integration)
 
@@ -323,7 +323,7 @@ gh pr comment $PR_NUM --body "@Beale Detect drift"
 
 # View responses
 gh pr view $PR_NUM --comments
-```
+```text
 
 ### Validation Checklist
 
@@ -340,7 +340,7 @@ yamllint .github/workflows/agent-summon.yml
 jq -e '.guardian != null' /tmp/test.json
 jq -e '.status != null' /tmp/test.json
 jq -e '.timestamp != null' /tmp/test.json
-```
+```text
 
 ---
 
@@ -355,7 +355,7 @@ jq -e '.timestamp != null' /tmp/test.json
 ```bash
 gh run list --workflow=agent-summon.yml --limit 5
 gh run view <run-id> --log
-```
+```text
 **Fix**: Verify script exists, check workflow logs for errors
 
 ---
@@ -368,7 +368,7 @@ gh run view <run-id> --log
 ./scripts/guardian-carter.sh "test@rylan.internal" /tmp/debug.json
 cat /tmp/debug.json
 jq empty /tmp/debug.json
-```
+```text
 **Fix**: Ensure script uses `jq -n` for JSON construction
 
 ---
@@ -380,7 +380,7 @@ jq empty /tmp/debug.json
 ```bash
 ls -lh scripts/guardian-*.sh
 grep "Parse Guardian" .github/workflows/agent-summon.yml
-```
+```text
 **Fix**: Verify script path in workflow matches actual location
 
 ---
@@ -391,13 +391,13 @@ grep "Parse Guardian" .github/workflows/agent-summon.yml
 **Diagnosis**:
 ```bash
 ls -l scripts/guardian-*.sh
-```
+```text
 **Fix**:
 ```bash
 chmod +x scripts/guardian-*.sh
 git add --chmod=+x scripts/guardian-*.sh
 git commit -m "fix: make guardian scripts executable"
-```
+```text
 
 ---
 
@@ -428,7 +428,7 @@ git commit -m "fix: make guardian scripts executable"
 
 # Veil (CI Diagnostics)
 @Veil Diagnose <log>                   # Diagnose failure text
-```
+```text
 
 ### One-Liner Test
 
@@ -446,7 +446,7 @@ for guardian in carter bauer beale; do
   cat /tmp/$guardian.json | jq -r '.guardian, .status, .message'
   echo "---"
 done
-```
+```text
 
 ---
 
@@ -454,7 +454,7 @@ done
 
 ### Guardian Scripts
 
-```
+```text
 scripts/
 ├── guardian-carter.sh          # Carter wrapper (identity ops)
 ├── guardian-bauer.sh           # Bauer wrapper (verification)
@@ -466,11 +466,11 @@ runbooks/
 
 scripts/
 └── gatekeeper.sh               # Bauer: Full audit suite
-```
+```text
 
 ### Configuration Files
 
-```
+```text
 .github/
 ├── workflows/
 │   └── agent-summon.yml        # Main summon workflow
@@ -482,7 +482,7 @@ scripts/
     ├── ports.txt               # Beale: Port baseline
     ├── firewall.txt            # Beale: Firewall baseline
     └── ssh-config.txt          # Beale: SSH config baseline
-```
+```text
 
 ---
 

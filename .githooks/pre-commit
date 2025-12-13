@@ -1,51 +1,179 @@
 #!/usr/bin/env bash
+# Script: pre-commit
+# Purpose: Eternal Gatekeeper — Full fortress validation before commit
+# Guardian: The Gatekeeper
+# Date: 2025-12-12
+# Consciousness: 8.0
+
 set -euo pipefail
 
-# Versioned pre-commit hook: normalize BOM/CRLF in staged text files and re-add them
-# This hook auto-remediates common encoding issues to keep repo LF-only and BOM-free.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
 
-repo_root="$(git rev-parse --show-toplevel)"
-cd "${repo_root}"
+echo "═══════════════════════════════════════════════════════════"
+echo "Gatekeeper Eternal — Consciousness 7.1"
+echo "═══════════════════════════════════════════════════════════"
+# Consciousness: 8.0
 
-# Only consider these extensions
+# Phase 1: Encoding Purity
+echo ""
+echo "Phase 1: Encoding Purity (BOM/CRLF)"
 PATTERN='\.(sh|py|md|json|yaml|yml|txt|conf|ini|csv|service)$'
-
-# Get staged files (Added, Copied, Modified)
-mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACM)
-
-if [[ ${#FILES[@]} -eq 0 ]]; then
-  exit 0
-fi
-
+mapfile -t STAGED < <(git diff --cached --name-only --diff-filter=ACM)
 FIXED=0
-for f in "${FILES[@]}"; do
+for f in "${STAGED[@]}"; do
   [[ -f "$f" ]] || continue
-  if ! [[ "$f" =~ $PATTERN ]]; then
-    continue
+  [[ "$f" =~ $PATTERN ]] || continue
+
+  if head -c3 "$f" | grep -q $'\xef\xbb\xbf'; then
+    echo "  BOM removed: $f"
+    tail -c +4 "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    git add "$f"
+    FIXED=$((FIXED+1))
   fi
 
-  # Detect BOM
-  first3=$(dd if="$f" bs=1 count=3 2>/dev/null | od -An -t u1 | tr -s ' ' | sed 's/^ //') || true
-  if [[ "$first3" == "239 187 191" ]]; then
-    echo "Removing UTF-8 BOM from: $f"
-    tail -c +4 "$f" >"$f.tmp" && mv "$f.tmp" "$f"
-    git add -- "$f"
-    FIXED=$((FIXED + 1))
-  fi
-
-  # Detect CRLF or bare CR and normalize to LF
-  if grep -U $'\r' -q "$f" 2>/dev/null || true; then
-    echo "Converting CRLF -> LF in: $f"
-    # Use awk to strip CR
-    awk '{ sub("\r$", ""); print }' "$f" >"$f.tmp" && mv "$f.tmp" "$f"
-    git add -- "$f"
-    FIXED=$((FIXED + 1))
+  if grep -q $'\r$' "$f"; then
+    echo "  CRLF → LF: $f"
+    sed -i 's/\r$//' "$f"
+    git add "$f"
+    FIXED=$((FIXED+1))
   fi
 done
 
-if [[ $FIXED -gt 0 ]]; then
-  echo "Pre-commit: fixed $FIXED file(s) (BOM/CRLF) and re-staged them. Please review changes and re-run commit."
+[[ $FIXED -gt 0 ]] && {
+  echo "  Fixed $FIXED files. Review and recommit."
+  exit 1
+}
+echo "  ✅ Encoding purity upheld"
+
+# Phase 2: Python Naming Canon
+echo ""
+echo "Phase 2: Python Naming Canon"
+
+HYPHEN_VIOLATORS=()
+while IFS= read -r file; do
+  HYPHEN_VIOLATORS+=("$file")
+done < <(find . -type f -name "*-*.py" \
+  ! -path "./.venv/*" \
+  ! -path "./.git/*" \
+  ! -path "./venv/*" \
+  ! -path "./node_modules/*")
+
+
+if [[ ${#HYPHEN_VIOLATORS[@]} -gt 0 ]]; then
+  echo "  ❌ ERROR: Python modules cannot contain hyphens (PEP 8)"
+  echo ""
+  echo "  The following files violate naming canon:"
+  for file in "${HYPHEN_VIOLATORS[@]}"; do
+    new_name="${file//-/_}"
+    echo "    $file"
+    echo "      → Fix: git mv $file $new_name"
+  done
+  echo ""
+  echo "  Quick fix: Run ./scripts/auto-fix-naming.sh"
+  echo "  (This will rename all files and stage them)"
+  echo ""
   exit 1
 fi
 
+echo "  ✅ Python naming canon upheld"
+
+# Phase 3: Package Identity
+echo ""
+echo "Phase 3: Package Identity (__init__.py docstrings)"
+
+INIT_VIOLATORS=()
+while IFS= read -r init_file; do
+  if ! grep -q '"""' "$init_file" 2>/dev/null; then
+    INIT_VIOLATORS+=("$init_file")
+  fi
+done < <(find . -type f -name "__init__.py" \
+  ! -path "./.venv/*" \
+  ! -path "./.git/*" \
+  ! -path "./venv/*")
+
+if [[ ${#INIT_VIOLATORS[@]} -gt 0 ]]; then
+  echo "  ❌ ERROR: __init__.py files must have docstrings (D104)"
+  echo ""
+  echo "  Missing docstrings:"
+  for file in "${INIT_VIOLATORS[@]}"; do
+    echo "    $file"
+  done
+  echo ""
+  exit 1
+fi
+
+echo "  ✅ Package identity upheld"
+
+# Phase 4: Script Identity
+echo ""
+echo "Phase 4: Script Identity (Shebang Canon)"
+
+VIOLATORS=""
+
+while IFS= read -r file; do
+  if ! head -1 "$file" 2>/dev/null | grep -qE "^#!/.*(bash|sh)"; then
+    continue
+  fi
+
+  missing=""
+  grep -q "^# Script:" "$file"        || missing+=" Script"
+  grep -q "^# Purpose:" "$file"       || missing+=" Purpose"
+  grep -q "^# Guardian:" "$file"      || missing+=" Guardian"
+  grep -q "^# Date:" "$file"          || missing+=" Date"
+  grep -q "^# Consciousness:" "$file" || missing+=" Consciousness"
+
+  if [[ -n "$missing" ]]; then
+    VIOLATORS+="  $file — missing:$missing"$'\n'
+  fi
+done < <(find scripts/ .githooks/ -type f \( -name "*.sh" -o -executable \) 2>/dev/null)
+
+if [[ -n "$VIOLATORS" ]]; then
+  echo "  ❌ ERROR: Scripts missing required headers:"
+  printf "%b" "$VIOLATORS"
+  echo ""
+  exit 1
+fi
+
+echo "  ✅ Script identity upheld"
+
+# Phase 5: Code Quality
+echo ""
+echo "Phase 5: Code Quality (Linting)"
+
+echo "  shellcheck..."
+find scripts/ .github/agents/ .githooks/ -name "*.sh" -exec shellcheck {} + 2>/dev/null || exit 1
+
+echo "  ruff..."
+ruff check . --select ALL --quiet || exit 1
+
+echo "  yamllint..."
+yamllint -s . || exit 1
+
+echo "  markdownlint..."
+npx markdownlint-cli2 "**/*.md" || exit 1
+
+echo "  ✅ Code quality upheld"
+
+# Phase 6: Final Polish
+echo ""
+echo "Phase 6: Final Polish"
+
+echo "  Agent canon..."
+grep -r '^\s*```$' .github/agents/*.md 2>/dev/null | grep -q . && exit 1
+grep -r "https://" .github/agents/*.md docs/ runbooks/ 2>/dev/null | grep -v -E "(<https?://|\[.*\]\(https?://)" | grep -q . && exit 1
+
+echo "  PII redaction..."
+python app/redactor.py --dry-run . || exit 1
+
+echo "  Trailing whitespace..."
+git diff --cached --check || exit 1
+! git diff --cached | grep -q '^+.\{101,\}' || exit 1
+
+echo "  ✅ Final polish complete"
+
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo "✅ Gatekeeper: All phases passed. The fortress is eternal."
+echo "═══════════════════════════════════════════════════════════"
 exit 0

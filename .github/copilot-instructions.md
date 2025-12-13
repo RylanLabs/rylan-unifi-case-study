@@ -9,7 +9,7 @@ applyTo: "**/*"
 ## Carter (Identity)
 - All identity operations MUST reference eternal-resurrect.sh or LDAP
 - Never generate anonymous or hardcoded users
-- Always validate email format: user@rylan.internal
+- Always validate email format: `user@rylan.internal`
 - Email regex: ^[a-zA-Z0-9._%+-]+@rylan\.internal$
 
 ## Bauer (Verification)

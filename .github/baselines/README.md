@@ -14,7 +14,7 @@ beale-update-baseline.sh --approve
 
 # Check for drift
 diff .github/baselines/firewall.txt <(iptables-save)
-```
+```text
 
 ## Format
 One entry per line, sorted, no comments.

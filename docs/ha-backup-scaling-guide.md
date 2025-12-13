@@ -50,7 +50,7 @@ Each path includes deployment steps, cost analysis, and RTO/RPO targets.
 │         │ - Weekly full (4 weeks)         │              │
 │         └──────────────────────────────────┘              │
 └─────────────────────────────────────────────────────────────┘
-```
+```text
 
 RTO: 15 min | RPO: 1 hour
 
@@ -66,7 +66,7 @@ sudo apt update && sudo apt install -y nfs-kernel-server rsync
 sudo mkdir -p /srv/nfs/backups
 sudo chown nobody:nogroup /srv/nfs/backups
 sudo chmod 777 /srv/nfs/backups
-```
+```text
 
 1. **Export NFS share**
 
@@ -74,7 +74,7 @@ sudo chmod 777 /srv/nfs/backups
 echo '/srv/nfs/backups 192.168.1.0/24(rw,sync,no_subtree_check)' | sudo tee -a /etc/exports
 sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
-```
+```text
 
 1. **Configure cron on each source host**
 
@@ -82,14 +82,14 @@ sudo systemctl restart nfs-kernel-server
 # On rylan-dc, rylan-pi, rylan-ai
 sudo crontab -e
 # Add: 0 */6 * * * /path/to/orchestrator.sh >> /var/log/backup.log 2>&1
-```
+```text
 
 1. **Monitor with check-critical-services.sh**
 
 ```bash
 # Verify backup freshness every 15 minutes
 */15 * * * * /03-validation-ops/check-critical-services.sh
-```
+```text
 
 ### Cost Analysis (Path A)
 
@@ -142,7 +142,7 @@ sudo crontab -e
 │         │ (optional: weekly full backup)  │                        │
 │         └─────────────────────────────────┘                        │
 └──────────────────────────────────────────────────────────────────────┘
-```
+```text
 
 RTO: 5 min | RPO: 1 hour | Geo-redundancy: Yes
 
@@ -157,7 +157,7 @@ RTO: 5 min | RPO: 1 hour | Geo-redundancy: Yes
 
 sudo apt install -y nfs-kernel-server rsync
 sudo mkdir -p /srv/nfs/backups
-```
+```text
 
 1. **Set up replication via rsync daemon**
 
@@ -171,7 +171,7 @@ sudo mkdir -p /srv/nfs/backups
 
 # On secondary: cron job
 0 * * * * rsync -avz primary:/srv/nfs/backups/ /srv/nfs/backups/
-```
+```text
 
 1. **Configure failover via VIP (Virtual IP)**
 
@@ -185,7 +185,7 @@ sudo apt install -y keepalived
 
 # All sources use NFS mount to 192.168.1.100
 mount -t nfs 192.168.1.100:/srv/nfs/backups /mnt/backups
-```
+```text
 
 1. **Add S3 mirror (weekly full backup)**
 
@@ -193,7 +193,7 @@ mount -t nfs 192.168.1.100:/srv/nfs/backups /mnt/backups
 # Optional: MinIO or AWS S3
 # Cron on secondary: weekly full sync to S3
 0 2 * * 0 aws s3 sync /srv/nfs/backups s3://eternal-backups/ --delete
-```
+```text
 
 ### Cost Analysis (Path B)
 
@@ -250,7 +250,7 @@ mount -t nfs 192.168.1.100:/srv/nfs/backups /mnt/backups
 │                    │ - Multi-site ready    │                         │
 │                    └───────────────────────┘                         │
 └────────────────────────────────────────────────────────────────────────┘
-```
+```text
 
 RTO: <60 sec | RPO: Real-time | Availability: 99.95%
 
@@ -266,7 +266,7 @@ sudo apt install -y nfs-kernel-server minio
 MINIO_ROOT_USER=admin
 MINIO_ROOT_PASSWORD=$(openssl rand -base64 32)
 MINIO_VOLUMES=/mnt/data{1..4}
-```
+```text
 
 1. **Deploy at Site B (Secondary)**
 
@@ -274,7 +274,7 @@ MINIO_VOLUMES=/mnt/data{1..4}
 # Mirror configuration
 # NFS replicates from Site A every 15 minutes
 # S3 bucket replicates in real-time via cross-region replication
-```
+```text
 
 1. **Configure S3 cross-region replication**
 
@@ -283,7 +283,7 @@ MINIO_VOLUMES=/mnt/data{1..4}
 mc mb --region us-east eternal-prod
 mc version enable eternal-prod
 mc replicate add eternal-prod --replicate-to arn:aws:s3:::eternal-prod-dr
-```
+```text
 
 1. **Implement real-time sync with Loki/Vector**
 
@@ -292,7 +292,7 @@ mc replicate add eternal-prod --replicate-to arn:aws:s3:::eternal-prod-dr
 clients:
   - url: https://loki.site-a.local/loki/api/v1/push
   - url: https://loki.site-b.local/loki/api/v1/push  # Async mirror
-```
+```text
 
 ### Cost Analysis (Path C)
 
@@ -374,7 +374,7 @@ for host in rylan-dc rylan-pi rylan-ai; do
     alert "Backup stale for $host: ${age}s old"
   fi
 done
-```
+```text
 
 ### Restore Procedure (Path A)
 
@@ -384,7 +384,7 @@ BACKUP_DATE=20251203
 cd /srv/nfs/backups/${BACKUP_DATE}_*_rylan-dc/samba
 rsync -avz ./ root@rylan-dc:/var/lib/samba/ --backup-dir=/var/lib/samba.bak
 systemctl restart smbd
-```
+```text
 
 ### Failover Procedure (Path B/C)
 
@@ -394,7 +394,7 @@ systemctl restart smbd
 ip addr show | grep 192.168.1.100
 # If on secondary, primary has failed
 # Promote secondary to primary in MinIO replication
-```
+```text
 
 ---
 

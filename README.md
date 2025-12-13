@@ -24,7 +24,7 @@ git push                    # Only reaches GitHub if Gatekeeper passes
 
 # Or manual full deployment
 ./eternal-resurrect.sh      # Full deployment: Carter → Bauer → Beale → Whitaker
-```
+```text
 
 **Current Status**:
 - **Drift**: Zero (continuous reconciliation)
@@ -101,13 +101,13 @@ flowchart TD
         GK -->|Exit 1| Fix[Fix Issues Locally]
         Fix --> GK
     end
-    
+
     subgraph CI["☁️ GitHub Actions"]
         Push --> CI_Gate{CI Pipeline}
         CI_Gate -->|Pass| Merge[Merge to Main]
         CI_Gate -->|Fail| Reject[PR Blocked]
     end
-    
+
     subgraph DEPLOY["🏰 Production Deployment"]
         Merge --> Resurrect[./eternal-resurrect.sh]
         Resurrect --> Carter[🔑 Carter<br>Identity + SSH Keys]
@@ -116,12 +116,12 @@ flowchart TD
         Beale --> Whitaker[🩸 Whitaker<br>21 Attack Vectors]
         Whitaker --> Done([✅ Fortress Secured])
     end
-    
+
     subgraph RECOVERY["🔄 Emergency Recovery"]
         Breach([Breach Detected]) --> Rollback[./rollback.sh]
         Rollback --> Resurrect
     end
-    
+
     style Start fill:#030,stroke:#0f0,color:#fff
     style GK fill:#036,stroke:#0af,color:#fff
     style Done fill:#030,stroke:#0f0,color:#fff
@@ -130,13 +130,13 @@ flowchart TD
     style Bauer fill:#063,stroke:#0fa,color:#fff
     style Beale fill:#306,stroke:#a0f,color:#fff
     style Whitaker fill:#603,stroke:#f0a,color:#fff
-```
+```text
 
 ---
 
 ## Repository Structure
 
-```
+```text
 .
 ├── eternal-resurrect.sh              # Main orchestration (Carter→Bauer→Beale→Whitaker)
 ├── gatekeeper.sh                     # Local CI pre-flight ($0 cost, blocks unsafe pushes)
@@ -193,7 +193,7 @@ flowchart TD
 ├── docs/                             # Canon & troubleshooting
 │   └── canon/README.md               # 10 eternal attachments + architecture
 └── requirements.txt                  # Pinned deps (bandit zero HIGH/MEDIUM)
-```
+```text
 
 ---
 
@@ -235,7 +235,7 @@ All commits validated **locally** before reaching GitHub:
 │   └── bandit -c .bandit -r . -f json (YAML parse check)
 └── Smoke test resurrection
     └── DRY_RUN=1 CI=true ./eternal-resurrect.sh (orchestration dry-run)
-```
+```text
 
 **Result**: Zero unclean code reaches GitHub. All CI runs are green.
 
@@ -244,7 +244,7 @@ All commits validated **locally** before reaching GitHub:
 chmod +x gatekeeper.sh
 # Optional: Auto-block unsafe pushes via pre-push hook
 # Hook already created at: .git/hooks/pre-push
-```
+```text
 
 ### Full Deployment Stages
 
@@ -311,12 +311,12 @@ chmod +x gatekeeper.sh
 ```bash
 ./gatekeeper.sh              # Full CI validation locally ($0 cost)
 # Exit 0 = safe to push; Exit 1 = fix locally, don't push
-```
+```text
 
 ### Full Deployment (All Guardians)
 ```bash
 ./eternal-resurrect.sh       # Deploys Carter → Bauer → Beale → Whitaker
-```
+```text
 
 ### Individual Guardian Deployment
 ```bash
@@ -325,7 +325,7 @@ chmod +x gatekeeper.sh
 ./runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh    # Bauer only
 ./runbooks/ministry-detection/rylan-beale-eternal-one-shot.sh   # Beale only
 ./scripts/simulate-breach.sh                                     # Whitaker only
-```
+```text
 
 ### Validation Only (No Changes)
 ```bash
@@ -333,7 +333,7 @@ chmod +x gatekeeper.sh
 ./eternal-resurrect.sh --validate  # Dry-run all ministries
 ./scripts/validate-isolation.sh    # nmap VLAN checks
 ./scripts/diagnose-bandit.sh       # Bandit heresy isolation
-```
+```text
 
 ### Drift Detection & Remediation
 ```bash
@@ -341,7 +341,7 @@ chmod +x gatekeeper.sh
 ./eternal-resurrect.sh --drift-check        # Compare state vs config
 ./eternal-resurrect.sh --force              # Reconcile drift
 ./rollback.sh                               # <15 min full revert
-```
+```text
 
 ### AI Summoning (VS Code Copilot)
 ```text
@@ -353,7 +353,7 @@ chmod +x gatekeeper.sh
 @Lorek Generate deployment checklist                       # Lore-based walkthrough
 @Eye Check consciousness level                            # Meta-metrics report
 @Namer Tag this commit with consciousness 3.8             # Semantic versioning
-```
+```text
 
 ---
 
@@ -366,7 +366,7 @@ UNIFI_ADMIN_PASS=${{ secrets.UNIFI_ADMIN_PASS }}  # CI/Prod (gitignored)
 DRY_RUN=1                   # Smoke mode (skip actual changes)
 CI=true                     # Mock audits (GitHub Actions)
 DRIFT_INTERVAL=300          # Drift check frequency (seconds)
-```
+```text
 
 ### Gatekeeper Rules
 Edit `gatekeeper.sh` to customize:
@@ -455,7 +455,7 @@ chmod +x gatekeeper.sh .git/hooks/pre-push
 # Validate environment
 ./gatekeeper.sh          # Full local CI ($0 cost)
 ./eternal-resurrect.sh --validate
-```
+```text
 
 ### Workflow
 1. Create feature branch from `refactor/zero-drift-ascension-v2`
@@ -486,7 +486,7 @@ chmod +x gatekeeper.sh .git/hooks/pre-push
 bandit -r . -f json | jq '.results[] | select(.severity == "HIGH" or .severity == "MEDIUM")'
 # Fix issues, re-run
 ./gatekeeper.sh                   # Retry
-```
+```text
 
 ### CI Workflow Fails
 **Issue**: GitHub Actions ci-validate.yaml fails  
@@ -498,7 +498,7 @@ bandit -r . -f json | jq '.results[] | select(.severity == "HIGH" or .severity =
 # Re-run locally with stricter Gatekeeper rules
 ./gatekeeper.sh                   # Validate locally
 git push                          # Retry
-```
+```text
 
 ### Deployment Fails at Carter Stage
 **Issue**: SSH key provisioning fails  
@@ -510,7 +510,7 @@ echo "password" > .secrets/unifi-admin-pass   # Local dev
 chmod 600 .secrets/unifi-admin-pass
 export UNIFI_ADMIN_PASS="prod-password"       # CI/Prod
 ./eternal-resurrect.sh carter
-```
+```text
 
 ### Deployment Fails at Bauer Stage
 **Issue**: Verification gates fail (e.g., nmap VLAN leak)  
@@ -521,7 +521,7 @@ export UNIFI_ADMIN_PASS="prod-password"       # CI/Prod
 ./scripts/validate-isolation.sh  # Isolate leak
 # Review firewall-rules.yaml
 ./eternal-resurrect.sh bauer     # Retry
-```
+```text
 
 ### Deployment Fails at Beale Stage
 **Issue**: Drift detection init fails  
@@ -532,7 +532,7 @@ export UNIFI_ADMIN_PASS="prod-password"       # CI/Prod
 systemctl list-units --state=running | wc -l
 snort -T -c /etc/snort/snort.conf
 ./eternal-resurrect.sh beale
-```
+```text
 
 ### Deployment Fails at Whitaker Stage
 **Issue**: Offensive validation fails (21 vectors: 3 exploits succeeded)  
@@ -543,7 +543,7 @@ snort -T -c /etc/snort/snort.conf
 ./scripts/simulate-breach.sh --dry-run  # Preview vectors
 ./scripts/validate-isolation.sh         # Fix leaks
 ./eternal-resurrect.sh whitaker
-```
+```text
 
 **Emergency Recovery**: Physical console → `./eternal-resurrect.sh` (one-command from ISO).
 

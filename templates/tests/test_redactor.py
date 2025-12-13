@@ -5,7 +5,7 @@ Validates Presidio integration and regex fallback for sensitive data:
 """
 
 import pytest
-from app.redactor import redact_pii, PATTERNS
+from app.redactor import redact_pii
 
 
 class TestRedactorPatterns:

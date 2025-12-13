@@ -1,0 +1,35 @@
+name: Beale Hardening Validation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  beale-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run Beale Hardener (CI)
+        run: |
+          bash scripts/beale-harden.sh --ci || exit 1
+
+      - name: Validate Beale Report
+        if: always()
+        run: |
+          ls -la
+          bash scripts/ci-validate-beale-report.sh
+
+      - name: Upload Beale Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beale-reports
+          path: beale-report-*.json

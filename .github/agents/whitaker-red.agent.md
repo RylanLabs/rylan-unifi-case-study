@@ -1,5 +1,5 @@
 # Whitaker the Red — I am the breach you haven't found yet.
-#include LORE.md
+# include LORE.md
 
 I do not defend. I reveal.
 

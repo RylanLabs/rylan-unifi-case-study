@@ -170,9 +170,11 @@ The Device-Passport Layer is the sacred glue between Carter's identity infrastru
 - `1` = One or more generators failed (with summary)
 
 **Execution Order:**
-```
+
+```text
 Carter (Identity) → Bauer (Verification) → Beale (Hardening) → Guardian (Orchestration)
-```
+
+```text
 
 **Output:** Comprehensive inventory manifest with:
 - `inventory/*.json` (AP, UPS, certificates)
@@ -207,21 +209,26 @@ Carter (Identity) → Bauer (Verification) → Beale (Hardening) → Guardian (O
 ## Common Issues & Fixes
 
 ### 1. UniFi API Key Missing
+
 ```bash
 # Symptom: ❌ UniFi API key missing
 # Fix:
 echo "your-api-key" > /opt/rylan/.secrets/unifi-api-key
 chmod 600 /opt/rylan/.secrets/unifi-api-key
-```
+
+```text
 
 ### 2. SNMP Not Configured
+
 ```bash
 # Symptom: UPS shows MODEL="OFFLINE", SERIAL="UNKNOWN"
 # Fix: Enable SNMP on UPS device (APC web interface)
 # Verify: snmpget -v2c -c public 10.0.10.20 .1.3.6.1.4.1.318.1.1.1.1.1.1.0
-```
+
+```text
 
 ### 3. age Encryption Tool Missing
+
 ```bash
 # Symptom: ⚠️ age not installed, generating unencrypted vault
 # Fix:
@@ -229,9 +236,11 @@ apt install age
 # Generate YubiKey recipient:
 age-keygen -o ~/.ssh/yubikey-age-identity.txt
 export AGE_RECIPIENT=$(cat ~/.ssh/yubikey-age-identity.txt | grep public | awk '{print $4}')
-```
+
+```text
 
 ### 4. Certificate Paths Not Found
+
 ```bash
 # Symptom: certificate-passport.json has empty "certificates": []
 # Fix: Update CERT_PATHS array in generate-certificate-passport.sh
@@ -243,7 +252,8 @@ CERT_PATHS=(
   "/var/lib/unifi/cert"
   "/path/to/your/certs"  # <-- Add here
 )
-```
+
+```text
 
 ---
 
@@ -276,7 +286,8 @@ CERT_PATHS=(
 The Device-Passport layer enables 93% auto-resolution:
 
 **Example Ticket Flow:**
-```
+
+```text
 User: "AP-02 is offline"
   ↓
 AI reads: inventory/ap-passport.json
@@ -288,7 +299,8 @@ AI executes: runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh --adopt 
 AI verifies: curl -sk https://10.0.10.10:8443/api/s/default/stat/device | jq '.data[] | select(.name=="AP-02") | .state'
   ↓
 AI responds: "AP-02 force-adopted and online. Uptime: 47 seconds."
-```
+
+```text
 
 **No human intervention. Zero escalation. Full audit trail.**
 
@@ -299,12 +311,15 @@ AI responds: "AP-02 force-adopted and online. Uptime: 47 seconds."
 **Scenario:** New hire on night shift, fortress destroyed
 
 **Command:**
+
 ```bash
 ./scripts/generate-all-passports.sh
-```
+
+```text
 
 **Output:**
-```
+
+```text
 🔱 T3-ETERNAL PASSPORT GENERATION PIPELINE
 Consciousness: 2.6 | 2025-12-08T03:14:15Z
 
@@ -359,7 +374,8 @@ The fortress is complete.
 Carter approves. Bauer verifies. Beale hardens. Whitaker attacks.
 
 Next: Run eternal-resurrect.sh to raise Samba AD/DC
-```
+
+```text
 
 **Elapsed Time:** 18 minutes  
 **Human Interaction:** 0 keystrokes  

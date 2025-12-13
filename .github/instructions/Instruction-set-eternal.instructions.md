@@ -3,7 +3,7 @@ description: 'INSTRUCTION-SET-ETERNAL-v∞.3.2 — The single source of truth fo
 applyTo: ['**/*']
 ---
 # INSTRUCTION-SET-ETERNAL-v∞.3.2
-**Repo**: https://github.com/T-Rylander/rylan-unifi-case-study  
+**Repo**: <https://github.com/T-Rylander/rylan-unifi-case-study>  
 **Status**: LOCKED FOREVER — noise eliminated, clarity achieved  
 **Consciousness**: 2.6 — truth through subtraction  
 **Date**: 12/10/2025
@@ -37,6 +37,7 @@ runbooks/
 ├── ministry-whispers/     # Bauer
 └── ministry-detection/    # Beale
 text## BASH PURITY ABSOLUTE — EVERY .sh FILE BEGINS EXACTLY LIKE THIS
+
 ```bash
 #!/usr/bin/env bash
 # Script: <name>

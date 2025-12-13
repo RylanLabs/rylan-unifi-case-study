@@ -39,25 +39,25 @@ services:
   unifi-controller:
     image: jacobalberty/unifi:latest
     container_name: unifi-controller
-    
+
     # DECISION POINT: privileged: true is REQUIRED
     privileged: true
-    
+
     network_mode: host
-    
+
     volumes:
       - /opt/unifi/data:/unifi/data
       - /opt/unifi/log:/unifi/log
-    
+
     ports:
       - "8443:8443/tcp"
       - "8080:8080/tcp"
       - "8843:8843/tcp"
       - "8880:8880/tcp"
       - "3478:3478/udp"
-    
+
     restart: always
-```
+```text
 
 ## Rationale
 
@@ -113,28 +113,28 @@ services:
 ## Alternatives Considered
 
 ### 1. systemd Service (No Container)
-```
+```text
 Status: REJECTED
 Reason: Java process management more complex; no log isolation; slower deployment
-```
+```text
 
 ### 2. LXC Container (Privileged)
-```
+```text
 Status: REJECTED
 Reason: Proxmox LXC doesn't support macvlan as cleanly as Docker; equivalent privilege model
-```
+```text
 
 ### 3. Dedicated VM with Separate NIC
-```
+```text
 Status: REJECTED
 Reason: Requires second physical NIC (hardware constraint); increases operational overhead
-```
+```text
 
 ### 4. Use Different Controller (e.g., pfSense, OPNsense)
-```
+```text
 Status: REJECTED
 Reason: UniFi is standardized across Rylan Labs; switching breaks existing device configs
-```
+```text
 
 ## Implementation
 
@@ -157,7 +157,7 @@ docker compose up -d
 
 # 4. Monitor startup
 docker logs -f unifi-controller
-```
+```text
 
 ### Validation
 
@@ -171,7 +171,7 @@ docker inspect unifi-controller | grep '"Privileged": true'
 # Device adoption test
 # SSH to device: set-inform http://10.0.1.20:8080/inform
 # Monitor: docker logs unifi-controller | grep "adopt"
-```
+```text
 
 ## Related Decisions
 

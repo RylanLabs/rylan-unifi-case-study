@@ -1,10 +1,11 @@
 """Extended tests for redactor.py Presidio integration and edge cases."""
+
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 import sys
 
 # Add app to path
-sys.path.insert(0, '/home/egx570/repos/rylan-unifi-case-study')
+sys.path.insert(0, "/home/egx570/repos/rylan-unifi-case-study")
 
 from app.redactor import redact_pii, is_pii_present, redact_file
 
@@ -44,7 +45,7 @@ class TestPresidioFallbackPath(unittest.TestCase):
         # IPv4
         self.assertTrue(is_pii_present("Server: 192.168.1.1"))
         self.assertFalse(is_pii_present("Server at port 80"))
-        
+
         # IPv6
         self.assertTrue(is_pii_present("Device: 2001:0db8:85a3::8a2e:0370:7334"))
 
@@ -138,7 +139,7 @@ class TestMacAddressRedactionVariants(unittest.TestCase):
         self.assertIn("[REDACTED]", result_upper)
         self.assertIn("[REDACTED]", result_lower)
 
-    def test_multiple_macs_same_string(self):
+    def test_multiple_macs_same_string(self) -> None:
         """Multiple MAC addresses in one string."""
         text = "Device1: 00:11:22:33:44:55 Device2: aa:bb:cc:dd:ee:ff"
         result = redact_pii(text, method="regex")
@@ -171,10 +172,10 @@ class TestComprehensivePIIPatterns(unittest.TestCase):
         """Test IPv6 full and compressed formats."""
         full = "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
         compressed = "2001:db8:85a3::8a2e:370:7334"
-        
+
         result_full = redact_pii(full, method="regex")
         result_compressed = redact_pii(compressed, method="regex")
-        
+
         # Both should be redacted
         self.assertIn("[REDACTED]", result_full)
         self.assertIn("[REDACTED]", result_compressed)

@@ -61,16 +61,16 @@ jobs:
       - name: Verify Trinity sequencing (Secrets → Whispers → Detection)
         run: |
           echo "Checking ignite.sh phase order..."
-          
+
           SECRETS_LINE=$(grep -n "ministry-secrets" scripts/ignite.sh | head -1 | cut -d: -f1)
           WHISPERS_LINE=$(grep -n "ministry-whispers" scripts/ignite.sh | head -1 | cut -d: -f1)
           DETECTION_LINE=$(grep -n "ministry-detection" scripts/ignite.sh | head -1 | cut -d: -f1)
-          
+
           if [[ -z "$SECRETS_LINE" || -z "$WHISPERS_LINE" || -z "$DETECTION_LINE" ]]; then
             echo "❌ Missing phase references"
             exit 1
           fi
-          
+
           if [[ $SECRETS_LINE -lt $WHISPERS_LINE ]] && [[ $WHISPERS_LINE -lt $DETECTION_LINE ]]; then
             echo "✓ Phase sequence verified: Secrets ($SECRETS_LINE) → Whispers ($WHISPERS_LINE) → Detection ($DETECTION_LINE)"
           else
@@ -93,7 +93,7 @@ jobs:
             echo "❌ Missing 'set -euo pipefail' in ignite.sh"
             exit 1
           fi
-          
+
           EXIT_COUNT=$(grep -c "exit 1" scripts/ignite.sh || echo 0)
           if [[ $EXIT_COUNT -ge 1 ]]; then
             echo "✓ Exit-on-fail enabled ($EXIT_COUNT occurrences)"

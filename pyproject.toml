@@ -3,7 +3,7 @@
 name = "rylan-unifi-case-study"
 version = "5.0.0"
 
-# Pytest configuration (ensure parser reads clean TOML)
+# Pytest configuration
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
@@ -14,7 +14,16 @@ cache_dir = ".pytest_cache"
 exclude_dirs = ["inventory", "tests"]
 skips = ["B404", "B603", "B607", "B110"]
 
+# Mypy configuration
 [tool.mypy]
 [[tool.mypy.overrides]]
 module = ["presidio_analyzer", "presidio_anonymizer"]
 ignore_missing_imports = true
+
+# Ruff configuration
+[tool.ruff.lint]
+extend-ignore = ["PT009", "PT027"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PT009", "PT027", "ANN"]
+"templates/tests/**/*.py" = ["ANN"]

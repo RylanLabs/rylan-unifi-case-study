@@ -4,7 +4,7 @@ Validates HTTP request formatting, endpoint handling, and response parsing.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch, ANY
+from unittest.mock import MagicMock, patch
 import requests
 from shared.unifi_client import UniFiClient
 
@@ -74,7 +74,9 @@ class TestUniFiClientRequests:
     def test_put_request(self, mock_session_func):
         """Test PUT request for updates."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"data": {"id": "existing_id", "updated": True}}
+        mock_response.json.return_value = {
+            "data": {"id": "existing_id", "updated": True}
+        }
         mock_session = MagicMock()
         mock_session.request.return_value = mock_response
         mock_session_func.return_value = mock_session
@@ -117,7 +119,9 @@ class TestUniFiClientNetworkMethods:
     def test_create_network(self, mock_session_func):
         """create_network() creates and returns network."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"data": {"_id": "new_id", "name": "VLAN40", "vlan": 40}}
+        mock_response.json.return_value = {
+            "data": {"_id": "new_id", "name": "VLAN40", "vlan": 40}
+        }
         mock_session = MagicMock()
         mock_session.request.return_value = mock_response
         mock_session_func.return_value = mock_session
@@ -137,7 +141,9 @@ class TestUniFiClientErrorHandling:
     def test_request_http_error(self, mock_session_func):
         """HTTP errors are raised."""
         mock_response = MagicMock()
-        mock_response.raise_for_status.side_effect = requests.HTTPError("401 Unauthorized")
+        mock_response.raise_for_status.side_effect = requests.HTTPError(
+            "401 Unauthorized"
+        )
         mock_session = MagicMock()
         mock_session.request.return_value = mock_response
         mock_session_func.return_value = mock_session

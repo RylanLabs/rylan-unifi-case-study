@@ -29,7 +29,7 @@ Samba AD DNS (10.0.10.10:53) — Primary
 Pi-hole (10.0.10.11:53) — Separate IP/device (endgame)
   ↓ Block ads, forward to 1.1.1.1
 Internet DNS (1.1.1.1)
-```
+```text
 
 ### Hardware Separation
 

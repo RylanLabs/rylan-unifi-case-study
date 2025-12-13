@@ -49,7 +49,8 @@ Leo's red-team analysis identified 15 refinement priorities:
 ### From Monolith to Modular (LOC Reduction)
 
 **Current Structure**:
-```
+
+```text
 01-bootstrap/proxmox/
 └── proxmox-ignite.sh (520 LOC)
     ├── validate_prerequisites() [80 LOC]
@@ -60,10 +61,12 @@ Leo's red-team analysis identified 15 refinement priorities:
     ├── resurrect_fortress() [40 LOC]
     ├── validate_security() [90 LOC]
     └── Helper functions [logging, retries] [50 LOC]
-```
+
+```text
 
 **Target Structure**:
-```
+
+```text
 01-bootstrap/proxmox/
 ├── proxmox-ignite.sh (150 LOC) [orchestrator only]
 ├── quickstart.sh (80 LOC) [interactive wrapper]
@@ -94,7 +97,8 @@ tests/
 
 .github/workflows/
 └── ci-proxmox-ignite.yaml [7-stage pipeline, GREEN]
-```
+
+```text
 
 ### Modularization Principles
 
@@ -122,18 +126,21 @@ tests/
 ## III. DOCUMENTATION CONSOLIDATION
 
 ### Files to DELETE
-```
+
+```text
 DELIVERY-REPORT.md      # Meta-commentary, no operational value
 INDEX.md                # Redundant with README TOC
 SUMMARY.md              # Duplicates README overview
 ADVANCED-USAGE.md       # Merge into README troubleshooting
-```
+
+```text
 
 ### Files to CREATE/UPDATE
 
 #### 1. **README.md** (Consolidated, ~500 lines, <20 KB)
 
 **Structure**:
+
 ```markdown
 # Proxmox Bare-Metal Ignition
 
@@ -187,7 +194,8 @@ ADVANCED-USAGE.md       # Merge into README troubleshooting
 ## Support
 - Issue tracking
 - Contributing guidelines
-```
+
+```text
 
 **Key Requirements**:
 - Grep-friendly (clear section headers)
@@ -198,6 +206,7 @@ ADVANCED-USAGE.md       # Merge into README troubleshooting
 #### 2. **QUICK-REFERENCE.md** (One-page, <100 lines, <5 KB)
 
 **Structure**:
+
 ```markdown
 # Proxmox-Ignite Quick Reference
 
@@ -209,7 +218,8 @@ ADVANCED-USAGE.md       # Merge into README troubleshooting
 ## Testing
 ## Metrics
 ## Support
-```
+
+```text
 
 **Constraints**:
 - Must fit on single printed page (landscape)
@@ -285,7 +295,8 @@ ADVANCED-USAGE.md       # Merge into README troubleshooting
 # Test: openssl s_client -connect localhost:8006
 # Expected: Valid certificate chain or known self-signed
 # Severity: LOW - informational
-```
+
+```text
 
 **Exit Codes**:
 - `0` = All tests passed (fortress holds)
@@ -294,11 +305,13 @@ ADVANCED-USAGE.md       # Merge into README troubleshooting
 - `3` = Information only (no action needed)
 
 **CI Integration**:
+
 ```yaml
 - name: Offensive Security Tests
   run: ./tests/offensive/test-ignite-security.sh
   # Fail pipeline if exit code != 0
-```
+
+```text
 
 ---
 
@@ -333,22 +346,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install ShellCheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
-      
+
       - name: Lint main script
         run: shellcheck 01-bootstrap/proxmox/proxmox-ignite.sh
-      
+
       - name: Lint phase scripts
         run: shellcheck 01-bootstrap/proxmox/phases/*.sh
-      
+
       - name: Lint library scripts
         run: shellcheck 01-bootstrap/proxmox/lib/*.sh
-      
+
       - name: Lint test scripts
         run: shellcheck tests/**/*.sh
-      
+
       - name: Bandit security scan
         run: |
           pip install bandit
@@ -360,18 +373,18 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install test dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y nmap jq curl netcat-openbsd bc
-      
+
       - name: Run unit test suite
         run: ./tests/test-proxmox-ignite.sh
-      
+
       - name: Test dry-run mode
         run: ./01-bootstrap/proxmox/proxmox-ignite.sh --dry-run
-      
+
       - name: Test validate-only mode
         run: ./01-bootstrap/proxmox/proxmox-ignite.sh --validate-only
 
@@ -382,23 +395,23 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup KVM
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-kvm libvirt-daemon-system virtinst
           sudo systemctl start libvirtd
-      
+
       - name: Download Proxmox ISO
         run: |
           wget -q https://enterprise.proxmox.com/iso/proxmox-ve_8.2-1.iso \
             -O /tmp/proxmox.iso
-      
+
       - name: Create test VM
         run: |
           # QEMU minimal setup
           qemu-img create -f qcow2 /tmp/test-disk.qcow2 32G
-          
+
           timeout 600 qemu-system-x86_64 \
             -enable-kvm \
             -m 2048 -smp 2 \
@@ -408,9 +421,9 @@ jobs:
             -net nic -net user,hostfwd=tcp::2222-:22 \
             -nographic \
             &
-          
+
           sleep 600 || true
-      
+
       - name: Run ignition script (simulated)
         run: |
           # Dry-run in CI (avoid actual network changes)
@@ -419,7 +432,7 @@ jobs:
             --ip 10.0.99.10/24 \
             --gateway 10.0.99.1 \
             --dry-run
-      
+
       - name: Cleanup
         if: always()
         run: |
@@ -432,16 +445,16 @@ jobs:
     needs: unit-tests
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install offensive tools
         run: |
           sudo apt-get update
           sudo apt-get install -y nmap hydra sshpass docker.io
           sudo systemctl start docker
-      
+
       - name: Lint offensive test suite
         run: shellcheck tests/offensive/test-ignite-security.sh
-      
+
       - name: Run mock fortress security tests
         run: |
           # Create mock fortress container
@@ -450,12 +463,12 @@ jobs:
             -e SSH_ENABLE_ROOT=true \
             -e SSH_ENABLE_PASSWORD_AUTH=false \
             linuxserver/openssh-server
-          
+
           sleep 10
-          
+
           # Run offensive tests
           timeout 60 bash tests/offensive/test-ignite-security.sh localhost:2222 || true
-          
+
           # Cleanup
           docker stop mock-fortress || true
           docker rm mock-fortress || true
@@ -466,15 +479,15 @@ jobs:
     needs: unit-tests
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install benchmark tools
         run: |
           sudo apt-get update
           sudo apt-get install -y bc time
-      
+
       - name: Lint benchmark test
         run: shellcheck tests/performance/test-ignite-rto.sh
-      
+
       - name: Dry-run performance test
         run: |
           # Measure script load time
@@ -485,12 +498,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Verify README exists
         run: |
           [ -f "01-bootstrap/proxmox/docs/README.md" ] || exit 1
           [ -f "01-bootstrap/proxmox/docs/QUICK-REFERENCE.md" ] || exit 1
-      
+
       - name: Check documentation size
         run: |
           SIZE=$(du -sh 01-bootstrap/proxmox/docs/ | awk '{print $1}')
@@ -501,7 +514,7 @@ jobs:
             echo "❌ Documentation exceeds 30 KB limit"
             exit 1
           fi
-      
+
       - name: Verify code blocks are executable
         run: |
           # Check that bash snippets in markdown are valid
@@ -515,7 +528,7 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Generate test report
         run: |
           echo "# CI Summary" > /tmp/report.md
@@ -530,7 +543,7 @@ jobs:
           echo "| Documentation | ✅ PASS |" >> /tmp/report.md
           echo "| Metrics | ✅ PASS |" >> /tmp/report.md
           cat /tmp/report.md
-      
+
       - name: Upload metrics artifact
         uses: actions/upload-artifact@v3
         with:
@@ -555,7 +568,8 @@ jobs:
             echo "❌ SOME STAGES FAILED"
             exit 1
           fi
-```
+
+```text
 
 ---
 
@@ -581,7 +595,8 @@ if command -v python3 &>/dev/null && [ -f "${FORTRESS_ROOT}/guardian/audit-etern
       \"status\":\"operational\"
     }" || true  # Don't fail ignition if logging fails
 fi
-```
+
+```text
 
 #### 2. **Eternal-Resurrect → Bare-Metal Detection**
 
@@ -593,19 +608,19 @@ if ! command -v pveversion &>/dev/null; then
   echo "⚠️  BARE-METAL SYSTEM DETECTED"
   echo "Proxmox VE not installed — triggering bare-metal ignition..."
   echo ""
-  
+
   # Prompt for ignition parameters
   read -p "Hostname [rylan-dc]: " HOSTNAME
   read -p "IP/CIDR [10.0.10.10/26]: " IP_CIDR
   read -p "Gateway [10.0.10.1]: " GATEWAY
-  
+
   # Execute bare-metal ignition
   if [ -f "01-bootstrap/proxmox/proxmox-ignite.sh" ]; then
     ./01-bootstrap/proxmox/proxmox-ignite.sh \
       --hostname "${HOSTNAME:-rylan-dc}" \
       --ip "${IP_CIDR:-10.0.10.10/26}" \
       --gateway "${GATEWAY:-10.0.10.1}"
-    
+
     if [ $? -ne 0 ]; then
       echo "❌ BARE-METAL IGNITION FAILED"
       exit 1
@@ -614,14 +629,15 @@ if ! command -v pveversion &>/dev/null; then
     echo "❌ proxmox-ignite.sh not found"
     exit 1
   fi
-  
+
   echo ""
   echo "✅ BARE-METAL IGNITED — Continuing with fortress resurrection..."
   echo ""
 fi
 
 # Standard resurrection flow continues from here...
-```
+
+```text
 
 #### 3. **Orchestrator → Pre-Flight Validation**
 
@@ -643,7 +659,7 @@ validate_proxmox() {
     echo "    --ssh-key-source github:T-Rylander"
     exit 1
   fi
-  
+
   if ! systemctl is-active --quiet pveproxy; then
     log_error "Proxmox Web UI not responding"
     echo "Recovery: systemctl restart pveproxy"
@@ -653,7 +669,8 @@ validate_proxmox() {
 
 # Call at start of orchestrator
 validate_proxmox
-```
+
+```text
 
 ---
 
@@ -680,14 +697,15 @@ fail_with_context() {
   local error_code="$1"
   local error_msg="$2"
   local remediation="$3"
-  
+
   # Output structure:
   # [ERROR] FAILURE [ERR-XXX]: <error message>
   # Remediation: <specific fix steps>
   # Logs: /var/log/proxmox-ignite.log
   # Support: https://github.com/.../issues
 }
-```
+
+```text
 
 ### Rollback Mechanism
 
@@ -711,9 +729,9 @@ rollback_all() {
     log_error "No rollback available"
     return 1
   fi
-  
+
   log_warn "ROLLING BACK ALL CHANGES"
-  
+
   # Restore all .bak files (in reverse timestamp order)
   find "${BACKUP_DIR}" -name "*.bak" -type f -printf '%T@\t%p\n' | \
     sort -rn | cut -f2 | while read -r backup; do
@@ -723,10 +741,10 @@ rollback_all() {
       log_info "Restored: $(basename "$original")"
     fi
   done
-  
+
   # Restart affected services
   systemctl restart sshd networking pveproxy || true
-  
+
   log_success "Rollback complete"
 }
 
@@ -735,7 +753,7 @@ trap 'rollback_prompt' ERR
 rollback_prompt() {
   local line_no=$1
   log_error "IGNITION FAILED at line ${line_no}"
-  
+
   if [ -f "${ROLLBACK_MARKER}" ]; then
     read -p "Rollback changes? [y/N]: " -n 1 -r
     echo
@@ -743,10 +761,11 @@ rollback_prompt() {
       rollback_all
     fi
   fi
-  
+
   exit 1
 }
-```
+
+```text
 
 ---
 
@@ -757,6 +776,7 @@ rollback_prompt() {
 **File**: `/var/log/proxmox-ignite-metrics.json`
 
 **Schema**:
+
 ```json
 {
   "ignition_start": "2025-12-05T14:30:00Z",
@@ -825,7 +845,8 @@ rollback_prompt() {
     "kernel": "5.15.0-1-pve"
   }
 }
-```
+
+```text
 
 ### Metrics Calculation & Display
 
@@ -838,19 +859,19 @@ finalize_metrics() {
   local rto_minutes=$(echo "scale=2; $total_duration / 60" | bc)
   local target_rto=900  # 15 minutes
   local compliant=$([ $total_duration -le $target_rto ] && echo "true" || echo "false")
-  
+
   # Update metrics JSON
   jq --arg end "$(date -Iseconds)" \
      --arg duration "$total_duration" \
      --arg rto_minutes "$rto_minutes" \
      --arg compliant "$compliant" \
-    '.ignition_end = $end | 
-     .total_duration = ($duration | tonumber) | 
-     .rto_minutes = ($rto_minutes | tonumber) | 
+    '.ignition_end = $end |
+     .total_duration = ($duration | tonumber) |
+     .rto_minutes = ($rto_minutes | tonumber) |
      .rto_compliant = ($compliant | fromjson)' \
     "$METRICS_FILE" > "${METRICS_FILE}.tmp" && \
     mv "${METRICS_FILE}.tmp" "$METRICS_FILE"
-  
+
   # Display summary
   echo ""
   echo "╔══════════════════════════════════════════════════════════════╗"
@@ -859,24 +880,25 @@ finalize_metrics() {
   echo ""
   echo "Total Duration: ${total_duration}s (${rto_minutes} minutes)"
   echo "Target RTO:    900s (15 minutes)"
-  
+
   if [ "$compliant" = "true" ]; then
     echo -e "${GREEN}✅ RTO COMPLIANT${NC}: ${total_duration}s < 900s"
   else
     echo -e "${RED}❌ RTO VIOLATION${NC}: ${total_duration}s > 900s"
   fi
-  
+
   echo ""
   echo "Phase Breakdown:"
   jq -r '.phases | to_entries[] | "  \(.key | ascii_upcase): \(.value.duration)s (\(.value.status))"' \
     "$METRICS_FILE"
-  
+
   echo ""
   echo "Security Score: $(jq -r '.phases.validation_audit.security_score' "$METRICS_FILE")/10"
   echo "Metrics File:   ${METRICS_FILE}"
   echo ""
 }
-```
+
+```text
 
 ---
 
@@ -890,49 +912,49 @@ finalize_metrics() {
 fetch_ssh_key() {
   local key_source="$1"
   local ssh_key=""
-  
+
   case "$key_source" in
     # GitHub: Fetch from user's GitHub public keys
     github:*)
       local github_user="${key_source#github:}"
       log_info "Fetching SSH key from GitHub user: ${github_user}"
-      
+
       ssh_key=$(curl -sSL "https://github.com/${github_user}.keys" 2>/dev/null)
-      
+
       if [ -z "$ssh_key" ] || echo "$ssh_key" | grep -q "Not Found"; then
         fail_with_context 201 "No SSH keys found for GitHub user: ${github_user}" \
           "Verify username is correct: github.com/${github_user}"
       fi
       ;;
-    
+
     # File: Load from local path
     file:*)
       local key_file="${key_source#file:}"
       log_info "Loading SSH key from file: ${key_file}"
-      
+
       if [ ! -f "$key_file" ]; then
         fail_with_context 202 "SSH key file not found: ${key_file}" \
           "Create key: ssh-keygen -t ed25519 -f ${key_file}"
       fi
-      
+
       ssh_key=$(cat "$key_file")
       ;;
-    
+
     # URL: Fetch from URL with GPG signature verification
     url:*)
       local key_url="${key_source#url:}"
       local sig_url="${key_url}.sig"
-      
+
       log_info "Fetching SSH key from URL: ${key_url}"
-      
+
       curl -sSL "$key_url" -o /tmp/ssh_key.pub 2>/dev/null || \
         fail_with_context 203 "Failed to fetch SSH key from URL" \
           "Verify URL is accessible: curl ${key_url}"
-      
+
       # Verify GPG signature (requires pre-imported public key)
       if [ -f "$sig_url" ]; then
         curl -sSL "$sig_url" -o /tmp/ssh_key.pub.sig 2>/dev/null
-        
+
         if ! gpg --verify /tmp/ssh_key.pub.sig /tmp/ssh_key.pub 2>/dev/null; then
           fail_with_context 204 "GPG signature verification failed" \
             "Check signature file: ${sig_url}"
@@ -940,17 +962,17 @@ fetch_ssh_key() {
       else
         log_warn "No .sig file found (skipping GPG verification)"
       fi
-      
+
       ssh_key=$(cat /tmp/ssh_key.pub)
       rm -f /tmp/ssh_key.pub /tmp/ssh_key.pub.sig
       ;;
-    
+
     # Inline: Accept key passed as argument
     inline:*)
       ssh_key="${key_source#inline:}"
       log_info "Using inline SSH key"
       ;;
-    
+
     *)
       fail_with_context 200 "Invalid SSH key source format: ${key_source}" \
         "Supported formats:
@@ -960,13 +982,13 @@ fetch_ssh_key() {
         - inline:ssh-ed25519 AAAA..."
       ;;
   esac
-  
+
   # Validate key format (reject weak algorithms)
   if ! echo "$ssh_key" | grep -qE '^(ssh-ed25519|ecdsa-sha2-|ssh-rsa [A-Z0-9]+={0,2}$)'; then
     fail_with_context 205 "Invalid SSH key format" \
       "Key must start with: ssh-ed25519, ecdsa-sha2-, or ssh-rsa"
   fi
-  
+
   echo "$ssh_key"
 }
 
@@ -979,7 +1001,8 @@ chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
 log_success "SSH key installed: $(echo "$SSH_KEY" | awk '{print $1, $2}' | head -c 50)..."
-```
+
+```text
 
 ---
 
@@ -1019,7 +1042,7 @@ if [ "$DRY_RUN" = true ]; then
   apt-get() { log_info "[DRY-RUN] apt-get $*"; return 0; }
   systemctl() { log_info "[DRY-RUN] systemctl $*"; return 0; }
   netplan() { log_info "[DRY-RUN] netplan $*"; return 0; }
-  
+
   # Export overrides to subshells
   export -f apt-get systemctl netplan
 fi
@@ -1029,7 +1052,8 @@ if [ "$VALIDATE_ONLY" = true ]; then
   display_validation_report
   exit 0
 fi
-```
+
+```text
 
 ### Validation Report
 
@@ -1040,39 +1064,40 @@ display_validation_report() {
   echo "║              PRE-DEPLOYMENT VALIDATION REPORT                ║"
   echo "╚══════════════════════════════════════════════════════════════╝"
   echo ""
-  
+
   # Hardware Checks
   echo "Hardware:"
   CPU_CORES=$(nproc)
   TOTAL_RAM=$(free -g | awk '/^Mem:/{print $2}')
   DISK_FREE=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
-  
+
   [ $CPU_CORES -ge 2 ] && echo "  ✅ CPU: ${CPU_CORES} cores" || \
     echo "  ❌ CPU: ${CPU_CORES} cores (need 2+)"
   [ $TOTAL_RAM -ge 4 ] && echo "  ✅ RAM: ${TOTAL_RAM}GB" || \
     echo "  ❌ RAM: ${TOTAL_RAM}GB (need 4+)"
   [ $DISK_FREE -ge 32 ] && echo "  ✅ Disk: ${DISK_FREE}GB free" || \
     echo "  ⚠️  Disk: ${DISK_FREE}GB free (need 32+)"
-  
+
   # Network Checks
   echo ""
   echo "Network:"
   ping -c 1 -W 2 1.1.1.1 &>/dev/null && echo "  ✅ Internet connectivity" || \
     echo "  ❌ No internet (check gateway/firewall)"
-  
+
   # Proxmox Status
   echo ""
   echo "Proxmox:"
   command -v pveversion &>/dev/null && echo "  ✅ Proxmox installed" || \
     echo "  ⚠️  Proxmox not yet installed"
-  
+
   # Estimated RTO
   echo ""
   echo "Estimated RTO: 11-14 minutes (based on hardware)"
   echo "Target:        <15 minutes (900 seconds)"
   echo ""
 }
-```
+
+```text
 
 ---
 
@@ -1116,7 +1141,8 @@ grep -l "TODO\|FIXME" *.md  # No TODOs remaining
 2. ADVANCED-USAGE.md     (content → README "Advanced Usage")
 3. INDEX.md              (structure → README table of contents)
 4. SUMMARY.md            (overview → README "Architecture")
-```
+
+```text
 
 ---
 
@@ -1204,7 +1230,8 @@ shellcheck 01-bootstrap/proxmox/**/*.sh        # Lint
 ./tests/test-proxmox-ignite.sh                # Unit tests
 ./01-bootstrap/proxmox/proxmox-ignite.sh --dry-run  # Dry-run
 git diff HEAD~1                                # Review changes
-```
+
+```text
 
 ---
 
@@ -1255,7 +1282,8 @@ wc -l 01-bootstrap/proxmox/docs/*.md
 
 # 4. Check CI locally (if possible)
 shellcheck 01-bootstrap/proxmox/**/*.sh
-```
+
+```text
 
 ### GitHub Actions Deployment
 
@@ -1297,7 +1325,8 @@ git push origin main
 # 4. Tag release
 git tag -a v2.2.0-proxmox-ignite -m "Proxmox ignite v2 - 98% eternal-ready"
 git push origin v2.2.0-proxmox-ignite
-```
+
+```text
 
 ### Production Deployment (Proxmox Host)
 
@@ -1329,7 +1358,8 @@ tail -f /var/log/proxmox-ignite.log
 # 6. Verify completion
 cat /var/log/proxmox-ignite-metrics.json | jq
 ./01-bootstrap/proxmox/phases/phase5-validate.sh
-```
+
+```text
 
 ---
 
@@ -1427,7 +1457,8 @@ Before merging to main:
 
 APPROVED FOR PRODUCTION: _______________ (Travis approval)
 DEPLOY DATE: _____________
-```
+
+```text
 
 ---
 
@@ -1436,4 +1467,3 @@ DEPLOY DATE: _____________
 *The fortress rises from bare metal in <15 minutes. Zero human decisions. Measured. Verifiable. Eternal.*
 
 🔥🛡️ **The fortress never sleeps.** 🔥🛡️
-

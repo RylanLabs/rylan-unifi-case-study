@@ -34,6 +34,13 @@ repos:
         files: ^02-declarative-config/policy-table-rylan-v5\.json$
         language: system
         stages: [push]
+      - id: beale-harden
+        name: Beale Hardening Validation
+        entry: bash scripts/beale-harden.sh --ci
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [push]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4

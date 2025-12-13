@@ -25,7 +25,7 @@
 
 ```text
 Both services try to bind to 0.0.0.0:53 → Port conflict → One service fails to start
-```
+```text
 
 **Community Evidence:**
 - Samba Wiki explicitly warns: "Do NOT run external DNS services on the same IP as your AD DC" (Cite: wiki.samba.org/index.php/DNS)
@@ -107,7 +107,7 @@ Samba AD DNS (10.0.10.10:53)
 Pi-hole (10.0.10.11:53) ← Separate IP or device
   ↓ Block ads, forward to 1.1.1.1
 Internet DNS (1.1.1.1)
-```
+```text
 
 **Configuration:**
 
@@ -117,7 +117,7 @@ Internet DNS (1.1.1.1)
 # /etc/samba/smb.conf
 [global]
     dns forwarder = 10.0.10.11  # Pi-hole IP
-```
+```text
 
 **On Pi-hole (separate device or rylan-pi):**
 
@@ -128,7 +128,7 @@ PIHOLE_DNS_2=8.8.8.8
 CONDITIONAL_FORWARDING=true
 CONDITIONAL_FORWARDING_IP=10.0.10.10  # Samba AD IP
 CONDITIONAL_FORWARDING_DOMAIN=rylan.internal
-```
+```text
 
 **Client DNS Config:**
 
@@ -136,7 +136,7 @@ CONDITIONAL_FORWARDING_DOMAIN=rylan.internal
 # DHCP option 6 (DNS servers)
 Primary DNS: 10.0.10.10 (Samba AD)
 Secondary DNS: 10.0.10.11 (Pi-hole fallback)
-```
+```text
 
 ---
 
@@ -177,7 +177,7 @@ dig ads.doubleclick.net @10.0.10.10
 # Test 4: SRV records for AD
 dig _ldap._tcp.rylan.internal SRV @10.0.10.10
 # Expected: Priority 0, Weight 100, Port 389, Target dc.rylan.internal
-```
+```text
 
 ---
 

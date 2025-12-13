@@ -19,14 +19,14 @@ Check Hyper-V status:
 Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
 
 # Should show: State : Enabled
-```
+```text
 
 Check Multipass installation:
 
 ```powershell
 multipass version
 # Should show version info
-```
+```text
 
 ### Root Causes
 
@@ -48,7 +48,7 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
 
 # Reboot system
 Restart-Computer
-```
+```text
 
 #### Option 2: Restart Hyper-V Service
 
@@ -56,7 +56,7 @@ Restart-Computer
 # Run as Administrator
 Restart-Service vmms  # Virtual Machine Management Service
 Get-Service vmms | Select-Object Status
-```
+```text
 
 #### Option 3: Check Disk Space
 
@@ -64,7 +64,7 @@ Get-Service vmms | Select-Object Status
 # Multipass VMs require ~20GB per instance
 Get-PSDrive C | Select-Object Used, Free
 # Should have >25GB free
-```
+```text
 
 #### Option 4: Force VM Hypervisor Reset
 
@@ -73,7 +73,7 @@ Get-PSDrive C | Select-Object Used, Free
 multipass purge
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart
 Restart-Computer
-```
+```text
 
 ---
 
@@ -92,14 +92,14 @@ Get-VMSwitch -SwitchType External
 # List VM network adapter status
 multipass exec $VM_NAME -- ip addr show
 multipass exec $VM_NAME -- ping -c 1 1.1.1.1
-```
+```text
 
 Check Multipass bridging:
 
 ```powershell
 multipass get local.bridged-network
 # Should show active adapter name (e.g., "Ethernet", "Default Switch")
-```
+```text
 
 ### Root Causes
 
@@ -126,7 +126,7 @@ New-VMSwitch -Name "ExternalSwitch" -NetAdapterName "Ethernet" -AllowManagementO
 
 # Set Multipass to use it
 multipass set local.bridged-network="ExternalSwitch"
-```
+```text
 
 #### Option 2: Use Default Switch (Simpler, NAT-based)
 
@@ -134,7 +134,7 @@ multipass set local.bridged-network="ExternalSwitch"
 # Default Switch provides NAT access automatically
 multipass set local.bridged-network=""  # Clear custom setting
 # VM will use Default Switch (built-in)
-```
+```text
 
 #### Option 3: Force VM Network Reconfiguration
 
@@ -145,7 +145,7 @@ Start-Sleep -Seconds 3
 multipass start $VM_NAME
 
 # Re-run Step 2 of samba-dc-test.ps1 (static IP config)
-```
+```text
 
 #### Option 4: Verify DNS Inside VM
 
@@ -157,7 +157,7 @@ multipass exec $VM_NAME -- cat /etc/resolv.conf
 # Test DNS resolution
 multipass exec $VM_NAME -- nslookup archive.ubuntu.com 1.1.1.1
 # Should return IP address
-```
+```text
 
 ---
 
@@ -175,14 +175,14 @@ multipass exec $VM_NAME -- sudo cat /etc/samba/smb.conf
 
 multipass exec $VM_NAME -- ls -la /var/lib/samba/
 # Should be mostly empty
-```
+```text
 
 Check systemd service state:
 
 ```bash
 multipass exec $VM_NAME -- sudo systemctl status smbd nmbd winbind
 # Should show "inactive (dead)" if not yet started
-```
+```text
 
 ### Root Causes
 
@@ -207,7 +207,7 @@ multipass exec $VM_NAME -- sudo rm -rf /var/lib/samba/*
 multipass exec $VM_NAME -- sudo rm -rf /var/cache/samba/*
 
 # Re-run provision (Step 5 in script)
-```
+```text
 
 #### Option 2: Delete and Recreate VM
 
@@ -215,7 +215,7 @@ multipass exec $VM_NAME -- sudo rm -rf /var/cache/samba/*
 # Fastest way to recover from "role conflict"
 multipass delete $VM_NAME --purge
 # Re-run samba-dc-test.ps1 from scratch
-```
+```text
 
 #### Option 3: Verify Provision Succeeded
 
@@ -226,7 +226,7 @@ multipass exec $VM_NAME -- ls -la /var/lib/samba/private/sam.ldb
 
 multipass exec $VM_NAME -- cat /etc/samba/smb.conf | head -20
 # Should show [global] section with configured realm
-```
+```text
 
 ---
 
@@ -246,7 +246,7 @@ multipass exec $VM_NAME -- sudo systemctl status samba-ad-dc
 # Check DNS backend is configured
 multipass exec $VM_NAME -- cat /etc/samba/smb.conf | grep "dns backend"
 # Should show "dns backend = SAMBA_INTERNAL"
-```
+```text
 
 Query Samba DNS directly:
 
@@ -256,7 +256,7 @@ multipass exec $VM_NAME -- sudo samba-tool dns query localhost rylan.internal @ 
 
 multipass exec $VM_NAME -- sudo samba-tool dns query localhost _ldap._tcp.rylan.internal SRV
 # Should show LDAP SRV records
-```
+```text
 
 Check system resolver:
 
@@ -266,7 +266,7 @@ multipass exec $VM_NAME -- cat /etc/resolv.conf
 
 multipass exec $VM_NAME -- nslookup rylan.internal 10.0.10.10
 # Should resolve to 10.0.10.10
-```
+```text
 
 ### Root Causes
 
@@ -289,7 +289,7 @@ Start-Sleep -Seconds 5
 
 # Retry DNS query
 multipass exec $VM_NAME -- host -t SRV _ldap._tcp.rylan.internal
-```
+```text
 
 #### Option 2: Verify DNS Zone Created
 
@@ -298,7 +298,7 @@ multipass exec $VM_NAME -- host -t SRV _ldap._tcp.rylan.internal
 multipass exec $VM_NAME -- sudo samba-tool dns zonelist localhost
 
 # Should list "rylan.internal"
-```
+```text
 
 #### Option 3: Check Provision Logs
 
@@ -309,7 +309,7 @@ multipass exec $VM_NAME -- sudo cat /var/log/samba/provision.log
 
 # If not found, check general Samba logs:
 multipass exec $VM_NAME -- sudo journalctl -u samba-ad-dc -n 100
-```
+```text
 
 #### Option 4: Manual resolv.conf Update
 
@@ -323,7 +323,7 @@ EOF"
 
 # Test resolution
 multipass exec $VM_NAME -- nslookup rylan.internal
-```
+```text
 
 ---
 
@@ -343,7 +343,7 @@ multipass exec $VM_NAME -- cat /etc/krb5.conf
 # Check KDC is listening
 multipass exec $VM_NAME -- nc -zv 10.0.10.10 88
 # Should show "succeeded" (port 88 is Kerberos)
-```
+```text
 
 Check time synchronization:
 
@@ -354,7 +354,7 @@ multipass exec $VM_NAME -- timedatectl
 
 # Manually sync if needed
 multipass exec $VM_NAME -- sudo timedatectl set-ntp on
-```
+```text
 
 Check Kerberos database:
 
@@ -362,7 +362,7 @@ Check Kerberos database:
 # Verify administrative user in database
 multipass exec $VM_NAME -- sudo samba-tool user list
 # Should show "Administrator" (capital A)
-```
+```text
 
 ### Root Causes
 
@@ -388,7 +388,7 @@ multipass exec $VM_NAME -- cat /etc/krb5.conf | grep -A 5 "\[libdefaults\]"
 # Restart Samba
 multipass exec $VM_NAME -- sudo systemctl restart samba-ad-dc
 Start-Sleep -Seconds 5
-```
+```text
 
 #### Option 2: Sync System Time
 
@@ -401,7 +401,7 @@ Start-Sleep -Seconds 3
 # Verify sync
 multipass exec $VM_NAME -- timedatectl
 # Should show "System clock synchronized: yes"
-```
+```text
 
 #### Option 3: Test Kinit with Verbose Output
 
@@ -413,7 +413,7 @@ multipass exec $VM_NAME -- bash -c "echo 'Passw0rd123!' | kinit -V administrator
 # - "Client not found": User not in database (provision failed)
 # - "Cannot contact KDC": Port 88 not listening (service not running)
 # - "Preauth failed": Wrong password
-```
+```text
 
 #### Option 4: Reset Kerberos Credentials
 
@@ -423,7 +423,7 @@ multipass exec $VM_NAME -- kdestroy 2>/dev/null || true
 
 # Try kinit again
 multipass exec $VM_NAME -- bash -c "echo 'Passw0rd123!' | kinit administrator@RYLAN.INTERNAL && klist"
-```
+```text
 
 ---
 
@@ -443,7 +443,7 @@ multipass exec $VM_NAME -- nc -zv 10.0.10.10 389
 # Test LDAPS (secure LDAP) port
 multipass exec $VM_NAME -- nc -zv 10.0.10.10 636
 # Should show "succeeded" (if TLS configured)
-```
+```text
 
 Check LDAP base DN:
 
@@ -451,7 +451,7 @@ Check LDAP base DN:
 # Verify DN structure
 multipass exec $VM_NAME -- samba-tool domain info 10.0.10.10
 # Should show "Domain Name: rylan", "Domain DN: DC=rylan,DC=internal"
-```
+```text
 
 ### Root Causes
 
@@ -471,7 +471,7 @@ multipass exec $VM_NAME -- samba-tool domain info 10.0.10.10
 multipass exec $VM_NAME -- ldapsearch -x -H ldap://10.0.10.10 -b "dc=rylan,dc=internal" "(objectClass=*)" | head -20
 
 # If this works, LDAP is functional; auth issue may be elsewhere
-```
+```text
 
 #### Option 2: Test LDAP with Administrator Credentials
 
@@ -485,7 +485,7 @@ multipass exec $VM_NAME -- ldapsearch -x \
     "(objectClass=user)"
 
 # Should list user objects (at minimum, Administrator)
-```
+```text
 
 #### Option 3: Check LDAP Logs
 
@@ -495,7 +495,7 @@ multipass exec $VM_NAME -- sudo journalctl -u samba-ad-dc -n 100 | grep -i ldap
 
 # Or check Samba debug logs
 multipass exec $VM_NAME -- sudo tail -50 /var/log/samba/log.sambadomain
-```
+```text
 
 ---
 
@@ -516,7 +516,7 @@ multipass exec $VM_NAME -- nc -zv 10.0.10.10 445
 # Check shares
 multipass exec $VM_NAME -- smbclient -L 10.0.10.10 -N
 # Should list "Sharename", including "netlogon", "sysvol"
-```
+```text
 
 ### Root Causes
 
@@ -537,7 +537,7 @@ Start-Sleep -Seconds 5
 
 # Retry share listing
 multipass exec $VM_NAME -- smbclient -L localhost -N
-```
+```text
 
 #### Option 2: Verify Share Creation
 
@@ -548,7 +548,7 @@ multipass exec $VM_NAME -- sudo samba-tool share list
 # Should include:
 # - netlogon: \\.\sysvol\rylan.internal\scripts
 # - sysvol: \\.\sysvol
-```
+```text
 
 ---
 
@@ -565,7 +565,7 @@ grep -i "read-host" bootstrap/samba-dc-test.ps1
 
 # All parameters are declared at top of script
 grep "^\$" bootstrap/samba-dc-test.ps1 | head -10
-```
+```text
 
 ### Bauer: Verify Everything
 
@@ -578,7 +578,7 @@ Validation tests are run (Step 8):
 # 3. DNS SRV records
 # 4. Kerberos tickets
 # 5. Domain functional level
-```
+```text
 
 ### Suehring: Network First
 
@@ -587,7 +587,7 @@ Network is configured before Samba:
 ```bash
 # Step 2 configures static IP before Step 3 (installation)
 # Step 6 configures DNS before Step 7 (service start)
-```
+```text
 
 ---
 
@@ -598,7 +598,7 @@ Network is configured before Samba:
 ```powershell
 # Safe deletion (all VM data removed)
 multipass delete $VM_NAME --purge
-```
+```text
 
 ### Force Cleanup (If VM Stuck)
 
@@ -611,14 +611,14 @@ multipass delete $VM_NAME --purge
 
 # Restart Multipass daemon
 multipass restart
-```
+```text
 
 ### Multipass Complete Reset (Nuclear Option)
 
 ```powershell
 # Remove all VMs and cached images (WARNING: destructive)
 multipass purge
-```
+```text
 
 ---
 

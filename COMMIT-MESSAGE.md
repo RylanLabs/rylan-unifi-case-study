@@ -20,7 +20,7 @@ WHAT CHANGED:
     - Network: host + macvlan-unifi (10.0.1.20/27, VLAN 1)
     - Ports: 8443, 8080, 8843, 8880, 3478/udp
     - Data: /opt/unifi/data (persistent, UID 1000)
-    - Health: curl -f -k https://localhost:8443/status (30s interval)
+    - Health: curl -f -k <https://localhost:8443/status> (30s interval)
 
   • bootstrap/unifi/macvlan-unifi.netdev
     - systemd-networkd device definition
@@ -138,7 +138,7 @@ DEPLOYMENT:
   5. cp bootstrap/unifi/docker-compose.yml /opt/unifi/
   6. cd /opt/unifi && docker compose up -d
   7. Monitor: docker logs -f unifi-controller
-  8. Verify: curl -k https://10.0.1.20:8443/status
+  8. Verify: curl -k <https://10.0.1.20:8443/status>
 
 ═══════════════════════════════════════════════════════════════════════════════
 

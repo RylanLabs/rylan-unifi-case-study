@@ -17,7 +17,7 @@ Docker Macvlan networking for FreePBX on isolated VLAN 40 (VoIP) with bridge rou
 
 ## Architecture
 
-```
+```text
 Host (rylan-dc)
 │
 ├─ enp4s0        (Primary NIC, VLAN 10 — 10.0.10.10)
@@ -36,7 +36,7 @@ Traffic Flow:
 - VoIP Phone → 10.0.40.30:5060 (SIP signaling)
 - VoIP Phone → 10.0.40.30:10000-20000 (RTP audio)
 - FreePBX → freepbx-db (internal backend network)
-```
+```text
 
 ## Prerequisites
 
@@ -61,13 +61,13 @@ network:
     enp4s0.40: # VLAN 40 (FreePBX/VoIP)
       addresses: [10.0.40.1/24]  # Gateway for VLAN 40
       mtu: 1500
-```
+```text
 
 Apply:
 ```bash
 sudo netplan apply
 ip addr show enp4s0.40  # Verify 10.0.40.1/24 present
-```
+```text
 
 ### 2. Docker Macvlan Network
 
@@ -84,7 +84,7 @@ docker network create -d macvlan \
 
 # Verify
 docker network inspect vlan40
-```
+```text
 
 ### 3. Host Routing (Critical)
 
@@ -101,7 +101,7 @@ docker network create -d bridge \
 sudo ip route add 10.0.40.30 dev enp4s0.40
 
 # Persistent route (add to netplan)
-```
+```text
 
 Update `/etc/netplan/01-rylan-dc.yaml`:
 
@@ -114,14 +114,14 @@ network:
       routes:
         - to: 10.0.40.30/32
           via: 10.0.40.1
-```
+```text
 
 Reapply:
 ```bash
 sudo netplan apply
 ip route show | grep 10.0.40.30
 # Output: 10.0.40.30 dev enp4s0.40 scope link
-```
+```text
 
 ---
 
@@ -140,7 +140,7 @@ cp /path/to/promtail-freepbx.yaml .
 
 # Load .env
 source ~/.env
-```
+```text
 
 ### Step 2: Create Macvlan Network
 
@@ -154,7 +154,7 @@ docker network create -d macvlan \
 
 docker network ls
 # Should show: vlan40 (macvlan, external=false)
-```
+```text
 
 ### Step 3: Deploy FreePBX
 
@@ -164,7 +164,7 @@ docker-compose -f freepbx-compose.yml up -d
 
 # Wait for startup (2-3 minutes)
 docker-compose -f freepbx-compose.yml logs -f freepbx
-```
+```text
 
 ### Step 4: Configure FreePBX
 
@@ -177,23 +177,23 @@ open http://10.0.40.30
 # Password: admin
 
 # IMPORTANT: Change admin password immediately
-```
+```text
 
 ### Step 5: Add Extensions
 
 In FreePBX Web UI → Applications → Extensions:
 
-```
+```text
 Extension 100: "Desk Phone 1" (SIP)
 Extension 101: "Desk Phone 2" (SIP)
 Extension 102: "Conference Room" (SIP)
-```
+```text
 
 Export extension configuration:
 ```bash
 docker exec freepbx /bin/bash -c "asterisk -rx 'sip show peers'" | grep OK
 # Output: Peers... 3 peers [...]
-```
+```text
 
 ### Step 6: Configure SIP Trunks (Optional)
 
@@ -210,7 +210,7 @@ For PSTN connectivity, add inbound/outbound routes in FreePBX UI.
 
 # Test call: 100 → 101
 # Should hear ringback + connected call
-```
+```text
 
 ---
 
@@ -224,7 +224,7 @@ docker ps | grep freepbx
 # freepbx-mariadb    UP (healthy)
 # freepbx            UP (healthy)
 # freepbx-promtail   UP
-```
+```text
 
 ### 2. Verify Macvlan Network
 
@@ -236,7 +236,7 @@ docker network inspect vlan40
 #     "IPv4Address": "10.0.40.30/24"
 #   }
 # }
-```
+```text
 
 ### 3. Test Connectivity
 
@@ -248,7 +248,7 @@ ping 10.0.40.30
 # From VLAN 40 device (IP phone, etc.)
 curl http://10.0.40.30/
 # Should return FreePBX login page
-```
+```text
 
 ### 4. Check SIP Port
 
@@ -260,21 +260,21 @@ sudo netstat -ulnp | grep 5060
 # Or from phone
 nmap -u -p 5060 10.0.40.30
 # Port 5060/udp should be open
-```
+```text
 
 ### 5. Verify Database Connection
 
 ```bash
 docker exec freepbx mysql -h freepbx-db -u asterisk -p${FREEPBX_MYSQL_PASSWORD} asterisk -e "SELECT VERSION();"
 # Should return MySQL version
-```
+```text
 
 ### 6. Check Audio Ports (RTP)
 
 ```bash
 docker exec freepbx asterisk -rx "rtp show stats"
 # After call: Should show active RTP channels on ports 10000-20000
-```
+```text
 
 ---
 
@@ -293,7 +293,7 @@ sudo ip route add 10.0.40.30 dev enp4s0.40
 
 # Or use docker-gwbridge
 docker run --network=docker-gwbridge alpine:latest ping 10.0.40.30
-```
+```text
 
 ### Cannot Reach Macvlan from VLAN 40 Network
 
@@ -306,7 +306,7 @@ docker run --network=docker-gwbridge alpine:latest ping 10.0.40.30
 # Verify switch port allows VLAN 40 (untagged or tagged)
 ssh admin@10.0.1.1 "show vlans"
 # Port carrying rylan-dc should have VLAN 40 tagged
-```
+```text
 
 ### SIP Port Blocked
 
@@ -323,7 +323,7 @@ ssh admin@10.0.1.1 "show vlans"
     address: "10.0.40.30"
     ports: ["5060", "5061", "10000-20000"]
   action: "accept"
-```
+```text
 
 ### MariaDB Connection Refused
 
@@ -342,7 +342,7 @@ docker logs freepbx-mariadb
 
 # Restart FreePBX after MariaDB is ready
 docker-compose -f freepbx-compose.yml restart freepbx
-```
+```text
 
 ### Audio One-Way or No Audio
 
@@ -359,7 +359,7 @@ docker exec freepbx netstat -uln | grep 10[0-9][0-9][0-9]
 # Check policy rule has RTP range
 cat 02-declarative-config/policy-table.yaml | grep "10000-20000"
 # Should include TCP and UDP RTP range
-```
+```text
 
 ---
 
@@ -392,14 +392,14 @@ For low-latency VoIP, apply DSCP EF marking:
     }
   }
 }
-```
+```text
 
 ### 2. Apply via UniFi Controller
 
 ```bash
 # Import config.gateway.json in UniFi UI
 # Settings → Routing & Firewall → Firewall → Import Config
-```
+```text
 
 ### 3. Verify Marking
 
@@ -407,7 +407,7 @@ For low-latency VoIP, apply DSCP EF marking:
 # Capture packets on host
 sudo tcpdump -i enp4s0.40 -v udp port 5060
 # Look for "tos 0xb8" = DSCP 46 (EF)
-```
+```text
 
 ---
 
@@ -422,14 +422,14 @@ docker exec freepbx tar -czf /data/freepbx-backup-$(date +%Y%m%d).tar.gz \
 
 # Copy to NFS
 docker cp freepbx:/data/freepbx-backup-*.tar.gz /mnt/nfs/backups/freepbx/
-```
+```text
 
 ### Backup Database
 
 ```bash
 docker exec freepbx-mariadb mysqldump -u root -p${FREEPBX_MYSQL_PASSWORD} asterisk \
   > /mnt/nfs/backups/freepbx/asterisk-$(date +%Y%m%d).sql
-```
+```text
 
 ### Restore from Backup
 
@@ -440,7 +440,7 @@ cat /mnt/nfs/backups/freepbx/asterisk-YYYYMMDD.sql | \
 
 # Restore filesystem
 docker exec freepbx tar -xzf /data/freepbx-backup-YYYYMMDD.tar.gz -C /
-```
+```text
 
 ---
 
@@ -456,7 +456,7 @@ if [[ "$HOSTNAME" == "rylan-dc" ]]; then
     -p${FREEPBX_MYSQL_PASSWORD} asterisk > \
     $BACKUP_DIR/freepbx/asterisk-$(date +%s).sql
 fi
-```
+```text
 
 ---
 

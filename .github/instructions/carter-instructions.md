@@ -32,7 +32,7 @@ applyTo: ["**/*carter*.sh", "**/*identity*.sh", "**/eternal-resurrect*.sh", "**/
 {
   "guardian": "Carter",
   "operation": "onboard|rotate|verify",
-  "user": "user@rylan.internal",
+  "user": "`user@rylan.internal`",
   "status": "success|failure",
   "timestamp": "ISO8601"
 }

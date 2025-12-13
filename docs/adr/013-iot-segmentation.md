@@ -11,26 +11,26 @@ The fortress requires integration of four IoT devices with varying trust levels:
 2. **Denon HEOS E300/E400 soundbars** — Moderate cloud dependency, hardwired capable, semi-trusted
 3. **Network printer** — No cloud dependency, legacy device, low risk
 
- Existing VLANs: 10 (servers), 30 (trusted-devices), 40 (voip), 90 (guest-iot)
- 
- ## Decision
- 
- Implement **two-tier IoT segmentation** with new VLANs:
- 
- - **VLAN 95 (iot-isolated)**: Untrusted WiFi IoT devices (Traeger)
-   - Subnet: 10.0.95.0/24
-   - Internet-only access via firewall whitelist (ports 443, 8883)
-   - Zero local network access
-   - DNS: Public resolvers only (1.1.1.1, 1.0.0.1)
- 
- - **VLAN 90 (guest-iot)**: Preferred placement for semi-trusted hardwired IoT (Denon)
-   - Subnet: 10.0.90.0/24
-   - Internet access for streaming services (ports 80, 443)
-   - mDNS reflector optional (avoid where possible)
-   - DNS: Public resolvers or Pi-hole forwarding
-   - Requires physical ethernet connection (US-8 Port 2) with MAC/port binding
+Existing VLANs: 10 (servers), 30 (trusted-devices), 40 (voip), 90 (guest-iot)
 
- **Total VLANs: 6** (Management + 5 custom)
+## Decision
+
+Implement **two-tier IoT segmentation** with new VLANs:
+
+- **VLAN 95 (iot-isolated)**: Untrusted WiFi IoT devices (Traeger)
+  - Subnet: 10.0.95.0/24
+  - Internet-only access via firewall whitelist (ports 443, 8883)
+  - Zero local network access
+  - DNS: Public resolvers only (1.1.1.1, 1.0.0.1)
+
+- **VLAN 90 (guest-iot)**: Preferred placement for semi-trusted hardwired IoT (Denon)
+  - Subnet: 10.0.90.0/24
+  - Internet access for streaming services (ports 80, 443)
+  - mDNS reflector optional (avoid where possible)
+  - DNS: Public resolvers or Pi-hole forwarding
+  - Requires physical ethernet connection (US-8 Port 2) with MAC/port binding
+
+**Total VLANs: 6** (Management + 5 custom)
 
 ## Alternatives Considered
 

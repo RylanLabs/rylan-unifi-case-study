@@ -22,19 +22,19 @@
 ```mermaid
 flowchart TD
     Start([Problem Detected]) --> Q1{What failed?}
-    
+
     Q1 -->|Python lint/test| PyValid[./scripts/validate-python.sh]
     Q1 -->|Bash lint/format| BashValid[./scripts/validate-bash.sh]
     Q1 -->|Bandit finding| Diagnose[./scripts/diagnose-bandit.sh]
     Q1 -->|VLAN leak suspected| Isolation[./scripts/validate-isolation.sh]
     Q1 -->|Security posture| Breach[./scripts/simulate-breach.sh]
     Q1 -->|SSH key issue| Keys{Key problem type?}
-    
+
     Keys -->|Need new keys| Refresh[./scripts/refresh-keys.sh]
     Keys -->|Repo binding| GlowUp[./scripts/bauer-glow-up.sh]
-    
+
     Q1 -->|Git hooks missing| Hooks[./scripts/install-git-hooks.sh]
-    
+
     PyValid --> Fix[Fix issues]
     BashValid --> Fix
     Diagnose --> Fix
@@ -43,21 +43,21 @@ flowchart TD
     Refresh --> Verify[Verify SSH access]
     GlowUp --> Verify
     Hooks --> Ready([Hooks installed])
-    
+
     Fix --> Rerun[Re-run ./gatekeeper.sh]
     Remediate --> Rerun
     Harden --> Rerun
     Verify --> Rerun
     Rerun --> Pass{Exit 0?}
-    
+
     Pass -->|Yes| Done([✅ Push safely])
     Pass -->|No| Start
-    
+
     style Start fill:#600,stroke:#f00,color:#fff
     style Done fill:#030,stroke:#0f0,color:#fff
     style Breach fill:#603,stroke:#f0a,color:#fff
     style Isolation fill:#063,stroke:#0fa,color:#fff
-```
+```text
 
 ## Validation Scripts (Gatekeeper Domain)
 
@@ -67,14 +67,14 @@ flowchart TD
 
 ```bash
 ./scripts/validate-bash.sh
-```
+```text
 
 **Expected output**:
-```
+```text
 Checking shell scripts...
 ✓ shellcheck passed (0 errors)
 ✓ shfmt formatting valid
-```
+```text
 
 ### validate-python.sh
 
@@ -82,15 +82,15 @@ Checking shell scripts...
 
 ```bash
 ./scripts/validate-python.sh
-```
+```text
 
 **Expected output**:
-```
+```text
 Running mypy... ✓
 Running ruff... ✓
 Running bandit... ✓ (0 HIGH, 0 MEDIUM)
 Running pytest... ✓ (59 passed, 94% coverage)
-```
+```text
 
 ### diagnose-bandit.sh
 
@@ -98,7 +98,7 @@ Running pytest... ✓ (59 passed, 94% coverage)
 
 ```bash
 ./scripts/diagnose-bandit.sh
-```
+```text
 
 **Usage**: Run when Gatekeeper fails at Bandit stage.
 
@@ -111,7 +111,7 @@ Running pytest... ✓ (59 passed, 94% coverage)
 ```bash
 ./scripts/simulate-breach.sh
 ./scripts/simulate-breach.sh --dry-run  # Preview only
-```
+```text
 
 **Vectors tested**:
 1. SQL injection probes
@@ -122,14 +122,14 @@ Running pytest... ✓ (59 passed, 94% coverage)
 6. ... (16 more)
 
 **Expected output** (healthy fortress):
-```
+```text
 [WHITAKER] Executing 21 attack vectors...
   ✓ Vector 1: SQLi blocked
   ✓ Vector 2: Port scan limited
   ...
 RESULT: 0 breaches, 21 blocked
 The fortress holds.
-```
+```text
 
 ### validate-isolation.sh
 
@@ -137,7 +137,7 @@ The fortress holds.
 
 ```bash
 ./scripts/validate-isolation.sh
-```
+```text
 
 **Test matrix**: 9 VLAN isolation tests.
 
@@ -149,7 +149,7 @@ The fortress holds.
 
 ```bash
 ./scripts/refresh-keys.sh
-```
+```text
 
 **Prerequisites**: SSH access to all hosts.
 
@@ -159,7 +159,7 @@ The fortress holds.
 
 ```bash
 ./scripts/bauer-glow-up.sh
-```
+```text
 
 **Result**: Keys stored in `identity/$(hostname -s)/`.
 
@@ -171,7 +171,7 @@ The fortress holds.
 
 ```bash
 ./scripts/install-git-hooks.sh
-```
+```text
 
 **Hooks installed**:
 - `pre-commit` — BOM/CRLF fixup
@@ -185,3 +185,24 @@ The fortress holds.
 - [gatekeeper.sh](../gatekeeper.sh) — Main local CI orchestrator
 - [eternal-resurrect.sh](../eternal-resurrect.sh) — Full deployment
 - [runbooks/](../runbooks/) — Trinity ministries
+
+## Beale Hardening Script (Beale Ministry)
+
+`scripts/beale-harden.sh` — Bastille hardening validator. Quick usage:
+
+```bash
+# Dry-run:
+bash scripts/beale-harden.sh --dry-run
+
+# CI mode (writes JSON report):
+bash scripts/beale-harden.sh --ci
+
+# Attempt safe auto-fix (requires minimal ruleset files):
+sudo bash scripts/beale-harden.sh --fix
+```
+
+Outputs:
+- Audit log: `/var/log/beale-audit.log` (fallback: `.fortress/audit/beale-audit.log`)
+- CI report: `beale-report-<ts>.json`
+
+See `scripts/beale-harden.sh --help` for details.

@@ -31,9 +31,11 @@ The theater has been stripped. The doors remain.
 **HIGH** — Policy injection vector
 
 ### Entry Point
+
 ```bash
 curl -k -d '{"policy": "rogue"}' https://192.168.1.13/proxy/network/api/s/default/
-```
+
+```text
 
 ### Exploit Chain
 1. Recon (nmap 8080) → API endpoint discovered
@@ -67,7 +69,8 @@ def require_auth(func):
 def apply_policy(config: dict) -> None:
     """Apply policy to UniFi controller."""
     # ... existing implementation
-```
+
+```text
 
 ### Validation
 - [ ] `./gatekeeper.sh` passes
@@ -91,9 +94,11 @@ IoT pivot to VLAN 30 (Users/PXE) is undetected.
 **MEDIUM** — Lateral movement vector
 
 ### Entry Point
-```
+
+```text
 Tailscale → Traeger (port 80) → VLAN 99 → hop to VLAN 30
-```
+
+```text
 
 ### Exploit Chain
 1. Social engineering (Dad phish for Tailscale key)
@@ -117,14 +122,16 @@ run_nmap_test "10.0.90.1" "443" "closed" "Quarantine→Prod HTTPS" && ((tests_pa
 # Test 7: Quarantine → Internet ONLY (allow)
 log "\n[TEST 7] Quarantine VLAN 99 → Internet (MUST BE ALLOWED)"
 run_nmap_test "1.1.1.1" "443" "open" "Quarantine→Internet HTTPS" && ((tests_passed++)) || ((tests_failed++))
-```
+
+```text
 
 Also add VLAN 99 to the CI mode documentation:
 
 ```bash
 if [[ "${CI_MODE:-}" == "1" ]]; then
     log "  - Quarantine→All VLANs (closed), Quarantine→Internet (open)"
-```
+
+```text
 
 ### Validation
 - [ ] `./gatekeeper.sh` passes
@@ -148,9 +155,11 @@ Rogue AP can replay bootp → compromise boot server.
 **MEDIUM** — Boot chain compromise vector
 
 ### Entry Point
-```
+
+```text
 DHCP port 67 on VLAN 30 → Sniff bootp → Spoof TFTP → PXE server own
-```
+
+```text
 
 ### Exploit Chain
 1. Connect rogue device to VLAN 30
@@ -174,7 +183,8 @@ Add DHCP snooping and option 82 validation:
   dhcp_snooping: true          # NEW: Enable DHCP snooping
   dhcp_trusted_ports: [1, 2]   # NEW: Only uplink ports trusted
   pxe_secure: true             # NEW: Signed boot images only
-```
+
+```text
 
 Add validation to `apply.py`:
 
@@ -184,7 +194,8 @@ def validate_dhcp_security(vlan: VLAN) -> None:
     if vlan.id == 30 and vlan.dhcp_enabled:
         if not getattr(vlan, 'dhcp_snooping', False):
             logger.warning(f"VLAN {vlan.id}: DHCP snooping not enabled (PXE risk)")
-```
+
+```text
 
 ### Validation
 - [ ] `./gatekeeper.sh` passes
@@ -208,9 +219,11 @@ Webhook exfil of sensitive data.
 **LOW** — PII leak vector (requires webhook access)
 
 ### Entry Point
-```
+
+```text
 Phish new hire → AI query with PII → Webhook log → PII dump
-```
+
+```text
 
 ### Exploit Chain
 1. Social engineering to gain webhook URL
@@ -242,7 +255,8 @@ def log_query(query: str, response: str) -> None:
     safe_response = scrub_pii(response)
     logger.info(f"Query: {safe_query}")
     logger.info(f"Response: {safe_response}")
-```
+
+```text
 
 ### Validation
 - [ ] `./gatekeeper.sh` passes
@@ -258,7 +272,7 @@ def log_query(query: str, response: str) -> None:
 
 ## Implementation Order
 
-```
+```text
 Ticket 1 (apply.py auth)     → Prerequisite for safe policy changes
     ↓
 Ticket 2 (VLAN 99 monitor)   → Closes lateral movement vector
@@ -268,7 +282,8 @@ Ticket 3 (DHCP secure)       → Closes boot chain vector
 Ticket 4 (Ollama scrub)      → Closes PII leak vector
     ↓
 Ticket #6 (whitaker-ci-breach) → All 4 doors closed, 10-vector CI pentest
-```
+
+```text
 
 ---
 
@@ -297,7 +312,8 @@ for ticket in 1 2 3 4; do
     --title "$(grep "## Ticket $ticket:" HARDENING-TICKETS.md | sed 's/## //')" \
     --body "$(sed -n "/## Ticket $ticket:/,/## Ticket $((ticket+1)):/p" HARDENING-TICKETS.md | head -n -1)"
 done
-```
+
+```text
 
 ---
 

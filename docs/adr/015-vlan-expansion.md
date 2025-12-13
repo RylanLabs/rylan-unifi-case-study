@@ -74,7 +74,7 @@ USG_CPU=$(ssh admin@$USG_IP "top -b -n 1 | grep 'CPU:' | awk '{print \$2}'")
 if [ "${USG_CPU%\%}" -gt 80 ]; then
   log_error "USG-3P CPU >80% — possible offload bypass"
 fi
-```
+```text
 
 Target: **CPU <80%** under normal load (RTO validation)
 

@@ -60,7 +60,7 @@ Implement **eternal controller abstraction**: the infrastructure treats controll
 
 ## Migration Path
 
-```
+```text
 Stage 1: LXC-only (Current)
   └─ Consciousness 2.3 (proven, fragile)
 
@@ -72,7 +72,7 @@ Stage 3: Cloud Key Primary + LXC Backup (Switchable)
 
 Stage 4: Hybrid Failover (Both Active)
   └─ Consciousness 2.5 (true immortality)
-```
+```text
 
 ## Testing Requirements
 

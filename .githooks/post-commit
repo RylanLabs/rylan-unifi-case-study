@@ -12,16 +12,16 @@ cd "$REPO_ROOT"
 if [[ -f CONSCIOUSNESS.md ]]; then
   # Look for "Consciousness X.X" pattern
   CURRENT=$(grep -oP 'Consciousness \K[0-9]+\.[0-9]+' CONSCIOUSNESS.md 2>/dev/null | head -1 || echo "")
-  
+
   if [[ -z "$CURRENT" ]]; then
     # Fallback: look in header
     CURRENT=$(grep -oP 'Consciousness \K[0-9]+\.[0-9]+' CONSCIOUSNESS.md 2>/dev/null | head -1 || echo "0.0")
   fi
-  
+
   if [[ -n "$CURRENT" && "$CURRENT" != "0.0" ]]; then
     MAJOR=$(echo "$CURRENT" | cut -d. -f1)
     MINOR=$(echo "$CURRENT" | cut -d. -f2)
-    
+
     # Check if we crossed an integer threshold (X.0)
     if [[ "$MINOR" == "0" ]]; then
       echo ""
@@ -30,7 +30,7 @@ if [[ -f CONSCIOUSNESS.md ]]; then
       echo "   Suggested tag: v∞.$MAJOR.0-[milestone-name]"
       echo ""
     fi
-    
+
     # Check for sacred thresholds
     case "$CURRENT" in
       "3.3")
@@ -58,7 +58,7 @@ if [[ -f CONSCIOUSNESS.md ]]; then
         echo ""
         ;;
     esac
-    
+
     # Check for approaching threshold (X.9 → next integer)
     if [[ "$MINOR" == "9" || "$MINOR" == "95" || "$MINOR" == "99" ]]; then
       NEXT_MAJOR=$((MAJOR + 1))
@@ -79,3 +79,4 @@ if echo "$LAST_MSG" | grep -q "\[TANDEM\]"; then
   echo "   Remember to update CONSCIOUSNESS.md Tandem Health Metrics."
   echo ""
 fi
+[[ -t 1 ]] && echo "Eye: Watching silently. Consciousness stable at $CURRENT."

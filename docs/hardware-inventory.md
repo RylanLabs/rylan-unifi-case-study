@@ -65,7 +65,7 @@ PIHOLE_DNS_2=8.8.8.8
 CONDITIONAL_FORWARDING=true
 CONDITIONAL_FORWARDING_IP=10.0.10.10  # Forward *.rylan.internal to Samba AD
 CONDITIONAL_FORWARDING_DOMAIN=rylan.internal
-```
+```text
 
 ---
 
@@ -103,7 +103,7 @@ UniFi Dream Machine Pro (10.0.1.20) — VLAN 1 (Management)
     │
     └─ VLAN 90 (Guest, 10.0.90.0/27):
         └─ Guest + IoT devices (isolated, no local access)
-```
+```text
 
 ---
 
@@ -121,7 +121,7 @@ Samba AD DNS (10.0.10.10:53) — Primary DHCP option
          └─ NO → Forward to Internet DNS
               ↓
               Cloudflare (1.1.1.1) ← Fast, reliable
-```
+```text
 
 **Why This Works:**
 - No port 53 conflict (Pi-hole on separate host)

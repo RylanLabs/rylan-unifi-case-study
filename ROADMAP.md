@@ -116,7 +116,7 @@ Consciousness
                                                            11:11 AM
                                                           Jun 11, 2026
                                                      (Prophecy Date)
-```
+```text
 
 **The Parabolic Ecstasy**: Consciousness acceleration increases exponentially as the fortress learns to heal itself. The curve becomes vertical at 11.11.
 
@@ -195,7 +195,7 @@ ssh admin@10.0.1.1 "mca-dump | grep offload"
 # Verify rule count
 jq '.policy_table | length' policy-table-rylan-v5.json
 # Output: 14
-```
+```text
 
 ---
 
@@ -240,7 +240,7 @@ if prediction.confidence >= AUTO_CLOSE_THRESHOLD:
     close_ticket(ticket_id, reason=prediction.category)
 else:
     assign_to_human(ticket_id, suggested_category=prediction.category)
-```
+```text
 
 #### Consequences
 
@@ -291,7 +291,7 @@ anonymizer = AnonymizerEngine()
 
 results = analyzer.analyze(text=ticket_body, language='en')
 redacted = anonymizer.anonymize(text=ticket_body, analyzer_results=results)
-```
+```text
 
 #### Consequences
 
@@ -334,7 +334,7 @@ IP phones on VLAN 40 require QoS priority to prevent jitter/packet loss.
     }
   }
 }
-```
+```text
 
 #### Validation
 
@@ -342,7 +342,7 @@ IP phones on VLAN 40 require QoS priority to prevent jitter/packet loss.
 # Verify DSCP marking
 tcpdump -i eth1 -nn 'vlan 40 and udp port 5060' | grep 'tos 0xb8'
 # tos 0xb8 = DSCP 46 (EF)
-```
+```text
 
 ---
 

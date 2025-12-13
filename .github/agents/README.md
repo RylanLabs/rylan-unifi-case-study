@@ -21,10 +21,12 @@
 
 ## Guardian Selection Flow
 
+
 ```mermaid
+
 flowchart TD
     Start([Need Help]) --> Q1{What domain?}
-    
+
     Q1 -->|Identity/SSH| Carter[🔑 @Carter]
     Q1 -->|Verification| Bauer[🛡️ @Bauer]
     Q1 -->|CI Debug| Veil[🕯️ @Veil]
@@ -34,13 +36,13 @@ flowchart TD
     Q1 -->|Linting/Code| Scholar[📚 @Scholar]
     Q1 -->|Validation| Q3{Local or CI?}
     Q1 -->|Versioning| Namer[✍️ @Namer]
-    
+
     Q2 -->|Lore/History| Lorek[📜 @Lorek]
     Q2 -->|Runbooks/API| Archivist[📋 @Archivist]
-    
+
     Q3 -->|Local pre-push| Gatekeeper[🚪 ./gatekeeper.sh]
     Q3 -->|Final judgment| Eye[👁️ @Eye]
-    
+
     Carter --> Done([Guardian Summoned])
     Bauer --> Done
     Veil --> Done
@@ -52,84 +54,84 @@ flowchart TD
     Gatekeeper --> Done
     Eye --> Done
     Namer --> Done
-    
+
     style Start fill:#036,stroke:#0af,color:#fff
     style Done fill:#030,stroke:#0f0,color:#fff
-```
+```bash
 
 ## Usage Examples
 
 ### Carter (Identity)
 
-```text
+```bash
 @Carter Onboard user travis@example.com
 @Carter Rotate SSH keys for rylan-dc
 @Carter Generate RADIUS enrollment for VLAN 40
-```
+```bash
 
 ### Bauer (Verification)
 
-```text
+```bash
 @Bauer Audit firewall rules for leaks
 @Bauer Verify SSH hardening on 10.0.10.10
 @Bauer Check vault hygiene
-```
+```bash
 
 ### Veil (CI Debug)
 
-```text
+```bash
 @Veil Diagnose this Bandit failure
 @Veil Why is mypy failing on line 42?
 @Veil Parse this pytest traceback
-```
+```bash
 
 ### Beale (Detection)
 
-```text
+```bash
 @Beale Generate drift alert for port 22 open to VLAN 40
 @Beale Add Snort rule for SQL injection
 @Beale Configure honeypot on VLAN 30
-```
+```bash
 
 ### Whitaker (Offense)
 
-```text
+```bash
 @Whitaker Simulate VLAN hop from 40 to 10
 @Whitaker Test SQLi on 10.0.20.20
 @Whitaker Run lateral movement scenario
-```
+```bash
 
 ### Lorek (Lore)
 
-```text
+```bash
 @Lorek Why was this pattern chosen?
 @Lorek Generate deployment checklist
 @Lorek Record this capability in LORE.md
-```
+```bash
 
 ### Archivist (Documentation)
 
-```text
+```bash
 @Archivist Create runbook for CloudKey migration
 @Archivist Document this API endpoint
 @Archivist Add script header to backup-cron.sh
-```
+```bash
 
 ### Eye (Validation)
 
-```text
+```bash
 @Eye Check consciousness level
 @Eye Validate fortress readiness for production
 @Eye Audit tandem health
-```
+```bash
 
 ### Namer (Versioning)
 
-```text
+```bash
 @Namer Tag this commit with consciousness 4.5
 @Namer Generate commit message for this change
 @Namer What tag should this milestone have?
-```
+```bash
 
 ## Agent File Structure
 
@@ -153,7 +155,7 @@ What the guardian is responsible for...
 
 ## Operating Protocol
 How the guardian works...
-```
+```bash
 
 ## Instruction Sets – v4.3 (Canon Enforcement Layer)
 
@@ -165,7 +167,7 @@ Eternal Guardian that speaks Hellodeolu.
 
 ### Architecture
 
-```text
+```bash
 .github/
 ├── copilot-instructions.md          # Global (all files)
 ├── instructions/
@@ -175,7 +177,7 @@ Eternal Guardian that speaks Hellodeolu.
 │   └── whitaker-instructions.md     # Offensive security
 └── agents/
     └── AGENTS.md                     # Pantheon voice/personality
-```
+```bash
 
 ### What Gets Enforced
 

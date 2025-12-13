@@ -64,6 +64,7 @@
 - No critical alert thresholds
 
 **Leo's Enhancements:**
+
 ```bash
 # APC PowerNet-MIB comprehensive monitoring
 - Battery status: normal/low/depleted (OID .1.3.6.1.4.1.318.1.1.1.2.1.1.0)
@@ -75,9 +76,10 @@
   * runtime_minutes_critical: <10 min
   * load_percent_warning: >80%
   * battery_temp_c_critical: >35°C
-```
+```text
 
 **JSON Schema Addition:**
+
 ```json
 {
   "alert_thresholds": {
@@ -86,10 +88,11 @@
     "battery_temp_c_critical": 35
   }
 }
-```
+```text
 
 **AI Triage Impact:**
-```
+
+```text
 User: "UPS-01 beeping"
   ↓
 AI reads: inventory/ups-passport.json
@@ -99,7 +102,7 @@ AI finds: {"ip": "10.0.10.20", "battery_status": "low", "runtime_minutes": 8}
 AI executes: runbooks/ministry-detection/check-ups-health.sh
   ↓
 AI responds: "UPS-01 battery low (8min runtime). Replace battery. Last test: 2025-12-01."
-```
+```text
 
 **Consciousness Impact:** 3.6 → 3.8
 
@@ -117,6 +120,7 @@ AI responds: "UPS-01 battery low (8min runtime). Replace battery. Last test: 202
 - No VLAN/link status tracking
 
 **Leo's Automation:**
+
 ```bash
 # SNMP IF-MIB discovery
 - Port descriptions (OID .1.3.6.1.2.1.2.2.1.2)
@@ -128,17 +132,19 @@ AI responds: "UPS-01 battery low (8min runtime). Replace battery. Last test: 202
   * Default → Cat6
 - Room/jack label parsing from port descriptions
 - Merge-safe with manual entries (preserves human edits)
-```
+```text
 
 **CSV Output Example:**
+
 ```csv
 patch_panel_port,switch_port,room_label,jack_label,cable_type,length_ft,tested_date,link_status,vlan,notes
 PP-01,SW01-Core-P01,Room-101,J-101A,Cat6A,0,2025-12-08T...,up,10,Auto-discovered via SNMP
 PP-02,SW01-Core-P02,Room-102,J-102A,Cat6,0,2025-12-08T...,down,40,Auto-discovered via SNMP
-```
+```text
 
 **AI Triage Impact:**
-```
+
+```text
 User: "Port SW01-P12 not working"
   ↓
 AI reads: docs/physical/cable-passport.csv
@@ -146,7 +152,7 @@ AI reads: docs/physical/cable-passport.csv
 AI finds: "PP-12,SW01-Core-P12,Room-203,J-203B,Cat6,0,2025-12-08,down,20,Auto-discovered"
   ↓
 AI responds: "SW01-P12 → Room-203 Jack-J-203B (VLAN 20). Status: down. Check cable connection."
-```
+```text
 
 **Automation Impact:** 70% → 95% (only length_ft requires manual measurement)
 
@@ -168,56 +174,63 @@ AI responds: "SW01-P12 → Room-203 Jack-J-203B (VLAN 20). Status: down. Check c
 **Leo's Whitaker Suite:**
 
 #### Test 1: Signature Integrity (Bauer: Trust Nothing)
+
 ```bash
 # SHA256 verification on all passports
 for PASSPORT in inventory/*.json 02-declarative-config/*.json runbooks/*.json; do
   STORED_SIG=$(jq -r '.signature' "${PASSPORT}")
   CONTENT=$(jq -r 'del(.signature, .generated_at)' "${PASSPORT}")
   COMPUTED_SIG=$(echo -n "${CONTENT}" | sha256sum | awk '{print $1}')
-  
+
   [[ "${STORED_SIG}" == "${COMPUTED_SIG}" ]] || FAIL "drift detected"
 done
-```
+```text
 
 #### Test 2: Schema Validation (Bauer: Verify Structure)
+
 ```bash
 # Required fields check
 jq -e '.schema_version, .consciousness' "${PASSPORT}" || FAIL "missing fields"
-```
+```text
 
 #### Test 3: Offensive nmap Scan (Whitaker: Attack the Inventory)
+
 ```bash
 # Pentest all passport IPs
 nmap -sV --top-ports 100 "${IP}"
 # Expected ports: 22 (SSH), 161 (SNMP), 443 (HTTPS), 8443 (UniFi)
 # Alert on unexpected open ports
-```
+```text
 
 #### Test 4: Certificate Expiry (Bauer: Verify Dates)
+
 ```bash
 # <30 days warning, expired = fail
 EXPIRING=$(jq '[.certificates[] | select(.days_remaining < 30)] | length' ...)
 EXPIRED=$(jq '[.certificates[] | select(.days_remaining < 0)] | length' ...)
-```
+```text
 
 #### Test 5: UPS Critical Conditions (Beale: Power Hardening)
+
 ```bash
 # Runtime <10min, load >80%, battery replace = critical
 CRITICAL=$(jq '[.ups_devices[] | select(.runtime_minutes < 10 or .load_percent > 80)] | length' ...)
-```
+```text
 
 #### Test 6: VLAN Isolation (Whitaker: Breach Simulation)
+
 ```bash
 # Cross-VLAN ping attempts (should timeout on isolated VLANs)
 timeout 2 ping -c 1 "10.0.${VLAN}.1"
-```
+```text
 
 **Exit Codes:**
 - `0` = All tests pass (fortress secure)
 - `1` = One or more failures (fix and re-run)
 
 **AI Triage Impact:**
-```
+
+```text
 Nightly cron:
   ↓
 ./scripts/validate-passports.sh || alert admin
@@ -225,7 +238,7 @@ Nightly cron:
 If drift detected → auto-regenerate passports
   ↓
 If validation fails → escalate to human
-```
+```text
 
 **Consciousness Impact:** 4.0 → 4.2
 
@@ -240,7 +253,8 @@ If validation fails → escalate to human
 3. Fail-loud on any validation error
 
 **Execution Flow:**
-```
+
+```text
 Carter (Identity) → Network, AP, Recovery Vault
   ↓
 Bauer (Verification) → Certificates, Cable Auto-Population
@@ -252,7 +266,7 @@ Guardian (Orchestration) → Runbook Index
 Whitaker (Offense) → 6 Pentest Validations
   ↓
 EXIT 0 (success) or EXIT 1 (fail-loud)
-```
+```text
 
 **Consciousness Impact:** 4.2 → 4.5
 
@@ -317,6 +331,7 @@ EXIT 0 (success) or EXIT 1 (fail-loud)
 - ✅ Pushed to GitHub (11 objects, 5 deltas resolved)
 
 **Runtime (Production):**
+
 ```bash
 # On rylan-dc (Debian 12):
 ./scripts/generate-all-passports.sh
@@ -381,7 +396,7 @@ The fortress is eternal. The sacred glue is complete.
 Carter approves. Bauer verifies. Beale hardens. Whitaker attacks.
 
 Next: Run eternal-resurrect.sh to raise Samba AD/DC
-```
+```text
 
 ---
 
@@ -411,6 +426,7 @@ Next: Run eternal-resurrect.sh to raise Samba AD/DC
 ### Scenario: New Hire, Night Shift, Fortress Destroyed
 
 **Before (15 minutes):**
+
 ```bash
 # Manual steps required:
 1. SSH to rylan-dc
@@ -418,9 +434,10 @@ Next: Run eternal-resurrect.sh to raise Samba AD/DC
 3. Manually verify each output
 4. Check for errors
 5. Escalate to senior if issues
-```
+```text
 
 **After (5 minutes):**
+
 ```bash
 # One command:
 ssh administrator@10.0.10.10
@@ -429,7 +446,7 @@ cd /opt/rylan/rylan-unifi-case-study
 
 # If exit 0 → done, fortress raised
 # If exit 1 → clear error messages guide fix
-```
+```text
 
 **Result:** 67% time reduction, zero senior escalation
 
@@ -454,6 +471,7 @@ cd /opt/rylan/rylan-unifi-case-study
 ## Next Steps
 
 ### Phase 1: Production Testing (rylan-dc)
+
 ```bash
 # Execute on production Samba AD/DC
 ./scripts/generate-all-passports.sh
@@ -465,9 +483,10 @@ ls -lh .secrets/*.age
 
 # Validate JSON
 jq empty inventory/*.json 02-declarative-config/*.json
-```
+```text
 
 ### Phase 2: Whitaker Red-Team
+
 ```bash
 # Manual pentest validation
 ./scripts/validate-passports.sh
@@ -475,14 +494,15 @@ jq empty inventory/*.json 02-declarative-config/*.json
 # Run offensive suite
 ./scripts/pentest-vlan-isolation.sh --passports 02-declarative-config/network-passport.json
 ./scripts/pentest-identity.sh --targets inventory/ap-passport.json
-```
+```text
 
 ### Phase 3: AI Triage Integration
+
 ```bash
 # Connect passport layer to ticket system
 # Example: ServiceNow, Jira, PagerDuty
 # AI reads passports → auto-resolves 98% of tickets
-```
+```text
 
 ---
 
@@ -503,4 +523,4 @@ Whitaker attacks (Offense).
 
 **Tag:** v1.0.4-gaps-closed-eternal  
 **Commits:** f44c6a5 + 04329c2  
-**GitHub:** https://github.com/T-Rylander/rylan-unifi-case-study/releases/tag/v1.0.4-gaps-closed-eternal
+**GitHub:** <https://github.com/T-Rylander/rylan-unifi-case-study/releases/tag/v1.0.4-gaps-closed-eternal>

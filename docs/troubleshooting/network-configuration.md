@@ -10,7 +10,7 @@ Check available network interfaces:
 
 ```bash
 ip -o link show
-```
+```text
 
 Verify naming scheme:
 - **Systemd predictable naming** (modern): `eno1`, `enp3s0`, `enp4s0`, etc.
@@ -41,13 +41,13 @@ ethernets:
       name: "en*"   # For systemd predictable naming
       # OR explicit match
       name: "enp3s0"  # For specific NIC
-```
+```text
 
 Then re-run:
 
 ```bash
 ./eternal-resurrect.sh
-```
+```text
 
 #### Option 2: Manual Interface Selection
 
@@ -55,7 +55,7 @@ Find your primary interface:
 
 ```bash
 ip -o link show | awk -F': ' '{print $2}' | grep -E "^en|^eth" | grep -v vlan | head -1
-```
+```text
 
 Apply netplan manually:
 
@@ -63,7 +63,7 @@ Apply netplan manually:
 sudo cp bootstrap/netplan-rylan-dc.yaml /etc/netplan/99-rylan-dc.yaml
 sudo sed -i 's/primary-nic/YOUR_NIC_NAME/g' /etc/netplan/99-rylan-dc.yaml
 sudo netplan apply --debug
-```
+```text
 
 #### Option 3: Verify Hardware Availability
 
@@ -75,14 +75,14 @@ lshw -C network
 
 # Or simpler view
 nmtui  # NetworkManager TUI (if available)
-```
+```text
 
 Enable NIC if needed:
 
 ```bash
 sudo ip link set YOUR_NIC_NAME up
 sudo dhclient YOUR_NIC_NAME  # Test DHCP
-```
+```text
 
 ---
 
@@ -96,19 +96,19 @@ Verify current IP state:
 
 ```bash
 ip addr show
-```
+```text
 
 Check netplan configuration:
 
 ```bash
 sudo netplan --debug generate
-```
+```text
 
 Review systemd-networkd logs:
 
 ```bash
 sudo journalctl -u systemd-networkd -n 50
-```
+```text
 
 ### Root Causes
 
@@ -127,7 +127,7 @@ sudo journalctl -u systemd-networkd -n 50
 sudo netplan apply --debug
 sleep 2
 ip addr show
-```
+```text
 
 #### Option 2: Manual IP Assignment (Temporary)
 
@@ -140,13 +140,13 @@ sudo ip route add default via 10.0.10.1 dev YOUR_NIC_NAME
 sudo ip link add link YOUR_NIC_NAME name YOUR_NIC_NAME.30 type vlan id 30
 sudo ip link set YOUR_NIC_NAME.30 up
 sudo ip addr add 10.0.30.10/24 dev YOUR_NIC_NAME.30
-```
+```text
 
 Then persist in netplan by fixing `bootstrap/netplan-rylan-dc.yaml` and running:
 
 ```bash
 ./eternal-resurrect.sh
-```
+```text
 
 #### Option 3: Verify Gateway/Samba DC Connectivity
 
@@ -156,7 +156,7 @@ ping -c 3 10.0.10.1
 
 # Test DNS (once Samba DNS is running)
 nslookup rylan.internal 127.0.0.1
-```
+```text
 
 ---
 
@@ -168,14 +168,14 @@ Validate syntax before applying:
 
 ```bash
 sudo netplan --debug generate
-```
+```text
 
 Should output:
 
-```
+```text
 Generated config: /run/systemd/network/10-netplan-primary-nic.network
 Generated config: /run/netplan-primary-nic.30.network
-```
+```text
 
 ### Dry-Run Network Application
 
@@ -183,13 +183,13 @@ Test without restarting network:
 
 ```bash
 sudo netplan apply --debug
-```
+```text
 
 Monitor with:
 
 ```bash
 sudo journalctl -f -u systemd-networkd
-```
+```text
 
 ### Rollback to DHCP
 
@@ -198,7 +198,7 @@ If static config causes connectivity loss:
 ```bash
 sudo rm /etc/netplan/99-rylan-dc.yaml
 sudo netplan apply
-```
+```text
 
 ---
 
@@ -211,9 +211,9 @@ ip -d link show | grep -A 2 vlan
 
 # Example output:
 # 5: YOUR_NIC_NAME.30@YOUR_NIC_NAME: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group 32
-#     link/ether xx:xx:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff promiscuity 0 
+#     link/ether xx:xx:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff promiscuity 0
 #     vlan protocol 802.1q id 30 <REORDER_HDR> txqueuelen 1000
-```
+```text
 
 ### Test PXE Service IP
 
@@ -223,7 +223,7 @@ netstat -tln | grep 10.0.30.10
 
 # Or verify with ip
 ip addr show | grep 10.0.30.10
-```
+```text
 
 ### Troubleshoot VLAN Not Tagged
 
@@ -237,7 +237,7 @@ If VLAN sub-interface not created:
 sudo netplan apply --debug
 sleep 2
 ip addr show
-```
+```text
 
 ---
 

@@ -4,7 +4,7 @@ Validates HTTP session setup and credential loading.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, mock_open
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 from shared.auth import get_authenticated_session, load_credentials
@@ -49,7 +49,11 @@ class TestGetAuthenticatedSession:
 class TestLoadCredentials:
     """Test credential loading from YAML."""
 
-    @patch("builtins.open", new_callable=mock_open, read_data="unifi_user: admin\nunifi_pass: secret123\n")
+    @patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data="unifi_user: admin\nunifi_pass: secret123\n",
+    )
     @patch("yaml.safe_load")
     def test_load_credentials_success(self, mock_yaml, mock_file):
         """Load credentials from inventory.yaml."""
@@ -57,7 +61,9 @@ class TestLoadCredentials:
         creds = load_credentials()
         assert creds["unifi_user"] == "admin"
         assert creds["unifi_pass"] == "secret123"
-        mock_file.assert_called_once_with("shared/inventory.yaml", "r", encoding="utf-8")
+        mock_file.assert_called_once_with(
+            "shared/inventory.yaml", "r", encoding="utf-8"
+        )
 
     @patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found"))
     def test_load_credentials_file_not_found(self, mock_file):

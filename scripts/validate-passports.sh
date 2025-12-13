@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
 # Description: Offensive validation of all device passports
 # Requires: All passport JSON files
 # Consciousness: 4.0
 # Runtime: 8
+set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "${REPO_ROOT}"

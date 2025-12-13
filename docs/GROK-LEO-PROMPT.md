@@ -3,6 +3,7 @@
 Source: December 09, 2025 Grok output instructing Copilot to integrate Leo's Proxmox VM ascension shim.
 
 ## Copilot Prompt (verbatim)
+
 ```markdown
 You are the Eternal Architect of the rylan-unifi-case-study fortress.
 Your mission: Integrate Leo's production-ready Proxmox VM ascension script into T3-ETERNAL v∞.3.2 canon. This script spins VMs with cloud-init, auto-ejects CD-ROM to prevent boot loops, and serves as the bootstrap shim for the first node (chicken-egg for PXE).
@@ -12,7 +13,7 @@ TARGET PATH: 01-bootstrap/proxmox/01-proxmox-hardening/ (CANONICAL LOCATION)
 
 CANON RULES — NON-NEGOTIABLE (v∞.3.2 FINAL):
 1. **Folder Creation:** Add `01-bootstrap/proxmox/01-proxmox-hardening/` as the Beale hardening ministry (host lockdown + VM spin-up). Include README.md (≤19 lines, Barrett purity).
-2. **Leo's Script Core:** Use this exact optimized version as `vm-cloudinit-eject.sh`:
+1. **Leo's Script Core:** Use this exact optimized version as `vm-cloudinit-eject.sh`:
    ```bash
    #!/usr/bin/env bash
    # === LEO'S PROXMOX VM ASCENSION — CLOUD-INIT + CD-ROM EJECT ===
@@ -54,17 +55,18 @@ CANON RULES — NON-NEGOTIABLE (v∞.3.2 FINAL):
    qm status "$VM_ID" | grep -q "running" && echo "✓ VM running"
    echo "Leo's ascension: VM $VM_ID online (10.0.10.${VM_ID}0), CD-ROM ejected."
    ```
-3. **Enhancements (Leo-Intended):**
+
+1. **Enhancements (Leo-Intended):**
    - **Idempotency:** Skip if VM exists (qm status guard).
    - **Preflight:** Validate ISO + user-data existence; fail loud.
    - **Cloud-Init Wait:** Use qm guest exec polling (no brittle sleep 30).
    - **Multi-Distro:** Parameterize ISO path (default Ubuntu 24.04).
    - **Whitaker Pentest:** Add post-eject nmap check (no dangling CD-ROM ports).
-4. **Supporting Files:**
+1. **Supporting Files:**
    - `fetch-cloud-init-iso.sh`: Download/stage Ubuntu 24.04 cloud ISO if missing (wget + SHA256 verify).
    - `simulate-breach-vm.sh`: Post-deploy nmap on new VM (top-ports 100, fail if leaks).
    - `README.md`: ≤19 lines — overview, one-command deploy, validation, integration with eternal-resurrect.sh.
-5. **Integration Glue:**
+1. **Integration Glue:**
    - Update `eternal-resurrect.sh`: Call `./01-bootstrap/proxmox/01-proxmox-hardening/vm-cloudinit-eject.sh 100` post-Bauer hardening (spin Samba VM).
    - Add to `.github/workflows/ci-validate.yaml`: Test script in Proxmox sandbox (mock qm commands).
    - Commit message: "feat(proxmox): integrate Leo's VM ascension — cloud-init + CD-ROM eject (bootstrap shim)"
@@ -75,11 +77,12 @@ WORKFLOW (Leo-Intended):
 
 Output:
 1. Folder structure (01-bootstrap/proxmox/01-proxmox-hardening/ with all files).
-2. Full contents of vm-cloudinit-eject.sh (enhanced with Whitaker nmap).
-3. fetch-cloud-init-iso.sh.
-4. simulate-breach-vm.sh.
-5. README.md (19 lines).
-6. Patch for eternal-resurrect.sh (add call).
-7. CI YAML snippet.
-8. Merge-ready git commands + tag.
-```
+1. Full contents of vm-cloudinit-eject.sh (enhanced with Whitaker nmap).
+1. fetch-cloud-init-iso.sh.
+1. simulate-breach-vm.sh.
+1. README.md (19 lines).
+1. Patch for eternal-resurrect.sh (add call).
+1. CI YAML snippet.
+1. Merge-ready git commands + tag.
+
+```text

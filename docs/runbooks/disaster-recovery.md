@@ -25,7 +25,7 @@ git checkout release/v∞.1.0-eternal
 # Restore config from latest backup
 LATEST=$(ls -td /mnt/nas/rylan-fortress-backups/* | head -1)
 rsync -avz "$LATEST/config/" /opt/rylan/
-```
+```text
 
 ### Phase 2: Samba AD DC Restore (90 min)
 
@@ -44,7 +44,7 @@ sudo systemctl enable samba-ad-dc
 # Verify domain
 samba-tool domain level show
 # Expected: Domain and forest function level = (Windows) 2008 R2
-```
+```text
 
 ### Phase 3: Network Services (60 min)
 
@@ -62,7 +62,7 @@ echo "User-Name = testuser" | radclient -x 127.0.1 auth testing123
 cd /opt/rylan/02-declarative-config
 python apply.py --dry-run
 python apply.py
-```
+```text
 
 ### Phase 4: Validation (30 min)
 
@@ -76,7 +76,7 @@ pytest -v
 
 # Check CI (push to trigger)
 git add . && git commit -m "chore(dr): post-recovery validation" && git push
-```
+```text
 
 ## Success Criteria
 - `guardian/audit-eternal.py` exits 0
@@ -93,7 +93,7 @@ If recovery fails, revert to previous backup date:
 ```bash
 PREVIOUS=$(ls -td /mnt/nas/rylan-fortress-backups/* | sed -n '2p')
 rsync -avz "$PREVIOUS/config/" /opt/rylan/
-```
+```text
 
 ## Contact
 - On-call: [Redacted]

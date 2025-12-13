@@ -20,7 +20,7 @@ The UniFi Network Controller (v9.5.21, jacobalberty/unifi:latest) runs natively 
 
 ## Architecture
 
-```
+```text
 Proxmox (Host)
 ├── vmbr0 (bridge, Debian 13)
 │   └── macvlan-unifi (10.0.1.20/27)
@@ -31,7 +31,7 @@ Proxmox (Host)
 │               ├── 8843 → HTTPS Device Mgmt
 │               ├── 8880 → HTTP Device Mgmt
 │               └── 3478/udp → STUN (device discovery)
-```
+```text
 
 ---
 
@@ -54,7 +54,7 @@ docker compose version
 sudo mkdir -p /opt/unifi/{data,log,cert}
 sudo chown -R 1000:1000 /opt/unifi
 sudo chmod -R 755 /opt/unifi
-```
+```text
 
 ### Network Setup (systemd-networkd Persistence)
 
@@ -73,7 +73,7 @@ ip addr show macvlan-unifi
 
 # 4. Verify connectivity to gateway
 ping -c 3 10.0.1.1  # USG-3P
-```
+```text
 
 ---
 
@@ -86,7 +86,7 @@ ping -c 3 10.0.1.1  # USG-3P
 mkdir -p /opt/unifi
 cp bootstrap/unifi/docker-compose.yml /opt/unifi/
 cd /opt/unifi
-```
+```text
 
 ### Step 2: Deploy Controller
 
@@ -100,7 +100,7 @@ docker compose up -d
 # Monitor startup (takes ~2-3 minutes for first init)
 docker logs -f unifi-controller
 # Wait for: "Unifi is ready"
-```
+```text
 
 ### Step 3: Initial Configuration
 
@@ -126,7 +126,7 @@ docker logs -f unifi-controller
 #   - On device SSH:
 #       set-inform http://10.0.1.20:8080/inform
 #       reboot
-```
+```text
 
 ### Step 4: Verify Adoption
 
@@ -138,7 +138,7 @@ docker logs -f unifi-controller
 # Command-line verification:
 curl -k https://10.0.1.20:8443/status
 # Should return: {"status":"ok","version":"9.5.21"}
-```
+```text
 
 ---
 
@@ -152,7 +152,7 @@ cd /opt/unifi && docker compose up -d
 docker ps | grep unifi-controller  # Should see container running
 curl -k https://10.0.1.20:8443/status  # Should return OK
 docker logs unifi-controller | tail -20  # Last 20 log lines
-```
+```text
 
 ---
 
@@ -171,7 +171,7 @@ docker compose down
 sudo rm -rf /opt/unifi/data/*
 docker compose up -d
 # Reconfigure from scratch (see Step 3)
-```
+```text
 
 ### Issue: "Connection refused on port 8443"
 ```bash
@@ -190,7 +190,7 @@ ip addr show macvlan-unifi
 
 # Force restart:
 docker compose restart
-```
+```text
 
 ### Issue: "Devices won't adopt"
 ```bash
@@ -202,7 +202,7 @@ docker compose restart
 
 # Cause 3: SSH key or credentials mismatch
 # Fix: Controller UI → Settings → Devices → SSH → Re-provision
-```
+```text
 
 ### Issue: "Memory/CPU maxed out"
 ```bash
@@ -215,7 +215,7 @@ docker compose restart
 #   MONGO_HEAP: 1024      # Up to 1GB
 #
 # docker compose up -d    # Recreates container with new heap
-```
+```text
 
 ---
 
@@ -230,7 +230,7 @@ curl -f -k https://localhost:8443/status
 # If 3 consecutive checks fail (3 min), container marked unhealthy
 # View health status:
 docker inspect unifi-controller | grep -A 5 "Health"
-```
+```text
 
 ### Logs
 
@@ -246,7 +246,7 @@ docker logs --since 1h unifi-controller
 
 # Save to file:
 docker logs unifi-controller > /tmp/unifi-$(date +%Y%m%d-%H%M%S).log
-```
+```text
 
 ### Disk Usage
 
@@ -256,7 +256,7 @@ du -sh /opt/unifi/data /opt/unifi/log
 
 # Clean old logs (keep last 30 days):
 find /opt/unifi/log -name "*.log.*" -mtime +30 -delete
-```
+```text
 
 ---
 
@@ -271,7 +271,7 @@ cd /opt/unifi
 docker compose pull          # Fetch latest image
 docker compose up -d         # Restart with new image
 docker logs -f unifi-controller  # Monitor startup
-```
+```text
 
 ### Manual Pin to Specific Version
 
@@ -283,7 +283,7 @@ docker logs -f unifi-controller  # Monitor startup
 # Then:
 docker compose pull
 docker compose up -d
-```
+```text
 
 ---
 
@@ -307,7 +307,7 @@ sudo tar -czf /opt/unifi-backup-$(date +%Y%m%d-%H%M%S).tar.gz \
 
 # Verify backup integrity:
 tar -tzf /opt/unifi-backup-20251206-120000.tar.gz | head -20
-```
+```text
 
 ### Restore
 
@@ -326,7 +326,7 @@ docker compose up -d
 # Verify:
 docker logs unifi-controller | tail -50
 curl -k https://10.0.1.20:8443/status
-```
+```text
 
 ---
 
@@ -370,7 +370,7 @@ docker logs -f unifi-controller
 # 6. Verify reachability
 sleep 30
 curl -k https://10.0.1.20:8443/status
-```
+```text
 
 ---
 

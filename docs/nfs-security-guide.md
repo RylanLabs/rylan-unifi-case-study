@@ -14,7 +14,7 @@ Domain-based (Kerberos) authentication for secure NFS backups across the eternal
 
 ## Architecture
 
-```
+```text
 Samba AD/DC (rylan-dc)
 │
 ├─ Kerberos Realm: RYLAN.INTERNAL
@@ -39,7 +39,7 @@ NFS Clients
 │  └─ /mnt/nfs/backups → osticket backup destination
 └─ rylan-ai (GPU host)
    └─ /srv/nfs/backups (NFS server, no client mount needed)
-```
+```text
 
 ## Security Properties
 
@@ -62,7 +62,7 @@ NFS Clients
 ```bash
 sudo apt-get update
 sudo apt-get install -y nfs-kernel-server krb5-user krb5-admin-server
-```
+```text
 
 #### 1.2 Create Export Directories
 
@@ -70,7 +70,7 @@ sudo apt-get install -y nfs-kernel-server krb5-user krb5-admin-server
 sudo mkdir -p /srv/nfs/backups/{loki-chunks,loki-index,samba,freeradius,osticket,qdrant}
 sudo chown nfsnobody:nfsnobody /srv/nfs/backups
 sudo chmod 755 /srv/nfs/backups
-```
+```text
 
 #### 1.3 Generate NFS Service Keytab (On rylan-dc)
 
@@ -87,7 +87,7 @@ scp /tmp/nfs.keytab rylan-ai:/tmp/nfs.keytab
 sudo mv /tmp/nfs.keytab /etc/krb5.keytab
 sudo chown root:root /etc/krb5.keytab
 sudo chmod 600 /etc/krb5.keytab
-```
+```text
 
 #### 1.4 Configure /etc/exports
 
@@ -99,7 +99,7 @@ sudo chmod 600 /etc/krb5.keytab
 /srv/nfs/backups/freeradius     10.0.10.10/32(sec=krb5p,rw,async,no_subtree_check,anonuid=65534,anongid=65534)
 /srv/nfs/backups/osticket       10.0.10.11/32(sec=krb5p,rw,async,no_subtree_check,anonuid=65534,anongid=65534)
 /srv/nfs/backups/qdrant         10.0.10.60/32(sec=krb5p,rw,async,no_subtree_check,anonuid=65534,anongid=65534)
-```
+```text
 
 **Notes**:
 - `sec=krb5p`: Kerberos auth + integrity + privacy
@@ -117,7 +117,7 @@ sudo systemctl start nfs-server
 
 # Verify
 sudo showmount -e localhost
-```
+```text
 
 ### Phase 2: NFS Clients (rylan-dc, rylan-pi)
 
@@ -126,7 +126,7 @@ sudo showmount -e localhost
 ```bash
 sudo apt-get update
 sudo apt-get install -y nfs-common krb5-user krb5-config
-```
+```text
 
 #### 2.2 Configure Kerberos (`/etc/krb5.conf`)
 
@@ -149,20 +149,20 @@ sudo apt-get install -y nfs-common krb5-user krb5-config
 [domain_realm]
   .rylan.internal = RYLAN.INTERNAL
   rylan.internal = RYLAN.INTERNAL
-```
+```text
 
 #### 2.3 Create Mount Point
 
 ```bash
 sudo mkdir -p /mnt/nfs/backups
-```
+```text
 
 #### 2.4 Add fstab Entry
 
 ```bash
 # /etc/fstab entry for permanent mount
 10.0.10.60:/srv/nfs/backups /mnt/nfs/backups nfs4 sec=krb5p,vers=4.2,proto=tcp,port=2049,rw,hard,intr,noatime,_netdev 0 0
-```
+```text
 
 #### 2.5 Authenticate with Kerberos
 
@@ -179,7 +179,7 @@ sudo mount -a
 
 # Verify mount
 df -h | grep /mnt/nfs
-```
+```text
 
 ### Phase 3: Automated Keytab (Optional)
 
@@ -190,7 +190,7 @@ For automated mounts without interactive authentication, use a service principal
 ```bash
 sudo samba-tool user create backup-nfs --no-password
 sudo samba-tool group addmembers "Backup Operators" backup-nfs
-```
+```text
 
 #### 3.2 Export Keytab
 
@@ -202,7 +202,7 @@ sudo chmod 600 /tmp/backup-nfs.keytab
 # Copy to NFS clients
 scp /tmp/backup-nfs.keytab rylan-dc:/etc/krb5.keytab.backup-nfs
 scp /tmp/backup-nfs.keytab rylan-pi:/etc/krb5.keytab.backup-nfs
-```
+```text
 
 #### 3.3 Auto-Mount in systemd
 
@@ -223,7 +223,7 @@ User=backup-nfs
 
 [Install]
 WantedBy=multi-user.target
-```
+```text
 
 Enable and start:
 
@@ -231,7 +231,7 @@ Enable and start:
 sudo systemctl daemon-reload
 sudo systemctl enable mnt-nfs-backups.mount
 sudo systemctl start mnt-nfs-backups.mount
-```
+```text
 
 ---
 
@@ -250,7 +250,7 @@ sudo showmount -e localhost
 # /srv/nfs/backups/osticket          10.0.10.11
 # /srv/nfs/backups/qdrant            10.0.10.60
 # /srv/nfs/backups/samba             10.0.10.10
-```
+```text
 
 ### 2. Verify Kerberos Ticket
 
@@ -263,7 +263,7 @@ klist
 #
 # Valid starting     Expires            Service principal
 # 12/03/2025 10:30   12/04/2025 10:30   krbtgt/RYLAN.INTERNAL@RYLAN.INTERNAL
-```
+```text
 
 ### 3. Test NFS Mount
 
@@ -277,7 +277,7 @@ df -h | grep /mnt/nfs
 
 sudo ls -la /mnt/nfs/backups/
 # Should list backup subdirectories (loki-chunks, samba, etc.)
-```
+```text
 
 ### 4. Test Write Permission
 
@@ -292,7 +292,7 @@ ls -la /mnt/nfs/backups/
 
 # Verify both files exist on NFS server (rylan-ai)
 sudo ls -la /srv/nfs/backups/
-```
+```text
 
 ---
 
@@ -307,7 +307,7 @@ sudo ls -la /srv/nfs/backups/
 kinit RYLAN\\admin@RYLAN.INTERNAL
 klist
 sudo mount -a
-```
+```text
 
 ### Mount Fails: "Server not responding"
 
@@ -321,7 +321,7 @@ sudo showmount -e localhost
 sudo ufw status
 sudo ufw allow 2049/tcp   # NFS
 sudo ufw allow 111/tcp    # Portmapper
-```
+```text
 
 ### "sec=krb5p not supported"
 
@@ -332,7 +332,7 @@ sudo ufw allow 111/tcp    # Portmapper
 sudo apt-get install nfs-common krb5-user
 # Use NFSv4.2 minimum
 mount -o vers=4.2 ...
-```
+```text
 
 ### Samba AD Certificate Validation
 
@@ -341,7 +341,7 @@ For production, validate Samba AD certificates:
 ```bash
 # Enable LDAPS validation in NFS mount options
 mount -o sec=krb5p,krb5i 10.0.10.60:/srv/nfs/backups /mnt/nfs/backups
-```
+```text
 
 ---
 
@@ -360,7 +360,7 @@ else
     echo "⚠️  NFS not mounted, using local backup"
     BACKUP_DESTINATION="/tmp/backups"
 fi
-```
+```text
 
 ---
 

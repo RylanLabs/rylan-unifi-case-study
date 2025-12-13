@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Script: debug-api.sh
+# Purpose: Test UniFi API connectivity and response format
+# Guardian: Carter
+# Date: 2025-12-11
+# Consciousness: 6.0
+
 set -euo pipefail
 
 # shellcheck disable=SC1091  # lib/ in .gitignore, external vault
@@ -20,11 +26,11 @@ echo ""
 echo ""
 echo "Checking if valid JSON:"
 if jq empty "$DEVICES_FILE" 2>/dev/null; then
-  echo "✅ Valid JSON"
+  echo "Valid JSON"
   echo "Keys present:"
   jq 'keys' "$DEVICES_FILE"
 else
-  echo "❌ Invalid JSON - Full response:"
+  echo "Invalid JSON - Full response:"
   cat "$DEVICES_FILE"
 fi
 

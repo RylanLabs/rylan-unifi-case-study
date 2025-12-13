@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install ShellCheck (pinned version)
         run: |
           # Pin to specific version to avoid CI drift
@@ -33,7 +33,7 @@ jobs:
           sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/shellcheck
           shellcheck --version
         shell: bash
-      
+
       - name: Install shfmt (pinned v3.8.0)
         run: |
           curl -sSL https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64 -o /tmp/shfmt
@@ -41,7 +41,7 @@ jobs:
           sudo chmod +x /usr/local/bin/shfmt
           shfmt --version
         shell: bash
-      
+
       - name: Run validate-bash.sh (with diagnostic capture)
         run: |
           echo "::group::File Discovery Debug"
@@ -50,7 +50,7 @@ jobs:
           echo "Total count:"
           find . -type f \( -name "*.sh" -o -path "*/scripts/*" \) -exec grep -l '^#!/.*bash' {} \; 2>/dev/null | wc -l
           echo "::endgroup::"
-          
+
           bash ./scripts/validate-bash.sh 2>&1 || {
             echo "::group::ShellCheck Failures"
             cat /tmp/shellcheck-output.log 2>/dev/null || echo "(no shellcheck log)"
@@ -61,7 +61,7 @@ jobs:
             exit 1
           }
         shell: bash
-      
+
       - name: Validate heresy containment
         run: |
           bash ./scripts/validate-heresy.sh 01-bootstrap/adopt-devices-wrapper.sh
@@ -73,17 +73,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install ruff mypy bandit pytest pytest-cov
           pip install -r requirements.txt || true
-      
+
       - name: Run validate-python.sh
         run: bash ./scripts/validate-python.sh
         shell: bash
@@ -93,17 +93,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt || true
           pip install pytest pytest-cov
-      
+
       - name: Run pytest with coverage
         run: |
           pytest --cov=. --cov-report=term-missing --cov-fail-under=70 || {
@@ -116,10 +116,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install nmap
         run: sudo apt-get update && sudo apt-get install -y nmap
-      
+
       - name: Validate VLAN isolation (CI mode)
         run: |
           cd 03-validation-ops
@@ -131,7 +131,7 @@ jobs:
           CI_MODE=1 bash ./01-bootstrap/proxmox/01-proxmox-hardening/vm-cloudinit-eject.sh 100
           CI_MODE=1 bash ./01-bootstrap/proxmox/01-proxmox-hardening/simulate-breach-vm.sh 10.0.10.100
         shell: bash
-      
+
       - name: Validate firewall policy (<=10 rules)
         run: |
           if [[ -f 02-declarative-config/policy-table-rylan-v5.json ]]; then
@@ -149,22 +149,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y shellcheck nmap jq
-      
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install bandit pytest pytest-cov
           pip install -r requirements.txt || true
-      
+
       - name: Smoke-test orchestrator
         run: |
           # Mock credentials for dry-run
@@ -173,14 +173,14 @@ jobs:
           export UNIFI_PASS="mock-pass"
           export CI=true
           export DRY_RUN=1
-          
+
           # Execute orchestrator in DRY_RUN + CI_MODE
           bash ./eternal-resurrect.sh || {
             echo "❌ Orchestrator failed smoke test"
             exit 1
           }
         shell: bash
-      
+
       - name: Validate 15-minute RTO compliance
         run: |
           echo "✅ RTO target: <15 minutes"

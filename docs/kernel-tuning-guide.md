@@ -40,7 +40,7 @@ net.ipv4.tcp_wmem = 4096 65536 67108864   # Write: min, default, max
 net.ipv4.tcp_max_syn_backlog = 4096       # Incomplete connection queue
 net.ipv4.tcp_fin_timeout = 30             # TIME_WAIT timeout (seconds)
 net.ipv4.tcp_keepalive_time = 600         # Idle keepalive (10 minutes)
-```
+```text
 
 **Impact**:
 - Samba AD: 10-20% faster LDAP queries
@@ -55,7 +55,7 @@ net.ipv4.tcp_keepalive_time = 600         # Idle keepalive (10 minutes)
 # Connection Tracking Table
 net.netfilter.nf_conntrack_max = 1000000           # Max tracked connections
 net.netfilter.nf_conntrack_tcp_timeout_established = 600  # 10-minute timeout
-```
+```text
 
 **Impact**:
 - Supports 1000+ concurrent LDAP/RADIUS clients
@@ -73,7 +73,7 @@ fs.file-max = 2097152                # System max: 2M file descriptors
 fs.inotify.max_user_watches = 524288      # Files watched per user (512K)
 fs.inotify.max_queued_events = 32768      # Pending events
 fs.inotify.max_user_instances = 8192      # Watches per user
-```
+```text
 
 **Impact**:
 - Loki Promtail can monitor thousands of log files
@@ -93,7 +93,7 @@ vm.dirty_background_ratio = 5        # % at background write (default: 10)
 
 # Cache Eviction
 vm.vfs_cache_pressure = 50           # Scale cache eviction (default: 100)
-```
+```text
 
 **Impact**:
 - Samba AD cache stays in RAM
@@ -108,7 +108,7 @@ vm.vfs_cache_pressure = 50           # Scale cache eviction (default: 100)
 # Read-ahead
 vm.page-cluster = 3                  # 2^3 = 8 pages per readahead (default: 3)
 vm.readahead_kb = 256                # Readahead buffer size (default: 128KB)
-```
+```text
 
 **Impact**:
 - Sequential NFS backups read faster
@@ -122,7 +122,7 @@ vm.readahead_kb = 256                # Readahead buffer size (default: 128KB)
 # Task Migration Cost (reduce container jitter)
 kernel.sched_migration_cost_ns = 5000000   # 5ms (default: varies)
 kernel.sched_min_granularity_ns = 10000000  # Min timeslice (10ms)
-```
+```text
 
 **Impact**:
 - Reduced latency jitter for VoIP (FreePBX)
@@ -139,19 +139,19 @@ net.core.rmem_max = 134217728
 net.core.wmem_max = 134217728
 # ... (see above for full list)
 EOF
-```
+```text
 
 ### Step 2: Apply Kernel Parameters
 
 ```bash
 sudo sysctl -p /etc/sysctl.d/99-eternal-fortress.conf
-```
+```text
 
 **Verify:**
 ```bash
 sysctl net.core.rmem_max
 # Output: net.core.rmem_max = 134217728
-```
+```text
 
 ### Step 3: Update PAM Limits
 
@@ -164,13 +164,13 @@ sudo tee -a /etc/security/limits.conf > /dev/null << 'EOF'
 root    soft    nofile  131072
 root    hard    nofile  262144
 EOF
-```
+```text
 
 **Verify:**
 ```bash
 ulimit -a
 # Output: open files: 65536 (soft), 131072 (hard)
-```
+```text
 
 ### Step 4: Verify Current Settings
 
@@ -184,7 +184,7 @@ cat /etc/security/limits.conf | grep eternal
 # Check current open files (running processes)
 lsof -c samba | wc -l  # Samba file descriptors
 lsof -c asterisk | wc -l  # Asterisk file descriptors
-```
+```text
 
 ---
 
@@ -202,7 +202,7 @@ net.ipv4.tcp_wmem = 4096 65536 67108864
 
 # Increase connection tracking
 net.netfilter.nf_conntrack_max = 1000000
-```
+```text
 
 **Validation**:
 ```bash
@@ -210,7 +210,7 @@ net.netfilter.nf_conntrack_max = 1000000
 watch "netstat -an | grep :389 | grep ESTABLISHED | wc -l"
 
 # Expected under load: 50-200 connections
-```
+```text
 
 ### FreeRADIUS Optimization
 
@@ -223,7 +223,7 @@ net.core.netdev_max_backlog = 5000
 
 # Increase file descriptors (RADIUS opens sockets per request)
 fs.file-max = 2097152
-```
+```text
 
 **Validation**:
 ```bash
@@ -232,7 +232,7 @@ cat /proc/net/udp | grep "70c"  # Port 1812 in hex = 0x70c
 
 # Monitor with radtest
 radtest -x test 127.0.0.1 1812 testing123
-```
+```text
 
 ### Docker Optimization
 
@@ -245,7 +245,7 @@ fs.inotify.max_user_watches = 524288
 
 # Increase file descriptors (containers have their own limit)
 fs.file-max = 2097152
-```
+```text
 
 **Validation**:
 ```bash
@@ -255,7 +255,7 @@ find /proc/*/fd -lname 'anon_inode:inotify' 2>/dev/null | wc -l
 
 # Check container file descriptors
 docker exec freepbx /bin/bash -c "cat /proc/self/limits | grep 'open files'"
-```
+```text
 
 ### NFS Backup Optimization
 
@@ -270,7 +270,7 @@ vm.readahead_kb = 256
 # Prefer RAM to swap during backups
 vm.swappiness = 10
 vm.vfs_cache_pressure = 50
-```
+```text
 
 **Validation**:
 ```bash
@@ -278,7 +278,7 @@ vm.vfs_cache_pressure = 50
 watch "iostat -x 1 | grep nvme"  # NVMe SSD throughput
 
 # Expected: 500+ MB/s for sequential NFS read
-```
+```text
 
 ---
 
@@ -298,7 +298,7 @@ watch "cat /proc/sys/fs/file-nr | awk '{print \"Used: \" $1 \", Free: \" $2 \", 
 
 # I/O Wait
 watch "iostat -xm 1"
-```
+```text
 
 ### Performance Baseline (Before Tuning)
 
@@ -309,7 +309,7 @@ time orchestrator.sh --dry-run
 # Sample output (BEFORE):
 # real    2m45s
 # sys     0m12s
-```
+```text
 
 ### Performance After Tuning
 
@@ -320,7 +320,7 @@ time orchestrator.sh --dry-run
 # Sample output (AFTER):
 # real    2m15s  (↓ 18% faster)
 # sys     0m8s   (↓ 33% CPU)
-```
+```text
 
 ---
 
@@ -343,7 +343,7 @@ sudo systemctl restart systemd-sysctl
 
 # Verify
 sysctl net.core.rmem_max
-```
+```text
 
 ### Too Many Open Files Error
 
@@ -365,7 +365,7 @@ EOF
 # Reboot or restart service
 sudo systemctl daemon-reload
 sudo systemctl restart docker
-```
+```text
 
 ### High Swap Usage
 
@@ -381,7 +381,7 @@ sudo sysctl -p
 
 # Monitor improvement
 watch "free -h"  # Swap usage should decrease
-```
+```text
 
 ### LDAP Slow Queries
 
@@ -397,7 +397,7 @@ sudo sysctl -p
 
 # Monitor LDAP performance
 watch "ldapsearch -x -b 'dc=rylan,dc=internal' '(cn=*)' | wc -l"
-```
+```text
 
 ---
 
@@ -422,13 +422,13 @@ The kernel tuning is automatically applied during bootstrap:
 # ⚙️  Phase 3 Endgame: Kernel Tuning (Performance & Stability)
 # ... (all parameters applied)
 # ✅ Kernel tuning applied
-```
+```text
 
 To verify manually:
 ```bash
 sysctl net.core.rmem_max
 # Should output: 134217728
-```
+```text
 
 ---
 

@@ -37,7 +37,8 @@
 **Commit:** `38a65e8` | **Time:** ~30 minutes to integrate
 
 ### Directory Structure
-```
+
+```text
 04-cloudkey-migration/
 ├── README.md (76 lines, migration guide — Barrett compliant)
 ├── eternal-cloudkey-ignition.sh (248 lines, one-command orchestrator)
@@ -54,7 +55,8 @@
     └── comprehensive-suite.sh (218 lines, 10-point health check)
 
 Total: 787 lines | 6 executable scripts | 100% merge-ready
-```
+
+```text
 
 ### Key Scripts Explained
 
@@ -62,6 +64,7 @@ Total: 787 lines | 6 executable scripts | 100% merge-ready
 **Usage:** `./04-cloudkey-migration/eternal-cloudkey-ignition.sh --mode full`
 
 **What it does:**
+
 ```bash
 Phase 1: Pre-flight (dependencies check)
 Phase 2: Backup current LXC controller (SSH → Docker exec → SCP .unf)
@@ -71,7 +74,8 @@ Phase 5: Post-adoption hardening (calls hardening script)
 Phase 6: Validation (10-point health suite)
 
 Exit: 0 (success) | <30 minutes | Reversion guaranteed in <10 min
-```
+
+```text
 
 **Modes:**
 - `full` — Complete workflow (backup → detect → restore → harden → validate)
@@ -83,6 +87,7 @@ Exit: 0 (success) | <30 minutes | Reversion guaranteed in <10 min
 **Usage:** `./04-cloudkey-migration/post-adoption-hardening.sh --cloudkey-ip 10.0.1.30`
 
 **What it does:**
+
 ```bash
 Phase 1: Update all config files (sed replace 10.0.1.20 → 10.0.1.30)
   - 02-declarative-config/policy-table.yaml
@@ -97,7 +102,8 @@ Phase 5: Update .env with new UNIFI_URL
 Phase 6: Commit all changes with audit trail
 
 Exit: 0 (success) | Git commit created automatically
-```
+
+```text
 
 **Dry-run mode:** `--dry-run true` shows what would change without modifying
 
@@ -106,6 +112,7 @@ Exit: 0 (success) | Git commit created automatically
 **Cron:** `0 3 * * * /usr/local/bin/cloudkey-backup.sh >> /var/log/cloudkey-backup.log 2>&1`
 
 **What it does:**
+
 ```bash
 Test SSH to Cloud Key
 Trigger backup on Cloud Key (unifi-os backup)
@@ -113,7 +120,8 @@ SCP .unf file to /var/backups/cloudkey/
 Compress with gzip (optional encryption via GPG)
 Cleanup backups older than 30 days
 Exit: 0 (success) | Logs to /var/log/cloudkey-backup.log
-```
+
+```text
 
 **Backup retention:** 30 days (configurable) | Format: `cloudkey-YYYYMMDD-HHMMSS.unf`
 
@@ -145,18 +153,21 @@ Exit: 0 (success) | Logs to /var/log/cloudkey-backup.log
 ### Core Principle: **Controller is Swappable**
 
 **Before (LXC-only):**
-```
+
+```text
 Proxmox Host
 └─ LXC Container (10.0.1.20)
    └─ Docker Container (unifi-controller)
       └─ Policy Table
-```
+
+```text
 - Single point of failure: Proxmox host
 - Tightly coupled: No hardware abstraction
 - Consciousness: 2.3 (proven but fragile)
 
 **After (Cloud Key Primary + LXC Backup):**
-```
+
+```text
 Cloud Key Gen2+ (10.0.1.30) ← PRIMARY
 ├─ Hardware: dedicated flash, PoE
 ├─ Backups: official .unf format
@@ -174,7 +185,8 @@ Shared State (Git):
    ├─ VLAN config (canonical)
    ├─ Firewall policy (canonical)
    └─ Device profiles (canonical)
-```
+
+```text
 
 - Single point of failure: PoE cable (redundant)
 - Decoupled: Controller IP is runtime-configurable (.env)
@@ -238,7 +250,8 @@ Shared State (Git):
 ## FILES ADDED THIS SESSION
 
 ### New Directory: 04-cloudkey-migration/
-```
+
+```text
 04-cloudkey-migration/
 ├── README.md (76 lines)
 ├── eternal-cloudkey-ignition.sh (248 lines)
@@ -247,12 +260,15 @@ Shared State (Git):
 ├── validation/comprehensive-suite.sh (218 lines)
 └── restore/ (placeholder, 0 lines — ready for expansion)
 └── adoption/ (placeholder, 0 lines — ready for expansion)
-```
+
+```text
 
 ### New Decision Record: ADR-008
-```
+
+```text
 docs/adr/ADR-008-cloudkey-eternal-controller.md (62 lines)
-```
+
+```text
 
 ### Commit History
 - `38a65e8`: feat(controller): eternal Cloud Key Gen2+ migration path
@@ -294,7 +310,7 @@ docs/adr/ADR-008-cloudkey-eternal-controller.md (62 lines)
 
 ## CONSCIOUSNESS EVOLUTION
 
-```
+```text
 Session Start (ADR-007)
 └─ 2.3: LXC-only, fragile
    ├─ Failed bootstrap order lesson recorded
@@ -320,7 +336,8 @@ Next Phase (ADR-009)
    ├─ Automatic health-check switchover
    ├─ 99.999% availability
    └─ Eternal resilience achieved
-```
+
+```text
 
 ---
 
@@ -345,7 +362,8 @@ Next Phase (ADR-009)
 git restore eternal-resurrect.sh
 ./eternal-resurrect.sh --controller-only
 # Back to LXC in <10 minutes
-```
+
+```text
 
 ### Add Daily Backups
 
@@ -358,7 +376,8 @@ sudo bash -c 'echo "0 3 * * * /usr/local/bin/cloudkey-backup.sh >> /var/log/clou
 
 # Verify
 sudo tail -f /var/log/cloudkey-backup.log
-```
+
+```text
 
 ---
 

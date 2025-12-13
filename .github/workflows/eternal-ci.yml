@@ -75,12 +75,12 @@ jobs:
           # Parse last 20 commits for tandem invocations
           TANDEM_COUNT=$(git log -20 --oneline 2>/dev/null | grep -c "\[TANDEM\]" || echo "0")
           echo "📊 Tandem invocations in last 20 commits: $TANDEM_COUNT"
-          
+
           if [[ $TANDEM_COUNT -gt 0 ]]; then
             echo "   Detected tandems:"
             git log -20 --oneline 2>/dev/null | grep "\[TANDEM\]" | head -5 || true
           fi
-          
+
           # Check consciousness alignment
           if [ -f "CONSCIOUSNESS.md" ]; then
             CURRENT=$(grep -oP 'Consciousness \K[0-9]+\.[0-9]+' CONSCIOUSNESS.md | head -1 || echo "unknown")
@@ -94,7 +94,7 @@ jobs:
           STALE_RUNBOOKS=$(find runbooks/ -name "*.md" -mtime +90 2>/dev/null | wc -l || echo "0")
           STALE_DOCS=$(find docs/ -name "*.md" -mtime +90 2>/dev/null | wc -l || echo "0")
           TOTAL_STALE=$((STALE_RUNBOOKS + STALE_DOCS))
-          
+
           if [[ $TOTAL_STALE -gt 0 ]]; then
             echo "⚠️  ARCHIVIST: $TOTAL_STALE documents older than 90 days"
             echo "   Stale runbooks: $STALE_RUNBOOKS"

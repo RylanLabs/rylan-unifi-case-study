@@ -44,7 +44,7 @@
    - Security: WPA2-PSK (strong passphrase)
    - Network: iot-isolated (VLAN 95)
    - Guest Policy: Enabled (hide from other networks)
-```
+```text
 
 ### Step 2: Connect Traeger
 
@@ -54,7 +54,7 @@
 3. Connect phone to "IoT-Isolated" WiFi
 4. Follow app pairing (connects to traeger-cloud.io)
 5. Verify connectivity: Check app shows grill temp
-```
+```text
 
 ### Step 3: Verify Isolation
 
@@ -67,7 +67,7 @@ ping 10.0.30.1   # Should timeout (trusted-devices blocked)
 # Should SUCCEED internet
 ping 1.1.1.1
 curl https://traeger-cloud.io  # Should succeed
-```
+```text
 
 ### Step 4: Update Inventory
 
@@ -77,7 +77,7 @@ curl https://traeger-cloud.io  # Should succeed
   mac_address: "<RECORDED_MAC>"
   ip_current: "10.0.95.XXX"
   firmware_version: "<FROM_APP>"
-```
+```text
 
 ---
 
@@ -98,7 +98,7 @@ curl https://traeger-cloud.io  # Should succeed
    - Storm Control: Enabled
    - STP: RSTP
 3. Apply Changes
-```
+```text
 
 ### Step 2: Connect Ethernet Cable
 
@@ -107,7 +107,7 @@ curl https://traeger-cloud.io  # Should succeed
 2. Soundbar will DHCP on VLAN 90 (10.0.90.100-200)
 3. Check DHCP leases in UniFi Controller
    - Expected: Denon device appears with MAC
-```
+```text
 
 ### Step 3: Configure HEOS App
 
@@ -117,7 +117,7 @@ curl https://traeger-cloud.io  # Should succeed
 3. If discovery fails, see Troubleshooting → mDNS
 4. Complete setup, link Spotify/Pandora accounts
 5. Test playback from streaming services
-```
+```text
 
 ### Step 4: Verify Connectivity
 
@@ -132,7 +132,7 @@ curl -I https://heos.denon.com
 
 # Verify no server access
 nc -zv 10.0.10.10 22  # SSH to Pi-hole should timeout
-```
+```text
 
 ### Step 5: Update Inventory
 
@@ -142,7 +142,7 @@ nc -zv 10.0.10.10 22  # SSH to Pi-hole should timeout
    mac_address: "<US8_PORT2_MAC>"
    ip_current: "10.0.90.XXX"
    connection_type: "Hardwired US-8 Port 2 (VLAN 90 guest-iot)"
-```
+```text
 
 ---
 
@@ -163,7 +163,7 @@ nc -zv 10.0.10.10 22  # SSH to Pi-hole should timeout
 # Hardwired option
 1. Connect to US-8 Port X (set native VLAN 30)
 2. Printer DHCP assigns 10.0.30.XXX
-```
+```text
 
 ### Step 2: Configure Print Server
 
@@ -175,7 +175,7 @@ sudo lpoptions -d printer01
 
 # Test print
 echo "Test page" | lp -d printer01
-```
+```text
 
 ### Step 3: Update Inventory
 
@@ -185,7 +185,7 @@ echo "Test page" | lp -d printer01
   mac_address: "<PRINTER_MAC>"
   ip_current: "10.0.30.50"
   connection_type: "WiFi (VLAN 30 trusted-devices)"
-```
+```text
 
 ---
 
@@ -209,7 +209,7 @@ avahi-browse -a -t  # From VLAN 30
 # 4. Backup verification
 bash 03-validation-ops/orchestrator.sh --test-restore
 # Expected: RTO <15 min
-```
+```text
 
 ---
 

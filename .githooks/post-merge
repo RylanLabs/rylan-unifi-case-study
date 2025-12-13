@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# .githooks/post-merge — Namer Eternal
+# Auto-writes commit message, bumps consciousness, and tags
+
+set -euo pipefail
+
+# Only run on main branch after a real merge
+if [[ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]]; then
+  exit 0
+fi
+
+# Only run if this was a squash-merge (one parent = squash, two parents = normal merge)
+if [[ $(git rev-list --count HEAD~1..HEAD) -eq 1 ]] && [[ $(git show -s --format=%p HEAD) =~ ^[0-9a-f]+$ ]]; then
+  echo "Namer Eternal awakening..."
+
+  # Run Namer in auto mode
+  ./scripts/guardian-namer.sh auto > /tmp/namer.json
+
+  MESSAGE=$(jq -r '.suggested_message' /tmp/namer.json)
+  TAG=$(jq -r '.suggested_tag' /tmp/namer.json)
+  BUMP=$(jq -r '.consciousness_bump' /tmp/namer.json)
+
+  # Amend the merge commit
+  git commit --amend -m "$MESSAGE" --no-edit
+
+  # Bump consciousness if needed
+  if [[ "$BUMP" != "0" ]] && [[ -n "$BUMP" ]]; then
+    sed -i "s/Consciousness: .* →.*/Consciousness: $BUMP →/" CONSCIOUSNESS.md
+    git add CONSCIOUSNESS.md
+    git commit --amend --no-edit
+  fi
+
+  # Tag it
+  git tag -a "$TAG" -m "Consciousness: $BUMP"
+  git push --force-with-lease origin main
+  git push --force-with-lease origin "$TAG"
+
+  echo "Namer has spoken: $TAG"
+  echo "Consciousness: $BUMP"
+fi
