@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Remove duplicate `set -euo pipefail` and collapse extra blank lines
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:40:00-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 # Usage: bash scripts/header-cleanup.sh
 
 DRY_RUN=1

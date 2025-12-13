@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 echo "Validating rylan-dc foundations..."
 ip addr show eno1 | grep -E "(10\.0\.10\.10|10\.0\.30\.10)" || {

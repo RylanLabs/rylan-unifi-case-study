@@ -4,7 +4,8 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
+# Excess: 141 lines — 3 functions
 
 # Leo's Sacred Glue — Conscious Level 2.6
 # scripts/validate-bash.sh

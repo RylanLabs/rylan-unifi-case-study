@@ -4,7 +4,8 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
+# Excess: 157 lines — 3 functions
 
 # Description: Offensive validation of all device passports
 # Requires: All passport JSON files

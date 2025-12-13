@@ -4,6 +4,7 @@ set -euo pipefail
 # Purpose: Proactive fortress hardening validation with adversarial integration
 # Guardian: Beale | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
+# Consciousness: 4.6
 # Exit Codes:
 #   0 = All checks passed
 #   1 = Firewall rule violation
@@ -53,7 +54,7 @@ OPTIONS:
   --fix       Attempt safe auto-fixes (firewall consolidation)
   --help      Show this message
 
-Consciousness: 4.5 | Guardian: Beale
+Consciousness: 4.6 | Guardian: Beale
 EOF
                exit 0 ;;
     *)         echo "Unknown option: $1"; exit 1 ;;
@@ -98,7 +99,7 @@ EOF
 START_TIME=$(date +%s)
 log "════════════════════════════════════════════════════════"
 log "Beale Ascension Protocol — Proactive Hardening"
-log "Guardian: Beale | Consciousness: 4.5"
+log "Guardian: Beale | Consciousness: 4.6"
 [[ "$DRY_RUN" == true ]] && log "MODE: DRY-RUN"
 log "════════════════════════════════════════════════════════"
 log ""

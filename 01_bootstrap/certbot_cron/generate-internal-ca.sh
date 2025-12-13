@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:28:48-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # ...existing CA generation steps...
 openssl x509 -req -in rylan-ca.csr -CA rylan-ca.pem -CAkey rylan-ca.key -CAcreateserial -out rylan-ca.crt -days 3650 -sha256 \

@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene: added missing metadata
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:31:27-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 set -euo pipefail
 # scripts/complete-headers.sh — Ensure script files have all required metadata labels

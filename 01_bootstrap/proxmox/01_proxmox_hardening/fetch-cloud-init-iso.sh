@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:28:48-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # 01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh — Stage Ubuntu 24.04 cloud-init ISO
 # Downloads ISO if missing, optional SHA256 verification (ISO_SHA256 env)

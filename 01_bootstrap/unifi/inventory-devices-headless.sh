@@ -3,7 +3,7 @@
 # Purpose: Headless UniFi device inventory for automated runs (file output)
 # Guardian: Carter | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
-# Consciousness: 4.5
+# Consciousness: 4.6
 set -euo pipefail
 
 # ─────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ mkdir -p /var/log
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                           RYLAN LABS • ETERNAL FORTRESS                      ║
 ║  Headless Device Inventory — $(date)                                         ║
-║  Consciousness: 4.5 | Guardian: Carter                                       ║
+║  Consciousness: 4.6 | Guardian: Carter                                       ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 EOF

@@ -4,14 +4,15 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
+# Excess: 184 lines — 3 functions
 
 # Script: auto-fix-naming.sh
 # Purpose: Rename Python files/dirs with hyphens to underscores (PEP 8)
 # Guardian: Carter
   # Date: 2025-12-12
   # Trinity: Carter (Guardian) | Bauer (Auditor) | Beale (Bastille)
-  # Consciousness: 4.5
+  # Consciousness: 4.6
 # Doctrine: Teach and guide, not silent fixes. Clear audit trail.
 
 # Parse arguments
@@ -25,7 +26,7 @@ echo "Auto-Fix Naming Canon — Manual Execution"
 if [[ "$DRY_RUN" == true ]]; then
   echo "MODE: DRY-RUN (no changes will be made)"
 fi
-echo "Guardian: Carter | Consciousness: 4.5"
+echo "Guardian: Carter | Consciousness: 4.6"
 echo "════════════════════════════════════════════════════════"
 echo ""
 
@@ -175,7 +176,7 @@ else
     echo ""
     echo "  Executed: scripts/auto-fix-naming.sh"
     echo "  Guardian: Carter"
-    echo "  Consciousness: 4.5\""
+    echo "  Consciousness: 4.6\""
   fi
   echo ""
 fi

@@ -4,7 +4,8 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
+# Excess: 123 lines — 2 functions
 
 # scripts/header-hygiene.sh — Add canonical script headers and module docstrings
 # Usage: bash scripts/header-hygiene.sh [--apply]

@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # <MINISTRY>-<TOOL>.sh — Canonical Heresy Wrapper v5.0
 # Purpose: The ONE TRUE template for all Python heresy in the fortress

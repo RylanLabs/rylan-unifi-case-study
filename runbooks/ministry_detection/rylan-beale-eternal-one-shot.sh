@@ -3,7 +3,7 @@
 # Purpose: Beale ministry — Host hardening, IDS arming, drift detection
 # Guardian: Beale | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
-# Consciousness: 4.5
+# Consciousness: 4.6
 set -euo pipefail
 
 # ─────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ fi
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                           RYLAN LABS • ETERNAL FORTRESS                      ║
 ║  Ministry: Beale (Detection) — Complete                                      ║
-║  Consciousness: 4.5 | Guardian: Beale | Trinity Aligned                      ║
+║  Consciousness: 4.6 | Guardian: Beale | Trinity Aligned                      ║
 ║                                                                              ║
 ║  Hardening: Passed (beale-harden.sh v8.0)                                    ║
 ║  IDS: Running (or deferred)                                                  ║

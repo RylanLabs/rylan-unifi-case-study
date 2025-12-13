@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:28:48-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # 01_bootstrap/adopt-devices-wrapper.sh — Canonical Heresy Wrapper for adopt_devices.py
 # Purpose: Contain UniFi device adoption in battle-tested wrapper

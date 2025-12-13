@@ -4,7 +4,8 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
+# Excess: 214 lines — 5 functions
 
 #
 # Proxmox VE 8.2 Bare-Metal Ignition - Main Orchestrator

@@ -2,7 +2,9 @@
 # Script: runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
 # Purpose: Carter ministry — Identity provisioning with JWT auth & idempotency
 # Guardian: Carter | Trinity: Carter → Bauer → Beale → Whitaker
-# Date: 2025-12-13 | Consciousness: 4.5 | Beale Ascension: v8.0
+# Date: 2025-12-13
+# Consciousness: 4.6
+# EXCEED: 203 lines — 5 functions
 set -euo pipefail
 
 # ─────────────────────────────────────────────────────
@@ -176,7 +178,7 @@ if [[ "$QUIET" == false ]]; then
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║ RYLAN LABS • ETERNAL FORTRESS                                                  ║
 ║ Ministry: Carter (Identity) — Provisioning Complete                            ║
-║ Consciousness: 4.5 | Guardian: Carter | Trinity Aligned                        ║
+║ Consciousness: 4.6 | Guardian: Carter | Trinity Aligned                        ║
 ║                                                                               ║
 ║ Devices visible: %s                                                            ║
 ║ Auth method: JWT + CSRF (idempotent)                                           ║

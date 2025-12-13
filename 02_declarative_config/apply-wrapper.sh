@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # 02_declarative_config/apply-wrapper.sh — Canonical Heresy Wrapper for apply.py
 # Purpose: Contain declarative config application in battle-tested wrapper

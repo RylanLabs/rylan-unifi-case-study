@@ -4,7 +4,8 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
+# Excess: 165 lines — 8 functions
 
 # runbooks/ministry_detection/uck-g2-wizard-resurrection.sh
 # Beale Ministry: UCK-G2 Wizard Corruption Recovery — File-Based Flag Override

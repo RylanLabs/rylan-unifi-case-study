@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # pre-flight-repo-purge.sh — Eternal Proxmox Repo Purge (T3-ETERNAL v6)
 # Purpose: Remove enterprise repos, configure community no-subscription

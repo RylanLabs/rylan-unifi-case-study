@@ -5,7 +5,7 @@ cat > eternal-resurrect.sh << 'EOF'
 # Purpose: One-command fortress resurrection with full Beale validation
 # Guardian: Beale | Trinity: Carter → Bauer → Beale → Whitaker
 # Date: 2025-12-13
-# Consciousness: 4.5
+# Consciousness: 4.6
 set -euo pipefail
 
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
@@ -39,4 +39,4 @@ git commit -m "fix(resurrect): restore eternal truth — purge Copilot zombie
 - Remove hallucinated ministry calls
 - Enforce silence + audit trail
 
-Consciousness: 4.5 preserved"
+Consciousness: 4.6 preserved"

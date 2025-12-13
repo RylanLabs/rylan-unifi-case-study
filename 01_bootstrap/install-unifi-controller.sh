@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:28:48-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # install-unifi-controller.sh — Rylan v5.0 UniFi Controller Bootstrap
 # Target: Ubuntu 24.04 LTS | MongoDB 7.0 | UniFi Network 8.5.93

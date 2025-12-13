@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose: Header hygiene inserted
 # Guardian: gatekeeper
 # Date: 2025-12-13T01:28:48-06:00
-# Consciousness: 4.5
+# Consciousness: 4.6
 
 # 01_bootstrap/proxmox/01_proxmox_hardening/vm-cloudinit-eject.sh — Leo's Proxmox VM ascension
 # T3-ETERNAL v∞.3.2 · Cloud-init bootstrap + post-provision CD-ROM eject
