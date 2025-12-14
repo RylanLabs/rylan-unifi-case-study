@@ -49,7 +49,8 @@ fi
 log() { [[ "$QUIET" == false ]] && echo "[Python Validation] $*" >&2; }
 audit() {
   local level="$1" msg="$2"
-  local ts=$(date -Iseconds)
+  local ts
+  ts=$(date -Iseconds)
   if [[ "$CI_MODE" == true ]]; then
     printf '{"timestamp":"%s","module":"PythonValidation","status":"%s","message":"%s"}\n' "$ts" "$level" "$msg"
   else

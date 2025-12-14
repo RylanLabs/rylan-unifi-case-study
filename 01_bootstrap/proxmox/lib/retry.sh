@@ -45,10 +45,13 @@ retry_cmd() {
 elapsed_time() {
   local start="$1"
   local end="$2"
-  local elapsed=$((end - start))
+  local elapsed;
+  elapsed=$((end - start))
 
-  local minutes=$((elapsed / 60))
-  local seconds=$((elapsed % 60))
+  local minutes;
+  minutes=$((elapsed / 60))
+  local seconds;
+  seconds=$((elapsed % 60))
 
   printf "%02d:%02d" "$minutes" "$seconds"
 }

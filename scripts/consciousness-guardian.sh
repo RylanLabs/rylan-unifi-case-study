@@ -17,6 +17,7 @@ set -euo pipefail
 # ============================================================================
 
 DRY_RUN=0
+# shellcheck disable=SC2034  # DRY_RUN used for dry-run invocation
 if [[ ${1-} == --dry-run ]]; then
   DRY_RUN=1
 fi
@@ -122,8 +123,9 @@ FUTURE_ENTRIES=$(awk -v canonical="$CANONICAL" '/^\| v∞/{
   if (version > canonical) print NR": "$0
 }' CONSCIOUSNESS.md)
 
-if [[ -n "$FUTURE_ENTRIES" ]]; then
+  if [[ -n "$FUTURE_ENTRIES" ]]; then
   echo "  ❌ VIOLATIONS found in increment log:"
+  # shellcheck disable=SC2001 # adding prefix to each line via sed is intentional
   echo "$FUTURE_ENTRIES" | sed 's/^/    /'
   violations=$((violations+1))
 else

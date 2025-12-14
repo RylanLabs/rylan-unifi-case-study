@@ -10,7 +10,7 @@ Production-grade bare-metal ignition script for Proxmox VE 8.2 that transforms f
 
 ### 1. Main Script: `proxmox-ignite.sh`
 **Location**: `01_bootstrap/proxmox/proxmox-ignite.sh`
-**Size**: ~520 lines (inline comments, modular functions)
+**Size**: ~520 lines (`inline comments, modular functions`)
 **Format**: Pure bash, `set -euo pipefail`, production-ready
 
 **Capabilities**:

@@ -108,8 +108,10 @@ done
 
 # Determine lock path and acquire lock now that CLI args are parsed
 if [[ "$DRY_RUN" == true ]]; then
+  # shellcheck disable=SC2034  # LOCK_FILE used by sourced lib functions
   LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/ignite-${UID}.lock"
 else
+  # shellcheck disable=SC2034  # LOCK_FILE used by sourced lib functions
   LOCK_FILE="/var/run/ignite.lock"
 fi
 

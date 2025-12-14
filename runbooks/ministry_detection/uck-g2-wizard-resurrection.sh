@@ -12,6 +12,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/runbooks/ministry_detection/lib/uck-utils.sh
 source "${SCRIPT_DIR}/lib/uck-utils.sh"
 
 preflight_checks() {

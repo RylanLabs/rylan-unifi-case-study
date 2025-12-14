@@ -1,215 +1,167 @@
 #!/usr/bin/env bash
-set -euo pipefail
-# Script: 01_bootstrap/proxmox/proxmox-ignite.sh
-# Purpose: Header hygiene inserted
-# Guardian: gatekeeper
-# Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.6
-# Excess: 214 lines — 5 functions
+# shellcheck disable=SC1091
+# Source helper library extracted to reduce function count
+source "${SCRIPT_DIR}/lib/ignite_lib.sh"
 
-#
-# Proxmox VE 8.2 Bare-Metal Ignition - Main Orchestrator
-# Modular, <150 LOC orchestrator that sequences 5 phase modules
-# T3-ETERNAL compliant: Unix Philosophyatomic phases, Hellodeolu RTO, Whitaker offensive
-#
-# Usage:
-#   sudo ./proxmox-ignite.sh \
-#     --hostname rylan-dc \
-#     --ip 10.0.10.10/26 \
-#     --gateway 10.0.10.1 \
-#     --ssh-key-source github:T-Rylander \
-#     [--validate-only] [--dry-run]
+  [[ -f "$phase_script" ]] || fail_with_context $EXIT_VALIDATION "Phase script missing: $phase_script"
 
-################################################################################
-# CONFIGURATION & SETUP
-################################################################################
+  log_info "[PHASE] $phase_name starting"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_FILE="/var/log/proxmox-ignite.log"
+  if [[ "$DRY_RUN" == true ]]; then
+    log_info "[DRY-RUN] Would execute: bash $phase_script"
+    bash "$phase_script" --dry-run 2>/dev/null || true
+    return 0
+  fi
 
-# Source shared libraries
-# shellcheck source=01_bootstrap/proxmox/lib/common.sh
-source "${SCRIPT_DIR}/lib/common.sh"
-# shellcheck source=01_bootstrap/proxmox/lib/metrics.sh
-source "${SCRIPT_DIR}/lib/metrics.sh"
-# shellcheck source=01_bootstrap/proxmox/lib/security.sh
-source "${SCRIPT_DIR}/lib/security.sh"
+  if bash "$phase_script" >"$output_file" 2>&1; then
+    log_success "$phase_name PASSED"
+    save_checkpoint "$phase_name"
+    return 0
+  else
+    local rc=$?
+    log_error "$phase_name FAILED (exit $rc)"
+    log_error "Full output: $output_file"
+    log_error "Last $LOG_TAIL_LINES lines:"
+    tail -n "$LOG_TAIL_LINES" "$output_file" | sed 's/^/  /'
+    auto_rollback
+    fail_with_context $rc "Phase $phase_name failed"
+  fi
+}
 
-# Global environment variables (passed to phases)
-export SCRIPT_DIR LOG_FILE
-export HOSTNAME TARGET_IP GATEWAY_IP SSH_KEY_SOURCE
-export PRIMARY_DNS FALLBACK_DNS
-export REPO_URL REPO_DIR REPO_BRANCH
-export SKIP_ETERNAL_RESURRECT DRY_RUN VALIDATE_ONLY
+# =============================================================================
+# PILLAR 2 + 6: DRY-RUN + DOCUMENTATION
+# =============================================================================
 
-# Defaults
-HOSTNAME=""
-TARGET_IP=""
-GATEWAY_IP=""
-SSH_KEY_SOURCE="github:T-Rylander"
-PRIMARY_DNS="10.0.10.10"
-FALLBACK_DNS="1.1.1.1"
-REPO_URL="https://github.com/T-Rylander/a-plus-up-unifi-case-study.git"
-REPO_DIR="/opt/fortress"
-REPO_BRANCH="feat/iot-production-ready"
-SKIP_ETERNAL_RESURRECT=false
-DRY_RUN=false
-VALIDATE_ONLY=false
+print_usage() {
+  cat <<EOF
 
-################################################################################
-# ARGUMENT PARSING
-################################################################################
+Usage: sudo $SCRIPT_NAME [OPTIONS]
+
+EXAMPLES:
+  # Full production ignition
+  sudo $SCRIPT_NAME --hostname rylan-dc --ip 10.0.10.10/26 --gateway 10.0.10.1
+
+  # Dry-run preview
+  sudo $SCRIPT_NAME --hostname test --ip 10.0.10.20/26 --gateway 10.0.10.1 --dry-run
+
+  # Validation only
+  sudo $SCRIPT_NAME --hostname rylan-dc --ip 10.0.10.10/26 --gateway 10.0.10.1 --validate-only
+
+  # Force re-ignition
+  sudo $SCRIPT_NAME --hostname rylan-dc --ip 10.0.10.10/26 --gateway 10.0.10.1 --force
+
+EXIT CODES:
+  0 = Success
+  1 = Validation failure
+  2 = Network configuration failure
+  3 = Security hardening failure
+  5 = Backup/recovery failure
+  7 = Offensive validation failure
+
+TROUBLESHOOTING:
+  • Logs:           tail -f $LOG_FILE
+  • All logs:       ls -la $LOG_DIR
+  • Manual rollback: cp -a $BACKUP_DIR/* / && reboot
+  • Stuck lock:     rm -f $LOCK_FILE (verify no PID running)
+  • Resume:         Script auto-resumes from checkpoint
+
+EOF
+}
 
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
     case $1 in
-      --hostname)
-        HOSTNAME="$2"
-        shift 2
-        ;;
-      --ip)
-        TARGET_IP="$2"
-        shift 2
-        ;;
-      --gateway)
-        GATEWAY_IP="$2"
-        shift 2
-        ;;
-      --ssh-key-source)
-        SSH_KEY_SOURCE="$2"
-        shift 2
-        ;;
-      --dns-primary)
-        PRIMARY_DNS="$2"
-        shift 2
-        ;;
-      --dns-secondary)
-        FALLBACK_DNS="$2"
-        shift 2
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      --validate-only)
-        VALIDATE_ONLY=true
-        shift
-        ;;
-      --skip-eternal-resurrect)
-        SKIP_ETERNAL_RESURRECT=true
-        shift
-        ;;
-      *)
-        log_error "Unknown argument: $1"
-        print_usage
-        exit 1
-        ;;
+      --hostname)           HOSTNAME="$2"; shift 2 ;;
+      --ip)                 TARGET_IP="$2"; shift 2 ;;
+      --gateway)            GATEWAY_IP="$2"; shift 2 ;;
+      --ssh-key-source)     SSH_KEY_SOURCE="$2"; shift 2 ;;
+      --dns-primary)        PRIMARY_DNS="$2"; shift 2 ;;
+      --dns-secondary)      FALLBACK_DNS="$2"; shift 2 ;;
+      --dry-run)            DRY_RUN=true; shift ;;
+      --validate-only)      VALIDATE_ONLY=true; shift ;;
+      --skip-eternal-resurrect) SKIP_ETERNAL_RESURRECT=true; shift ;;
+      --force)              FORCE=true; shift ;;
+      --json-logs)          JSON_LOGS=true; shift ;;
+      *) log_error "Unknown argument: $1"; print_usage; exit $EXIT_VALIDATION ;;
     esac
   done
 }
 
-print_usage() {
-  cat <<'EOF'
-Usage: proxmox-ignite.sh [OPTIONS]
+validate_required() {
+  [[ -n "$HOSTNAME" ]]   || fail_with_context $EXIT_VALIDATION "Missing --hostname"
+  [[ -n "$TARGET_IP" ]]  || fail_with_context $EXIT_VALIDATION "Missing --ip"
+  [[ -n "$GATEWAY_IP" ]] || fail_with_context $EXIT_VALIDATION "Missing --gateway"
 
-Required Options:
-  --hostname HOSTNAME           System hostname (e.g., rylan-dc)
-  --ip IP/CIDR                  IP address with CIDR (e.g., 10.0.10.10/26)
-  --gateway GATEWAY             Default gateway IP (e.g., 10.0.10.1)
-
-Optional Options:
-  --ssh-key-source SOURCE       SSH key source (default: github:T-Rylander)
-                                Formats: github:user, file:/path, inline:key
-  --dns-primary DNS             Primary DNS server (default: 10.0.10.10)
-  --dns-secondary DNS           Secondary DNS server (default: 1.1.1.1)
-  --dry-run                     Preview without making changes
-  --validate-only               Pre-flight checks only
-  --skip-eternal-resurrect      Skip fortress resurrection script
-
-Example:
-  sudo ./proxmox-ignite.sh \
-    --hostname rylan-dc \
-    --ip 10.0.10.10/26 \
-    --gateway 10.0.10.1 \
-    --ssh-key-source github:T-Rylander
-EOF
+  [[ "$TARGET_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]{1,2}$ ]] ||
+    fail_with_context $EXIT_VALIDATION "Invalid IP/CIDR: $TARGET_IP"
+  [[ "$GATEWAY_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] ||
+    fail_with_context $EXIT_VALIDATION "Invalid gateway: $GATEWAY_IP"
 }
 
-################################################################################
-# VALIDATION
-################################################################################
-
-validate_arguments() {
-  if [ -z "$HOSTNAME" ] || [ -z "$TARGET_IP" ] || [ -z "$GATEWAY_IP" ]; then
-    log_error "Missing required arguments"
-    print_usage
-    exit 1
-  fi
-
-  if ! validate_cidr_format "$TARGET_IP"; then
-    fail_with_context 1 "Invalid IP/CIDR format: $TARGET_IP" \
-      "Expected format: 10.0.10.10/26"
-  fi
-
-  if ! validate_ip_format "$GATEWAY_IP"; then
-    fail_with_context 1 "Invalid gateway IP format: $GATEWAY_IP" \
-      "Expected format: 10.0.10.1"
-  fi
-}
-
-################################################################################
-# MAIN EXECUTION
-################################################################################
+# =============================================================================
+# MAIN ORCHESTRATION (Leo's corrected order)
+# =============================================================================
 
 main() {
-  # Parse and validate arguments
+  print_rylanlabs_banner
+
+  log_info "=== PROXMOX IGNITE v3 — A+ PRODUCTION HOMOGENIZED ==="
+  log_info "Log file: $LOG_FILE"
+  log_info "Dry-run: $DRY_RUN | Validate-only: $VALIDATE_ONLY | Force: $FORCE"
+
+  acquire_lock
+  create_backup
+  check_proxmox_version
+  check_already_ignited
+
   parse_arguments "$@"
-  validate_arguments
+  validate_required
 
-  # Initialize logging
-  mkdir -p "$(dirname "$LOG_FILE")"
-  echo "Proxmox Ignite started: $(date)" >"$LOG_FILE"
+  if [[ "$VALIDATE_ONLY" == true ]]; then
+    run_phase "VALIDATION ONLY" "${SCRIPT_DIR}/phases/phase0-validate.sh"
+    log_success "VALIDATION COMPLETE"
+    exit $EXIT_SUCCESS
+  fi
 
-  log_info "=== PROXMOX IGNITION SEQUENCE INITIATED ==="
-  log_info "Hostname: $HOSTNAME"
-  log_info "IP/CIDR: $TARGET_IP"
-  log_info "Gateway: $GATEWAY_IP"
-  log_info "SSH Key Source: $SSH_KEY_SOURCE"
+  # Resume logic
+  if [[ -f "$CHECKPOINT_FILE" ]]; then
+    local last_phase;
+    last_phase=$(cat "$CHECKPOINT_FILE")
+    log_info "Resuming from checkpoint: $last_phase"
+  fi
 
-  # Execute phases sequentially
-  "${SCRIPT_DIR}/phases/phase0-validate.sh" ||
-    fail_with_context 1 "Phase 0 validation failed" "Review logs"
+  # Phase execution (skip completed via checkpoint or idempotency in phases)
+  run_phase "0: Pre-flight validation" "${SCRIPT_DIR}/phases/phase0-validate.sh"
+  run_phase "1: Network configuration" "${SCRIPT_DIR}/phases/phase1-network.sh"
+  run_phase "2: Security hardening"    "${SCRIPT_DIR}/phases/phase2-harden.sh"
+  run_phase "3: Tooling bootstrap"     "${SCRIPT_DIR}/phases/phase3-bootstrap.sh"
 
-  hostnamectl set-hostname "$HOSTNAME" || log_warn "Failed to set hostname"
+  if [[ "$SKIP_ETERNAL_RESURRECT" == false ]]; then
+    run_phase "4: Fortress resurrection" "${SCRIPT_DIR}/phases/phase4-resurrect.sh" ||
+      log_warn "Phase 4 non-fatal issues (continuing)"
+  fi
 
-  "${SCRIPT_DIR}/phases/phase1-network.sh" ||
-    fail_with_context 1 "Phase 1 network configuration failed" "Review logs"
-
-  "${SCRIPT_DIR}/phases/phase2-harden.sh" ||
-    fail_with_context 1 "Phase 2 security hardening failed" "Review logs"
-
-  "${SCRIPT_DIR}/phases/phase3-bootstrap.sh" ||
-    fail_with_context 1 "Phase 3 tooling installation failed" "Review logs"
-
-  "${SCRIPT_DIR}/phases/phase4-resurrect.sh" ||
-    log_warn "Phase 4 had issues (non-fatal, continuing)"
-
-  # Collect system metrics
-  collect_system_metrics
-
-  # Run Whitaker offensive security validation
-  if run_whitaker_offensive_suite "$HOSTNAME" "$TARGET_IP" "$GATEWAY_IP" \
-    "$FALLBACK_DNS"; then
-    finalize_metrics
-    log_success "=== PROXMOX IGNITION COMPLETE ==="
-    log_success "Fortress operational. RTO compliance achieved."
-    exit 0
+  if run_whitaker_offensive_suite; then
+    clear_checkpoint
+    log_success "=== PROXMOX IGNITION COMPLETE — ETERNAL GREEN ==="
+    log_success "Fortress operational | Marker: $MARKER_FILE | RTO <15 min"
+    exit $EXIT_SUCCESS
   else
-    finalize_metrics
-    log_error "=== PROXMOX IGNITION COMPLETED WITH SECURITY WARNINGS ==="
-    exit 1
+    log_error "=== OFFENSIVE VALIDATION FAILED ==="
+    exit $EXIT_OFFENSIVE
   fi
 }
 
-# Execute main
+# =============================================================================
+# LIBRARY SOURCING (after all functions defined)
+# =============================================================================
+
+for lib in common.sh metrics.sh security.sh; do
+  source "${SCRIPT_DIR}/lib/${lib}" || fail_with_context $EXIT_VALIDATION "Failed to source lib/${lib}"
+done
+
+# =============================================================================
+# EXECUTE (must be last)
+# =============================================================================
+
 main "$@"

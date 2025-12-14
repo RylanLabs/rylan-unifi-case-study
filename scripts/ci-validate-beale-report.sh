@@ -9,7 +9,7 @@ set -euo pipefail
 # CI validator: ensure beale-report-*.json exists and contains required keys
 # Small, fast, exits non-zero on failure
 
-REPORT=$(ls -1t beale-report-*.json 2>/dev/null | head -n1 || true)
+REPORT=$(find . -maxdepth 1 -type f -name 'beale-report-*.json' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | awk '{print $2}' || true)
 if [[ -z "$REPORT" ]]; then
   echo "ERROR: no beale-report-*.json found"
   exit 2

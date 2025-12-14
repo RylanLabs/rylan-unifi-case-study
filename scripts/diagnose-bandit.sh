@@ -16,8 +16,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC2034  # SCRIPT_NAME reserved for template / external sourcing
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
-readonly REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+readonly REPO_ROOT
 
 # Diagnostics helpers (Beale: Never raise voice)
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }

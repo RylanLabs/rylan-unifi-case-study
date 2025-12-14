@@ -21,6 +21,8 @@ sdist/
 var/
 wheels/
 share/python-wheels/
+# lib/ is now used for UniFi shared code; excluded from this gitignore
+# lib/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -190,3 +192,4 @@ tmp/
 temp/
 05_network_migration/configs/*.json
 05_network_migration/configs/*.json
+/.backups/

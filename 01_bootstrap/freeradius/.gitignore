@@ -1,0 +1,38 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Backups and temporary files
+*.backup
+*.bak
+*~
+
+# Logs
+logs/
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary SSH keys
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Certificates (sensitive)
+*.key
+*.csr
+
+# Lock files
+*.lock

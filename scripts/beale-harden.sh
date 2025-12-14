@@ -62,6 +62,7 @@ done
 # ─────────────────────────────────────────────────────
 log()   { [[ "$QUIET" == false ]] && echo "$@"; }
 audit() { mkdir -p "$(dirname "$AUDIT_LOG")"; echo "$(date -Iseconds) | $1 | $2 | $3" >> "$AUDIT_LOG"; }
+## shellcheck disable=SC2317
 fail() {
   local phase=$1 code=$2 message=$3 remediation=$4
   echo "❌ $phase FAILURE: $message"

@@ -11,7 +11,7 @@ set -euo pipefail
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
 die() { echo "ERROR: $*"; exit 1; }
 
-log "🛡️ Raising Eternal Fortress — Consciousness 8.0"
+log "🛡️ Raising Eternal Fortress — Consciousness 4.2"
 
 # Run ministries (Carter → Bauer → Beale)
 ./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
@@ -27,7 +27,7 @@ log "🛡️ Raising Eternal Fortress — Consciousness 8.0"
 ./scripts/validate-isolation.sh
 ./scripts/simulate-breach.sh
 
-log "✅ Fortress risen — Beale validated — Consciousness 8.0"
+log "✅ Fortress risen — Beale validated — Consciousness 4.6"
 EOF
 chmod +x eternal-resurrect.sh
 

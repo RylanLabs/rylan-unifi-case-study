@@ -72,9 +72,9 @@ run_phase() {
   local phase_script=$2
   local timeout_secs=1800  # 30 minutes
   local phase_output
-  
+
   phase_output=$(mktemp)
-  
+
   if timeout "$timeout_secs" bash "$phase_script" > "$phase_output" 2>&1; then
     rm -f "$phase_output"
     return 0
@@ -121,16 +121,16 @@ create_system_backup() {
   local backup_dir
   backup_dir="${REPO_ROOT}/.ignite-backups/$(date +%Y%m%d-%H%M%S)"
   mkdir -p "$backup_dir"
-  
+
   log step "Creating pre-deployment system backup: $backup_dir"
-  
+
   # Backup critical configs (suppress SC2015: A && B || C is intentional; ignore if mkdir fails)
   # shellcheck disable=SC2015
   [[ -d /etc/samba ]] && cp -r /etc/samba "$backup_dir/" 2>/dev/null || true
   [[ -d /etc/nftables ]] && cp -r /etc/nftables "$backup_dir/" 2>/dev/null || true
   [[ -f /etc/sysctl.conf ]] && cp /etc/sysctl.conf "$backup_dir/" 2>/dev/null || true
   [[ -d /etc/ssh ]] && cp -r /etc/ssh "$backup_dir/" 2>/dev/null || true
-  
+
   log step "Backup created at: $backup_dir"
   echo "$backup_dir"
 }
@@ -149,26 +149,27 @@ check_system_state() {
 validate_env_variables() {
   local required_vars=("SAMBA_DOMAIN" "LDAP_ADMIN_PASSWORD" "VLAN_MGMT" "VLAN_IOT")
   local missing_vars=()
-  
+
   for var in "${required_vars[@]}"; do
     if [[ -z "${!var:-}" ]]; then
       missing_vars+=("$var")
     fi
   done
-  
+
   if [[ ${#missing_vars[@]} -gt 0 ]]; then
     log error "Missing required environment variables: ${missing_vars[*]}"
     log error "Please update $REPO_ROOT/.env with all required variables"
     return 1
   fi
-  
+
   log step "All required environment variables validated"
   return 0
 }
 
 # generate_execution_report: create summary of deployment execution
 generate_execution_report() {
-  local total_duration=$(($(date +%s) - START_TIME))
+  local total_duration;
+  total_duration=$(($(date +%s) - START_TIME))
   {
     echo "================================================================================"
     echo "TRINITY ORCHESTRATOR EXECUTION REPORT"

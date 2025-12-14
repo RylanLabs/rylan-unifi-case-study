@@ -74,7 +74,8 @@ component_end() {
   local end
   end=$(date +%s%N)
   local start=${COMPONENT_START[$c]:-0}
-  local elapsed_ms=$(((end - start) / 1000000))
+  local elapsed_ms;
+  elapsed_ms=$(((end - start) / 1000000))
   # shellcheck disable=SC2034
   COMPONENT_TIMES[$c]=$elapsed_ms
   log_info "  ⏱️  $c: ${elapsed_ms}ms"

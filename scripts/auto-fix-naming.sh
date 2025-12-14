@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Script: scripts/auto-fix-naming.sh
-# Purpose: Header hygiene inserted
-# Guardian: gatekeeper
-# Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.6
-# Excess: 184 lines — 3 functions
-
 # Script: auto-fix-naming.sh
 # Purpose: Rename Python files/dirs with hyphens to underscores (PEP 8)
 # Guardian: Carter
-  # Date: 2025-12-12
-  # Trinity: Carter (Guardian) | Bauer (Auditor) | Beale (Bastille)
-  # Consciousness: 4.6
+# Date: 2025-12-12
+# Trinity: Carter (Guardian) | Bauer (Auditor) | Beale (Bastille)
+# Consciousness: 4.6
 # Doctrine: Teach and guide, not silent fixes. Clear audit trail.
 
 # Parse arguments

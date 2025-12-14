@@ -33,7 +33,7 @@ run_firewall_phase() {
           sudo nft flush ruleset || true
           sudo nft -f /etc/nftables/minimal-ruleset.conf || true
         elif [[ "$fw_type" == "iptables" && -f /etc/iptables/minimal.rules ]]; then
-          sudo iptables-restore < /etc/iptables/minimal.rules || true
+          sudo sh -c 'iptables-restore < /etc/iptables/minimal.rules' || true
         else
           log "❗ No known minimal ruleset available for auto-fix ($fw_type)"
         fi

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 set -euo pipefail
 # Script: 01_bootstrap/proxmox/lib/metrics.sh
 # Purpose: Metrics orchestrator sourcing modular collection and reporting modules

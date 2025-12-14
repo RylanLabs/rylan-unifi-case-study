@@ -14,11 +14,14 @@ set -euo pipefail
 
 IFS=$'\n\t'
 # shellcheck disable=SC2155
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR;
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC2155
-readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+readonly SCRIPT_NAME;
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 # shellcheck disable=SC2155
-readonly HOSTNAME_SHORT="$(hostname -s)"
+readonly HOSTNAME_SHORT;
+HOSTNAME_SHORT="$(hostname -s)"
 
 log() { printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
 die() {

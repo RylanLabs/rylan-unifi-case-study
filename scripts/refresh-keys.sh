@@ -14,11 +14,14 @@ set -euo pipefail
 
 IFS=$'\n\t'
 # shellcheck disable=SC2155
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR;
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC2155
-readonly HOSTNAME_SHORT="$(hostname -s)"
+readonly HOSTNAME_SHORT;
+HOSTNAME_SHORT="$(hostname -s)"
 # shellcheck disable=SC2155
-readonly REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+readonly REPO_DIR;
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 readonly IDENTITY_FILE="${REPO_DIR}/identity/${HOSTNAME_SHORT}/authorized_keys"
 
 [[ -d "${REPO_DIR}/allowed_keys" ]] || exit 0

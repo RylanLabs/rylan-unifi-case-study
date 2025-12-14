@@ -51,7 +51,8 @@ validate_ssh() {
   if [[ "$test_name" == "all" ]] || [[ "$test_name" == "key" ]]; then
     log_info "Test 4: Verifying SSH public key is installed..."
     if [[ -f /root/.ssh/authorized_keys ]] && [[ -s /root/.ssh/authorized_keys ]]; then
-      local key_fingerprint=$(ssh-keygen -lf /root/.ssh/authorized_keys 2>/dev/null | head -1 || echo "N/A")
+      local key_fingerprint;
+      key_fingerprint=$(ssh-keygen -lf /root/.ssh/authorized_keys 2>/dev/null | head -1 || echo "N/A")
       log_success "SSH public key installed: $key_fingerprint"; ((passed++))
     else
       log_error "SSH public key not installed"; ((failed++))

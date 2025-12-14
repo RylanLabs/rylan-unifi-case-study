@@ -19,6 +19,7 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly SCRIPT_NAME
 
 # Configuration
+# shellcheck disable=SC2034
 MGMT_DC="10.0.10.10"
 FILE_SERVER="10.0.20.30"
 FREEPBX="10.0.20.20"
@@ -91,38 +92,94 @@ main() {
 
   # Test 1: IoT  Mgmt DNS (allow)
   log "\n[TEST 1] IoT VLAN  Mgmt DC (DNS+SSH)"
-  run_nmap_test "10.0.10.10" "53" "open" "IoTMgmt DNS" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.10.10" "22" "closed" "IoTMgmt SSH" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "10.0.10.10" "53" "open" "IoTMgmt DNS"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.10.10" "22" "closed" "IoTMgmt SSH"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Test 2: Guest → Mgmt DNS (allow), SSH (deny)
   log "\n[TEST 2] Guest VLAN → Mgmt DC"
-  run_nmap_test "10.0.10.10" "53" "open" "GuestMgmt DNS" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.10.10" "22" "closed" "GuestMgmt SSH" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "10.0.10.10" "53" "open" "GuestMgmt DNS"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.10.10" "22" "closed" "GuestMgmt SSH"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Test 3: Trusted → Servers LDAP (allow), SSH (deny)
   log "\n[TEST 3] Trusted VLAN → Servers"
-  run_nmap_test "10.0.20.30" "389" "open" "TrustedServers LDAP" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.20.30" "22" "closed" "TrustedServers SSH" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "10.0.20.30" "389" "open" "TrustedServers LDAP"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.20.30" "22" "closed" "TrustedServers SSH"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Test 4: VoIP → Servers LDAP (allow), NFS (deny)
   log "\n[TEST 4] VoIP VLAN → Servers"
-  run_nmap_test "10.0.20.20" "389" "open" "VoIPFreePBX LDAP" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.20.30" "2049" "closed" "VoIPServers NFS" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "10.0.20.20" "389" "open" "VoIPFreePBX LDAP"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.20.30" "2049" "closed" "VoIPServers NFS"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Test 5: Cross-VLAN attempt (IoT → Servers, should fail)
   log "\n[TEST 5] Cross-VLAN Block (IoT → Servers)"
-  run_nmap_test "10.0.20.30" "445" "closed" "IoTServers SMB" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "10.0.20.30" "445" "closed" "IoTServers SMB"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Test 6: Quarantine VLAN 99 Isolation (DadNet — MUST BE BLOCKED)
   log "\n[TEST 6] Quarantine VLAN 99 → All Internal VLANs (MUST BE BLOCKED)"
-  run_nmap_test "10.0.10.10" "22" "closed" "Quarantine→Mgmt SSH" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.30.1" "67" "closed" "Quarantine→Users DHCP" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.40.1" "80" "closed" "Quarantine→IoT HTTP" && ((tests_passed++)) || ((tests_failed++))
-  run_nmap_test "10.0.90.1" "443" "closed" "Quarantine→Prod HTTPS" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "10.0.10.10" "22" "closed" "Quarantine→Mgmt SSH"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.30.1" "67" "closed" "Quarantine→Users DHCP"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.40.1" "80" "closed" "Quarantine→IoT HTTP"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
+  if run_nmap_test "10.0.90.1" "443" "closed" "Quarantine→Prod HTTPS"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Test 7: Quarantine → Internet ONLY (allow outbound)
   log "\n[TEST 7] Quarantine VLAN 99 → Internet (MUST BE ALLOWED)"
-  run_nmap_test "1.1.1.1" "443" "open" "Quarantine→Internet HTTPS" && ((tests_passed++)) || ((tests_failed++))
+  if run_nmap_test "1.1.1.1" "443" "open" "Quarantine→Internet HTTPS"; then
+    ((tests_passed++))
+  else
+    ((tests_failed++))
+  fi
 
   # Summary
   log ""

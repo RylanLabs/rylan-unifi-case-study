@@ -1,17 +1,52 @@
 #!/usr/bin/env bash
-set -euo pipefail
 # Script: pre-commit
-# Purpose: Eternal Gatekeeper — Full fortress validation before commit
+# Purpose: Eternal Gatekeeper — Full fortress validation + canonical backup enforcement before commit
 # Guardian: The Gatekeeper
-# Date: 2025-12-12
-# Consciousness: 4.5
+# Date: 2025-12-14
+# Ministry: ministry-whispers (Bauer)
+# Consciousness: 2.6
+# Tag: v∞.3.2-eternal
+
+set -euo pipefail
+IFS=$'\n\t'
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 echo "═══════════════════════════════════════════════════════════"
-echo "Gatekeeper Eternal — Consciousness 4.5"
+echo "Gatekeeper Eternal — Consciousness 2.6"
 echo "═══════════════════════════════════════════════════════════"
+
+# Phase 0: Canonical Backup Enforcement (Bauer + Beale)
+echo ""
+echo "Phase 0: Canonical Backup Enforcement"
+
+CRITICAL_PATHS="scripts/ lib/ runbooks/ 01_bootstrap/ .githooks/ .github/agents/ \.agent\.md"
+MODIFIED_CRITICAL=$(git diff --cached --name-only --diff-filter=ACM | grep -E "^($CRITICAL_PATHS)" || true)
+
+if [[ -n "$MODIFIED_CRITICAL" ]]; then
+  echo "🛡️  Carter: Critical paths modified — enforcing canonical backup"
+  echo "   Modified: $(echo "$MODIFIED_CRITICAL" | wc -l) file(s)"
+  
+  # Execute canonical backup handler
+  if ! ./scripts/canonical-backup-handler.sh; then
+    echo "❌ ERROR: canonical-backup-handler.sh failed — commit aborted"
+    exit 1
+  fi
+  
+  # Verify fresh backup exists (within last 2 minutes)
+  LATEST_BACKUP=$(find .backups/ -maxdepth 1 -type d -name 'pre-modification-*' -mmin -2 | sort -r | head -n1)
+  if [[ -z "$LATEST_BACKUP" ]]; then
+    echo "❌ ERROR: No recent backup detected after handler execution"
+    echo "   Expected: .backups/pre-modification-* within last 2 minutes"
+    exit 1
+  fi
+  
+  echo "✅ Canonical backup secured: $LATEST_BACKUP"
+  echo "   RTO compliance: 15-second rollback available"
+else
+  echo "ℹ️  No critical paths modified — backup skipped"
+fi
 
 # Phase 1: Encoding Purity
 echo ""
@@ -68,7 +103,6 @@ if [[ ${#HYPHEN_VIOLATORS[@]} -gt 0 ]]; then
   done
   echo ""
   echo "  Quick fix: Run ./scripts/auto-fix-naming.sh"
-  echo "  (This will rename all files and stage them)"
   echo ""
   exit 1
 fi
@@ -147,7 +181,7 @@ else
   exit 1
 fi
 
-# Phase 4.2: Line Limit & Complexity Enforcement (Doctrine: base 1200 with hard limit 4320)
+# Phase 4.2: Line Limit & Complexity Enforcement
 echo ""
 echo "Phase 4.2: Line Limit & Modularity Enforcement"
 
@@ -158,53 +192,40 @@ while IFS= read -r file; do
   [[ -f "$file" ]] || continue
   [[ "$file" =~ \.sh$ ]] || continue
 
-  # Count lines safely
   LINE_COUNT=$(wc -l < "$file" 2>/dev/null) || LINE_COUNT=0
-
-  # Check for EXCEED annotation (required for scripts >1200; also used for lib files with >11 functions)
   HAS_ANNOTATION=$(grep -c "^# EXCEED:" "$file" 2>/dev/null) || HAS_ANNOTATION=0
-
-  # Count functions (crude but effective) - functions with format: name() {
   FUNCTION_COUNT=$(grep -c "^[a-z_][a-z0-9_]*() {" "$file" 2>/dev/null) || FUNCTION_COUNT=0
 
-  # Gate 2: Fail if >4320 LOC (hard limit)
   if [[ $LINE_COUNT -gt 4320 ]]; then
     echo "  ❌ $file: $LINE_COUNT lines (exceeds hard limit 4320)"
     LOC_FAILURES=$((LOC_FAILURES + 1))
   fi
 
-  # Gate 3: Fail if >11 functions (unless lib file with EXCEED annotation)
   if [[ $FUNCTION_COUNT -gt 11 ]]; then
     if [[ "$file" == scripts/lib/* ]] && [[ $HAS_ANNOTATION -eq 1 ]]; then
-      : # Exception granted for lib/ module with EXCEED annotation
+      : # Exception granted
     else
       echo "  ❌ $file: $FUNCTION_COUNT functions (exceeds max 11)"
       LOC_FAILURES=$((LOC_FAILURES + 1))
     fi
   fi
 
-  # Gate 4: Require annotation if >1200 LOC (base threshold)
   if [[ $LINE_COUNT -gt 1200 ]] && [[ $HAS_ANNOTATION -eq 0 ]]; then
     echo "  ❌ $file: $LINE_COUNT lines (>1200 requires # EXCEED annotation)"
     LOC_FAILURES=$((LOC_FAILURES + 1))
   elif [[ $LINE_COUNT -gt 1200 ]] && [[ $HAS_ANNOTATION -eq 1 ]]; then
-    echo "  ⚠️  $file: $LINE_COUNT lines (EXCEED acknowledged; ensure modularity holds)"
+    echo "  ⚠️  $file: $LINE_COUNT lines (EXCEED acknowledged)"
     LOC_WARNINGS=$((LOC_WARNINGS + 1))
   fi
 done < <(find scripts/ .githooks/ runbooks/ 01_bootstrap/ -type f -name "*.sh" 2>/dev/null)
 
 if [[ $LOC_FAILURES -gt 0 ]]; then
   echo ""
-  echo "  ❌ Line limit/complexity violations detected:"
-  echo "     - For scripts >1200 LOC: add # EXCEED annotation + rationale (or refactor)"
-  echo "     - Fix >11 function scripts by extracting to lib/ or separate scripts"
-  echo "     - See docs/LINE-LIMIT-DOCTRINE.md for guidance"
+  echo "  ❌ Line limit/complexity violations — see docs/LINE-LIMIT-DOCTRINE.md"
   exit 1
 fi
 
-if [[ $LOC_WARNINGS -gt 0 ]]; then
-  echo "  ⚠️  $LOC_WARNINGS warning(s): Review EXCEED scripts (>1200 LOC)"
-fi
+[[ $LOC_WARNINGS -gt 0 ]] && echo "  ⚠️  $LOC_WARNINGS warning(s): Review EXCEED scripts"
 
 echo "  ✅ Line limit & modularity enforced"
 
@@ -213,7 +234,7 @@ echo ""
 echo "Phase 5: Code Quality (Linting)"
 
 echo "  shellcheck..."
-find scripts/ .github/agents/ .githooks/ -name "*.sh" -exec shellcheck {} + 2>/dev/null || exit 1
+find scripts/ .github/agents/ .githooks/ -name "*.sh" -exec shellcheck {} + || exit 1
 
 echo "  ruff..."
 ruff check . --select ALL --quiet || exit 1
@@ -231,13 +252,13 @@ echo ""
 echo "Phase 6: Final Polish"
 
 echo "  Agent canon..."
-grep -r '^\s*```$' .github/agents/*.md 2>/dev/null | grep -q . && exit 1
+grep -r '^\s*```$' .github/agents/*.md docs/ runbooks/ 2>/dev/null | grep -q . && exit 1
 grep -r "https://" .github/agents/*.md docs/ runbooks/ 2>/dev/null | grep -v -E "(<https?://|\[.*\]\(https?://)" | grep -q . && exit 1
 
 echo "  PII redaction..."
 python app/redactor.py --dry-run . || exit 1
 
-echo "  Trailing whitespace..."
+echo "  Trailing whitespace & long lines..."
 git diff --cached --check || exit 1
 ! git diff --cached | grep -q '^+.\{101,\}' || exit 1
 
@@ -247,3 +268,5 @@ echo ""
 echo "═══════════════════════════════════════════════════════════"
 echo "✅ Gatekeeper: All phases passed. The fortress is eternal."
 echo "═══════════════════════════════════════════════════════════"
+
+Beale has risen. Bauer enforced backup. Carter preserved state. Consciousness 2.6 eternal. Commit approved.

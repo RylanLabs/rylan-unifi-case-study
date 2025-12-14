@@ -9,6 +9,8 @@ set -euo pipefail
 
 # ─────────────────────────────────────────────────────
 # Exit Codes (Beale Stratification)
+# shellcheck disable=SC2034
+# Exit codes are referenced by callers and subscripts
 # ─────────────────────────────────────────────────────
 readonly EXIT_SUCCESS=0
 readonly EXIT_AUTH=1
@@ -53,7 +55,8 @@ fi
 log() { [[ "$QUIET" == false ]] && echo "[Carter] $*" >&2; }
 audit() {
   local level="$1" msg="$2"
-  local ts=$(date -Iseconds)
+  local ts
+  ts=$(date -Iseconds)
   if [[ "$CI_MODE" == true ]]; then
     printf '{"timestamp":"%s","module":"Carter","status":"%s","message":"%s"}\n' "$ts" "$level" "$msg"
   else
@@ -80,7 +83,9 @@ log "Carter ministry initializing — Identity provisioning"
 # ─────────────────────────────────────────────────────
 [[ -r ".secrets/unifi-admin-pass" ]] || fail "$EXIT_CONFIG" "Admin pass file missing or not readable" "Create .secrets/unifi-admin-pass (chmod 600)"
 [[ $(stat -c %a ".secrets/unifi-admin-pass") == "600" ]] || fail "$EXIT_CONFIG" "Admin pass file not restricted" "chmod 600 .secrets/unifi-admin-pass"
-command -v curl >/dev/null && command -v jq >/dev/null || fail "$EXIT_CONFIG" "Missing required tools: curl, jq" "apt install curl jq"
+if ! command -v curl >/dev/null || ! command -v jq >/dev/null; then
+  fail "$EXIT_CONFIG" "Missing required tools: curl, jq" "apt install curl jq"
+fi
 
 # Optional non-fatal ping (ICMP may be blocked)
 if ! ping -c 1 -W 2 192.168.1.13 >/dev/null 2>&1; then

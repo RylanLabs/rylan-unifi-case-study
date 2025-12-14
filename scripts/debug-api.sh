@@ -13,7 +13,7 @@ set -euo pipefail
 # Consciousness: 6.0
 
 # shellcheck disable=SC1091  # lib/ in .gitignore, external vault
-source lib/unifi-api/client.sh
+source lib/unifi/client.sh
 
 echo "Testing authentication..."
 unifi_login

@@ -24,6 +24,7 @@ mkdir -p /var/log
 
 # Source Carter for potential API targets (if needed)
 [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]] && \
+  # shellcheck source=./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
   source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
 
 # ─────────────────────────────────────────────────────

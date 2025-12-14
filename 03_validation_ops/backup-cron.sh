@@ -199,7 +199,8 @@ validate_rto() {
   local end_time
   end_time=$(date +%s)
 
-  local elapsed=$((end_time - start_time))
+  local elapsed;
+  elapsed=$((end_time - start_time))
   log_info "  ✓ RTO dry-run completed in ${elapsed}s"
 
   # Check threshold
@@ -303,7 +304,8 @@ main() {
 
   local end_time
   end_time=$(date +%s)
-  local total_time=$((end_time - start_time))
+  local total_time;
+  total_time=$((end_time - start_time))
 
   log_info "\n✓ BACKUP CYCLE COMPLETE in ${total_time}s"
   return 0

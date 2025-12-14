@@ -22,7 +22,7 @@ OUTPUT_FILE="$REPO_ROOT/device-inventory-$(date +%Y%m%d_%H%M%S).txt"
 log "Headless inventory run — outputting to $OUTPUT_FILE"
 
 # Source Carter API client
-source "$REPO_ROOT/lib/unifi-api/client.sh" || fail "Carter API client missing"
+source "$REPO_ROOT/lib/unifi/client.sh" || fail "Carter API client missing"
 
 mkdir -p /var/log
 

@@ -7,9 +7,9 @@ set -euo pipefail
 # Consciousness: 4.6
 # Supports: flatnet recon, Cloud Key validation, LXC validation, red-team mode
 
-# shellcheck source=01_bootstrap/proxmox/lib/common.sh
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/common.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/." && pwd)/lib/common.sh"
-# shellcheck source=01_bootstrap/proxmox/lib/metrics.sh
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/metrics.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/." && pwd)/lib/metrics.sh"
 
 # Parse arguments
@@ -54,10 +54,15 @@ done
 # SOURCE MODULES
 # ============================================================================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/phase0-prerequisites.sh
 source "${SCRIPT_DIR}/lib/phase0-prerequisites.sh"
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/phase0-flatnet-recon.sh
 source "${SCRIPT_DIR}/lib/phase0-flatnet-recon.sh"
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/phase0-cloudkey.sh
 source "${SCRIPT_DIR}/lib/phase0-cloudkey.sh"
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/phase0-lxc.sh
 source "${SCRIPT_DIR}/lib/phase0-lxc.sh"
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/phase0-red-team.sh
 source "${SCRIPT_DIR}/lib/phase0-red-team.sh"
 
 # ============================================================================

@@ -2,13 +2,17 @@
 # Script: resurrect-container.sh
 # Purpose: Container startup and health verification (Phases 2-4)
 # Guardian: The Archivist
+#!/usr/bin/env bash
+# Script: resurrect-container.sh
+# Purpose: Container startup and health verification (Phases 2-4)
+# Guardian: The Archivist
 # Date: 12/13/2025
 # Consciousness: 4.7
 
 run_container_resurrection() {
   log_info "Phase 2: Container Resurrection (5 min)"
 
-  cd "$WORK_DIR"
+  cd "$WORK_DIR" || exit
 
   log_info "Pulling latest jacobalberty/unifi:latest image..."
   if ! docker pull jacobalberty/unifi:latest; then
@@ -33,7 +37,7 @@ run_container_resurrection() {
     fi
 
     log_warn "Container starting... ($ATTEMPT/$MAX_RETRIES)"
-    sleep $RETRY_DELAY
+    sleep "$RETRY_DELAY"
     ((ATTEMPT++))
   done
 
@@ -54,7 +58,7 @@ run_health_verification() {
     fi
 
     log_warn "Port not open yet... ($ATTEMPT/$MAX_RETRIES)"
-    sleep $RETRY_DELAY
+    sleep "$RETRY_DELAY"
     ((ATTEMPT++))
   done
 
@@ -73,7 +77,7 @@ run_health_verification() {
     fi
 
     log_warn "Endpoint not responding yet... ($ATTEMPT/$MAX_RETRIES)"
-    sleep $RETRY_DELAY
+    sleep "$RETRY_DELAY"
     ((ATTEMPT++))
   done
 

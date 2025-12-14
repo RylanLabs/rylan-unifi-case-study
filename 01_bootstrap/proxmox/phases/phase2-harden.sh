@@ -14,9 +14,9 @@ set -euo pipefail
 # Exit codes: 0 = success, 1 = fatal error
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/." && pwd)"
-# shellcheck source=01_bootstrap/proxmox/lib/common.sh
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/common.sh
 source "${SCRIPT_DIR}/lib/common.sh"
-# shellcheck source=01_bootstrap/proxmox/lib/metrics.sh
+# shellcheck source=/home/egx570/repos/rylan-unifi-case-study/01_bootstrap/proxmox/lib/metrics.sh
 source "${SCRIPT_DIR}/lib/metrics.sh"
 
 ################################################################################

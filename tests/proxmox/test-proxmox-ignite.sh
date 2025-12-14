@@ -414,7 +414,8 @@ suite_code_metrics() {
 
   test_case "Check comment density"
 
-  local comment_density=$((comment_lines * 100 / total_lines))
+  local comment_density;
+  comment_density=$((comment_lines * 100 / total_lines))
   if [ "$comment_density" -ge 20 ]; then
     test_pass "Good comment density: $comment_density% ($comment_lines/$total_lines lines)"
   else

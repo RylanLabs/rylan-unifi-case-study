@@ -86,12 +86,32 @@ def main() -> None:
     url = os.getenv("UNIFI_URL")
     user = os.getenv("UNIFI_USER")
     password = os.getenv("UNIFI_PASS")
+    api_key = os.getenv("UNIFI_API_KEY")
+    cookie_file = os.getenv("UNIFI_COOKIE_FILE")
+    csrf = os.getenv("UNIFI_CSRF_TOKEN")
 
-    if not url or not user or not password:
-        fail("UNIFI_USER/UNIFI_PASS must be set in environment")
+    if not url:
+        fail("UNIFI_URL must be set in environment")
 
     logger.info("Controller: %s (site=%s)", url, args.site)
-    login(url, user, password)
+
+    # Auth precedence: cookie file (session) -> API key -> username/password login
+    if cookie_file and os.path.exists(cookie_file):
+        from http.cookiejar import MozillaCookieJar
+
+        jar = MozillaCookieJar(cookie_file)
+        jar.load(ignore_discard=True, ignore_expires=True)
+        SESSION.cookies = jar
+        if csrf:
+            SESSION.headers.update({"X-CSRF-Token": csrf})
+        logger.info("Loaded session from cookie file: %s", cookie_file)
+    elif api_key:
+        SESSION.headers.update({"X-API-KEY": api_key, "Accept": "application/json"})
+        logger.info("Using API key authentication")
+    else:
+        if not user or not password:
+            fail("UNIFI_USER/UNIFI_PASS must be set in environment")
+        login(url, user, password)
 
     devices = list_devices(url, args.site)
     if not devices:

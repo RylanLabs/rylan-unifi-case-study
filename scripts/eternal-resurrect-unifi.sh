@@ -9,12 +9,14 @@ set -euo pipefail
 # Eternal Resurrect – UniFi Controller (One-Command, Idempotent, 15-min RTO)
 # USAGE: cd /opt/unifi && bash /path/to/eternal-resurrect-unifi.sh
 
+# shellcheck disable=SC2034  # color constants used for pretty output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# shellcheck disable=SC2317
 log_info() { echo -e "${BLUE}[RESURRECT]${NC} $1"; }
 log_success() { echo -e "${GREEN}[RESURRECT]${NC} ✅ $1"; }
 log_error() {
@@ -37,16 +39,22 @@ BANNER
 
 CONTROLLER_IP="10.0.1.20"
 CONTROLLER_PORT="8443"
+# shellcheck disable=SC2034  # variables consumed by sourced modules
 DATA_DIR="/opt/unifi/data"
+# shellcheck disable=SC2034  # variables consumed by sourced modules
 WORK_DIR="/opt/unifi"
+# shellcheck disable=SC2034  # variables consumed by sourced modules
 MAX_RETRIES=30
+# shellcheck disable=SC2034  # variables consumed by sourced modules
 RETRY_DELAY=2
 
 # ============================================================================
 # SOURCE MODULES
 # ============================================================================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./lib/resurrect-preflight.sh
 source "${SCRIPT_DIR}/lib/resurrect-preflight.sh"
+# shellcheck source=./lib/resurrect-container.sh
 source "${SCRIPT_DIR}/lib/resurrect-container.sh"
 
 # ============================================================================
