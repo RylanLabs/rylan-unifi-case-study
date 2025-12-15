@@ -45,7 +45,7 @@ newgrp docker
 ```bash
 # Clone fortress repository
 cd /opt
-sudo git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
+sudo git clone https://github.com/RylanLabs/rylan-unifi-case-study.git
 sudo chown -R $USER:$USER rylan-unifi-case-study
 cd rylan-unifi-case-study
 

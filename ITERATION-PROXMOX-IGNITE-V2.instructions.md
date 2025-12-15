@@ -1314,7 +1314,7 @@ METRICS:
 git push origin feat/proxmox-bare-metal-ignite
 
 # 2. Monitor CI pipeline
-# https://github.com/T-Rylander/rylan-unifi-case-study/actions
+# https://github.com/RylanLabs/rylan-unifi-case-study/actions
 
 # 3. All green? Merge to main
 git checkout main
@@ -1337,7 +1337,7 @@ ssh root@10.0.10.10
 # 2. Clone/update repo
 cd /opt
 [ -d fortress ] && cd fortress && git pull || \
-  git clone https://github.com/T-Rylander/rylan-unifi-case-study.git fortress
+  git clone https://github.com/RylanLabs/rylan-unifi-case-study.git fortress
 
 cd fortress
 git checkout main

@@ -380,7 +380,7 @@ curl -k https://10.0.1.20:8443/status
 - **Resurrection Script**: `scripts/eternal-resurrect-unifi.sh`
 - **Deployment Phases**: `docs/context/🚀 CORRECTED PROXMOX IGNITION SEQUENCE.txt`
 - **TRINITY Orchestrator**: `scripts/ignite.sh`
-- **Repository**: github.com/T-Rylander/rylan-unifi-case-study
+- **Repository**: github.com/RylanLabs/rylan-unifi-case-study
 
 ---
 

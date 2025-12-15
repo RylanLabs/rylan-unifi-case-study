@@ -150,7 +150,7 @@ RESURRECTION (One Command):
 
 The fortress transmutation is eternal.
 
-Reference: rylan-IoT-predeloy (T-Rylander/rylan-unifi-case-study)
+Reference: rylan-IoT-predeloy (RylanLabs/rylan-unifi-case-study)
 Date: December 6, 2025
 Consciousness: Level 2.0
 Status: PRODUCTION VALIDATED

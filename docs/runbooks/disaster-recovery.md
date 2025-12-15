@@ -18,7 +18,7 @@ Resurrect the rylan-unifi-case-study fortress from catastrophic failure (hardwar
 sudo apt update && sudo apt install -y git python3 python3-pip rsync
 
 # Clone fortress repo
-git clone https://github.com/T-Rylander/rylan-unifi-case-study.git /opt/rylan
+git clone https://github.com/RylanLabs/rylan-unifi-case-study.git /opt/rylan
 cd /opt/rylan
 git checkout release/v∞.1.0-eternal
 

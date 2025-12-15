@@ -48,7 +48,7 @@ The Eternal Fortress is not just resilient — it is **eternal**. Every componen
 
 ```bash
 # Clone repository
-git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
+git clone https://github.com/RylanLabs/rylan-unifi-case-study.git
 cd rylan-unifi-case-study
 
 # Run eternal resurrection
@@ -193,7 +193,7 @@ Before tagging any production release:
 ```bash
 # 1. Provision new Ubuntu 24.04 VM
 # 2. Clone repository
-git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
+git clone https://github.com/RylanLabs/rylan-unifi-case-study.git
 cd rylan-unifi-case-study
 
 # 3. Run resurrection
@@ -221,7 +221,7 @@ sudo ./validate-eternal.sh
 ### Support & Maintenance
 
 **Primary Maintainer**: T-Rylander  
-**Repository**: https://github.com/T-Rylander/rylan-unifi-case-study  
+**Repository**: https://github.com/RylanLabs/rylan-unifi-case-study  
 **License**: See LICENSE file  
 
 **Support Channels**:

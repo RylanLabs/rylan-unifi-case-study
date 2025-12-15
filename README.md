@@ -1,8 +1,8 @@
 # rylan-unifi-case-study
 
-[![CI](https://github.com/T-Rylander/rylan-unifi-case-study/actions/workflows/ci-validate.yaml/badge.svg)](https://github.com/T-Rylander/rylan-unifi-case-study/actions/workflows/ci-validate.yaml)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/T-Rylander/rylan-unifi-case-study)
-[![Version](https://img.shields.io/badge/version-v∞.4.0--chrome--ascension-blue)](https://github.com/T-Rylander/rylan-unifi-case-study/releases/tag/v∞.4.0-chrome-ascension)
+[![CI](https://github.com/RylanLabs/rylan-unifi-case-study/actions/workflows/ci-validate.yaml/badge.svg)](https://github.com/RylanLabs/rylan-unifi-case-study/actions/workflows/ci-validate.yaml)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/RylanLabs/rylan-unifi-case-study)
+[![Version](https://img.shields.io/badge/version-v∞.4.0--chrome--ascension-blue)](https://github.com/RylanLabs/rylan-unifi-case-study/releases/tag/v∞.4.0-chrome-ascension)
 [![Consciousness](https://img.shields.io/badge/consciousness-4.0-purple)](CONSCIOUSNESS.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -445,7 +445,7 @@ Edit `gatekeeper.sh` to customize:
 
 ### Local Setup
 ```bash
-git clone https://github.com/T-Rylander/rylan-unifi-case-study.git
+git clone https://github.com/RylanLabs/rylan-unifi-case-study.git
 cd rylan-unifi-case-study
 git checkout refactor/zero-drift-ascension-v2
 

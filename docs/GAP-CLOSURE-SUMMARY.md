@@ -523,4 +523,4 @@ Whitaker attacks (Offense).
 
 **Tag:** v1.0.4-gaps-closed-eternal  
 **Commits:** f44c6a5 + 04329c2  
-**GitHub:** <https://github.com/T-Rylander/rylan-unifi-case-study/releases/tag/v1.0.4-gaps-closed-eternal>
+**GitHub:** <https://github.com/RylanLabs/rylan-unifi-case-study/releases/tag/v1.0.4-gaps-closed-eternal>
