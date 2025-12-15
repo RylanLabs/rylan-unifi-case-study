@@ -1,0 +1,20 @@
+name: ShellCheck (canonical)
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  shellcheck:
+    name: ShellCheck (with cross-file analysis)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Run ShellCheck (exclude .venv and .backups)
+        run: |
+          echo "Running ShellCheck across repo (following sources)"
+          find . -type f -name "*.sh" -not -path './.venv/*' -not -path './.backups/*' -print0 \
+            | xargs -0 shellcheck -x -S style
