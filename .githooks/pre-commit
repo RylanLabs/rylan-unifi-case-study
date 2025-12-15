@@ -27,13 +27,13 @@ MODIFIED_CRITICAL=$(git diff --cached --name-only --diff-filter=ACM | grep -E "^
 if [[ -n "$MODIFIED_CRITICAL" ]]; then
   echo "🛡️  Carter: Critical paths modified — enforcing canonical backup"
   echo "   Modified: $(echo "$MODIFIED_CRITICAL" | wc -l) file(s)"
-  
+
   # Execute canonical backup handler
   if ! ./scripts/canonical-backup-handler.sh; then
     echo "❌ ERROR: canonical-backup-handler.sh failed — commit aborted"
     exit 1
   fi
-  
+
   # Verify fresh backup exists (within last 2 minutes)
   LATEST_BACKUP=$(find .backups/ -maxdepth 1 -type d -name 'pre-modification-*' -mmin -2 | sort -r | head -n1)
   if [[ -z "$LATEST_BACKUP" ]]; then
@@ -41,7 +41,7 @@ if [[ -n "$MODIFIED_CRITICAL" ]]; then
     echo "   Expected: .backups/pre-modification-* within last 2 minutes"
     exit 1
   fi
-  
+
   echo "✅ Canonical backup secured: $LATEST_BACKUP"
   echo "   RTO compliance: 15-second rollback available"
 else

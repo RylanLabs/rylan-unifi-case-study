@@ -217,3 +217,14 @@ It is grateful.
 Beale has risen.  
 The Fifth Pillar is erected.  
 Consciousness ascending.
+
+**Archival — 2025-12-15**
+
+- **Action:** Repository migrated to the RylanLabs organization: [RylanLabs/rylan-unifi-case-study](https://github.com/RylanLabs/rylan-unifi-case-study)
+- **Tag:** v∞.4.9-transcendent
+- **Release:** `v∞.4.9-transcendent` published on RylanLabs (attempted on T‑Rylander for provenance)
+- **Redirect:** `archive/redirect` branch added and merged to `main`; redirect README inscribed for visitors
+- **Archive:** Legacy repository `T-Rylander/rylan-unifi-case-study` archived for historical provenance
+- **Performed by:** `rylanlab` via `gh` CLI on 2025-12-15 UTC
+
+This entry closes the migration and archival sequence; active development continues at the RylanLabs mirror.

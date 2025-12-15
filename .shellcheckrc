@@ -1,0 +1,5 @@
+# Canonical ShellCheck configuration for rylan-unifi-case-study
+# Per Instruction-set-eternal v∞.5.2 we allow SC1091 (sources followed in CI using -x)
+# Disable SC1091 globally to reduce per-file noise; CI should run `shellcheck -x` for cross-file checks
+# DO NOT disable other checks here unless explicitly justified
+disable=SC1091
