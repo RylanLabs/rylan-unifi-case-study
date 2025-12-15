@@ -23,8 +23,8 @@ log "Whitaker offensive simulation — Ethical breach attempt"
 mkdir -p /var/log
 
 # Source Carter for potential API targets (if needed)
-# shellcheck source=./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
 if [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]]; then
+  # shellcheck source=./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
   source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
 fi
 

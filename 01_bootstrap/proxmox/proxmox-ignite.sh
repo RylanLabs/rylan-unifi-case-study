@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
+
 # Source helper library extracted to reduce function count
 source "${SCRIPT_DIR}/lib/ignite_lib.sh"
 

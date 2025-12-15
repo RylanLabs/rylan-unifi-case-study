@@ -10,8 +10,16 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+# shellcheck disable=SC2034
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+# shellcheck disable=SC2034
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+readonly SCRIPT_NAME
+:
+: "${SCRIPT_DIR:-}"
+:
+: "${SCRIPT_NAME:-}"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; exit 1; }
@@ -24,7 +32,8 @@ readonly REPO_ROOT="$HOME/repos/rylan-unifi-case-study"
 [[ -r "$REPO_ROOT" ]] || die "Cannot read REPO_ROOT=$REPO_ROOT — Bauer verification failed"
 
 # Beale: Detect breach early — backup before modification
-readonly BACKUP_DIR="${REPO_ROOT}/.backup-lib-annotate-$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="${REPO_ROOT}/.backup-lib-annotate-$(date +%Y%m%d-%H%M%S)"
+readonly BACKUP_DIR
 mkdir -p "$BACKUP_DIR"
 log "Backup directory created: $BACKUP_DIR"
 
@@ -41,7 +50,7 @@ mapfile -t SCRIPT_FILES < <(grep -Rl --include='*.sh' \
 log "Found ${#SCRIPT_FILES[@]} scripts sourcing libraries — processing"
 
 for script in "${SCRIPT_FILES[@]}"; do
-  relative_path="${script#$REPO_ROOT/}"
+  relative_path="${script#"$REPO_ROOT"/}"
   backup_file="${BACKUP_DIR}/${relative_path}"
   mkdir -p "$(dirname "$backup_file")"
   cp "$script" "$backup_file"

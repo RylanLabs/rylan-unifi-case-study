@@ -14,7 +14,7 @@ if [[ ! -f .env ]]; then
   echo "❌ .env not found"
   exit 1
 fi
-# shellcheck disable=SC1091
+
 source .env
 
 HOSTNAME=$(hostname)

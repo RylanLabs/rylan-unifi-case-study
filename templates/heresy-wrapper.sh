@@ -28,7 +28,7 @@ die() {
 
 # ────── CANONICAL MAGIC COMMENTS (exactly 4 allowed) ──────
 # shellcheck disable=SC2155  # readonly declaration in one line (Carter style)
-# shellcheck disable=SC1091  # source .secrets/* outside repo (Bauer vault)
+
 # shellcheck disable=SC2317  # unreachable code in heredoc (Python payload)
 # shellcheck disable=SC2086  # intentional word splitting (rare, justify in commit)
 # ────── END MAGIC COMMENTS ──────

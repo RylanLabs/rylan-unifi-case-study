@@ -20,9 +20,9 @@ readonly LOG_DIR
 LOG_FILE="${LOG_DIR}/freeradius-ignite-$(date +%Y%m%d-%H%M%S).log"
 readonly LOG_FILE
 
-# shellcheck disable=SC1091
+
 source "${SCRIPT_DIR}/lib/ignite-utils.sh"
-# shellcheck disable=SC1091
+
 source "${SCRIPT_DIR}/lib/ignite-orchestration.sh"
 
 # Configuration

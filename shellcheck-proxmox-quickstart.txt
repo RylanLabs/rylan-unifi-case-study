@@ -1,0 +1,3 @@
+01_bootstrap/proxmox/proxmox-ignite-quickstart.sh:20:8: note: Not following: ./lib/quickstart_lib.sh was not specified as input (see shellcheck -x). [SC1091]
+01_bootstrap/proxmox/proxmox-ignite-quickstart.sh:60:29: warning: FORCE appears unused. Verify use (or export if used externally). [SC2034]
+01_bootstrap/proxmox/proxmox-ignite-quickstart.sh:178:15: warning: Use single quotes, otherwise this expands now rather than when signalled. [SC2064]

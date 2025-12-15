@@ -13,20 +13,26 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
-# shellcheck disable=SC1091
+
 source "${REPO_ROOT}/lib/ignite-utils.sh"
 
 # Configuration
-# shellcheck disable=SC2034
-# variables referenced by sourced deploy_lib.sh
+# shellcheck disable=SC2034  # variables referenced by sourced deploy_lib.sh
 readonly CERT_DIR="/etc/freeradius/3.0/certs"
+# shellcheck disable=SC2034
 readonly SERVER_KEY="${CERT_DIR}/server.key"
+# shellcheck disable=SC2034
 readonly SERVER_CSR="${CERT_DIR}/server.csr"
+# shellcheck disable=SC2034
 readonly SERVER_CRT="${CERT_DIR}/server.pem"
 readonly DC_IP="10.0.10.10"
+# shellcheck disable=SC2034
 readonly DC_CA_SOURCE="root@${DC_IP}:/etc/ssl/rylan-internal/rylan-ca.crt"
+# shellcheck disable=SC2034
 readonly DC_CA_KEY_SOURCE="root@${DC_IP}:/etc/ssl/rylan-internal/rylan-ca.key"
+# shellcheck disable=SC2034
 readonly CA_DEST="${CERT_DIR}/rylan-ca.pem"
+# shellcheck disable=SC2034
 readonly DH_PARAMS="${CERT_DIR}/dh"
 
 # Source extracted library helpers

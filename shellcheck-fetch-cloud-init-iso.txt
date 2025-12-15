@@ -1,0 +1,5 @@
+01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:22:10: warning: Declare and assign separately to avoid masking return values. [SC2155]
+01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:23:10: warning: Declare and assign separately to avoid masking return values. [SC2155]
+01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:113:15: warning: Use single quotes, otherwise this expands now rather than when signalled. [SC2064]
+01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:158:13: warning: path is referenced but not assigned. [SC2154]
+01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:159:12: warning: url is referenced but not assigned. [SC2154]

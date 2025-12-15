@@ -1,0 +1,4 @@
+lib/proxmox/quickstart_lib.sh:80:12: note: Double quote to prevent globbing and word splitting. [SC2086]
+lib/proxmox/quickstart_lib.sh:148:10: note: Double quote to prevent globbing and word splitting. [SC2086]
+lib/proxmox/quickstart_lib.sh:209:9: warning: NON_INTERACTIVE appears unused. Verify use (or export if used externally). [SC2034]
+lib/proxmox/quickstart_lib.sh:213:9: warning: FORCE appears unused. Verify use (or export if used externally). [SC2034]

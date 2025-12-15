@@ -11,9 +11,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-readonly BACKUP_ROOT="${REPO_ROOT}/.backups"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+readonly REPO_ROOT
+BACKUP_ROOT="${REPO_ROOT}/.backups"
+readonly BACKUP_ROOT
 
 # Carter: Identity — verify we are in the eternal fortress
 [[ "$(basename "$REPO_ROOT")" == "rylan-unifi-case-study" ]] || {
@@ -43,7 +46,7 @@ if [[ ${#SCATTERED[@]} -gt 0 ]]; then
   HERESY_DIR="${BACKUP_ROOT}/heresy-migration-$(date +%Y%m%d-%H%M%S)"
   mkdir -p "$HERESY_DIR"
   for bak in "${SCATTERED[@]}"; do
-    relative="${bak#$REPO_ROOT/}"
+    relative="${bak#"$REPO_ROOT"/}"
     mkdir -p "$HERESY_DIR/$(dirname "$relative")"
     mv "$bak" "$HERESY_DIR/$relative"
   done

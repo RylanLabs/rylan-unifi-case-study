@@ -16,7 +16,9 @@ readonly EXIT_SUCCESS=0
 readonly EXIT_AUTH=1
 readonly EXIT_API=2
 readonly EXIT_CONFIG=3
+# shellcheck disable=SC2034
 readonly EXIT_ISOLATION=4
+# shellcheck disable=SC2034
 readonly EXIT_ADVERSARIAL=5
 
 # ─────────────────────────────────────────────────────

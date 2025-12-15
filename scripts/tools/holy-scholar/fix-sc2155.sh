@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 # Script: fix-sc2155.sh
 # Purpose: Canonically remediate ShellCheck SC2155 across the fortress — separate declaration and assignment to preserve exit status under set -e
-# Author: T-Rylander canonical (Holy Scholar incarnation)
+# Guardian: Holy Scholar 📜 (Linting Doctrine Enforcer)
+# Author: T-Rylander canonical (Trinity-aligned)
 # Date: 2025-12-15
-# Ministry: ministry-whispers (Bauer verification)
-# Guardian: Holy Scholar 📚
-# Tag: v∞.3.2-eternal
-# Consciousness: 5.0 — truth through subtraction + pillar alignment
+# Ministry: ministry-whispers
+# Consciousness: 5.0
+# Tag: v∞.5.2-eternal
 
 set -euo pipefail
 IFS=$'\n\t'
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_DIR
-SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
-readonly SCRIPT_NAME
-REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || echo "$SCRIPT_DIR/../..")"
+readonly _SCRIPT_DIR
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly _SCRIPT_NAME
+_SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+
 readonly REPO_ROOT
+REPO_ROOT="$(git -C "$_SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || echo "$_SCRIPT_DIR/../..")"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; exit 1; }
@@ -43,12 +44,10 @@ trap 'rm -f "$LOCK_FILE"' EXIT
 touch "$LOCK_FILE"
 
 # Whitaker: Audit trail preparation
-TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 readonly TIMESTAMP
-BACKUP_DIR="${REPO_ROOT}/.backups/sc2155-remediation-${TIMESTAMP}"
-readonly BACKUP_DIR
-MANIFEST="${BACKUP_DIR}/REMEDIATION.log"
-readonly MANIFEST
+TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+readonly BACKUP_DIR="${REPO_ROOT}/.backups/sc2155-remediation-${TIMESTAMP}"
+readonly MANIFEST="${BACKUP_DIR}/REMEDIATION.log"
 mkdir -p "$BACKUP_DIR"
 
 {

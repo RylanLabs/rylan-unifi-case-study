@@ -1,0 +1,2 @@
+lib/proxmox/ignite_lib.sh:143:15: warning: Use single quotes, otherwise this expands now rather than when signalled. [SC2064]
+lib/proxmox/ignite_lib.sh:238:9: warning: VALIDATE_ONLY appears unused. Verify use (or export if used externally). [SC2034]

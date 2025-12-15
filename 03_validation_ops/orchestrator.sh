@@ -43,7 +43,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # Load .env
-# shellcheck disable=SC1091
+
 if [[ -f .env ]]; then
   source .env
 else

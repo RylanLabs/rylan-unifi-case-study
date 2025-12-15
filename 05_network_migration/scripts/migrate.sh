@@ -16,7 +16,7 @@ cd "$(dirname "$0")/.."
 
 # Pre-flight: Backup (Hellodeolu: RTO <15 min)
 mkdir -p backups
-# shellcheck disable=SC1091
+
 source ../runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
 unifi_get_networks >"backups/pre-migration-$(date +%Y%m%d-%H%M%S).json"
 echo "💾 Backup saved to backups/"

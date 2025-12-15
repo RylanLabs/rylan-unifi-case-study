@@ -13,7 +13,7 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
-# shellcheck disable=SC1091
+
 source "${REPO_ROOT}/lib/ignite-utils.sh"
 
 # Configuration

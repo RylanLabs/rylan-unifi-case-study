@@ -23,7 +23,7 @@ die() {
 }
 
 # shellcheck disable=SC2155
-# shellcheck disable=SC1091
+
 
 # Source UniFi credentials
 source "${SCRIPT_DIR}/../.secrets/unifi-env" || die "Missing vault: .secrets/unifi-env"

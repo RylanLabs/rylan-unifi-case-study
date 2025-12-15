@@ -51,8 +51,8 @@ log "Phase 3: Remediation SC2034 (unused variables)"
   'scripts/**/*.sh' '01_bootstrap/**/*.sh' 'runbooks/**/*.sh' '*.sh'
 
 log "Phase 4: Final verification"
-remaining_2034=$(shellcheck ./**/*.sh 01_bootstrap/**/*.sh runbooks/**/*.sh ./*.sh 2>/dev/null | grep -c "SC2034" || true)
-remaining_2155=$(shellcheck ./**/*.sh 01_bootstrap/**/*.sh runbooks/**/*.sh ./*.sh 2>/dev/null | grep -c "SC2155" || true)
+remaining_2034=$(shellcheck ./**/*.sh ./01_bootstrap/**/*.sh ./runbooks/**/*.sh ./*.sh 2>/dev/null | grep -c "SC2034" || true)
+remaining_2155=$(shellcheck ./**/*.sh ./01_bootstrap/**/*.sh ./runbooks/**/*.sh ./*.sh 2>/dev/null | grep -c "SC2155" || true)
 
 cat <<EOF
 

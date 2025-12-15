@@ -1,0 +1,74 @@
+02_declarative_config/apply-wrapper.sh:26:# shellcheck disable=SC1091
+03_validation_ops/orchestrator.sh:46:# shellcheck disable=SC1091
+templates/heresy-wrapper.sh:31:# shellcheck disable=SC1091  # source .secrets/* outside repo (Bauer vault)
+01_bootstrap/freeradius/ignite.sh:23:# shellcheck disable=SC1091
+01_bootstrap/freeradius/ignite.sh:25:# shellcheck disable=SC1091
+01_bootstrap/freeradius/runbooks/ministry_secrets/deploy.sh:16:# shellcheck disable=SC1091
+01_bootstrap/freeradius/runbooks/ministry_whispers/harden.sh:16:# shellcheck disable=SC1091
+01_bootstrap/freeradius/runbooks/ministry_detection/apply.sh:16:# shellcheck disable=SC1091
+01_bootstrap/freeradius/lib/ignite-orchestration.sh:10:# shellcheck disable=SC1091
+01_bootstrap/freeradius/scripts/validate-eternal.sh:12:# shellcheck disable=SC1091
+01_bootstrap/unifi/adopt-devices-wrapper.sh:26:# shellcheck disable=SC1091
+01_bootstrap/setup-nfs-kerberos.sh:17:# shellcheck disable=SC1091
+01_bootstrap/proxmox/proxmox-ignite.sh:2:# shellcheck disable=SC1091
+01_bootstrap/proxmox/lib/metrics.sh:2:# shellcheck disable=SC1091
+01_bootstrap/proxmox/lib/common.sh:2:# shellcheck disable=SC1091
+01_bootstrap/proxmox/lib/security.sh:33:# shellcheck disable=SC1091
+01_bootstrap/proxmox/lib/security.sh:35:# shellcheck disable=SC1091
+01_bootstrap/proxmox/lib/security.sh:37:# shellcheck disable=SC1091
+01_bootstrap/proxmox/lib/security.sh:39:# shellcheck disable=SC1091
+docs/shellcheck-full.log:9:       ^-- SC1091 (info): Not following: ./lib/ignite-utils.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:79:       ^-- SC1091 (info): Not following: ./lib/resurrect-preflight.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:84:       ^-- SC1091 (info): Not following: ./lib/resurrect-container.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:124:       ^-- SC1091 (info): Not following: ./lib/validate-output.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:129:       ^-- SC1091 (info): Not following: ./lib/validate-cross-host.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:134:       ^-- SC1091 (info): Not following: ./lib/validate-host-specific.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:139:         ^-- SC1091 (info): Not following: runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:224:       ^-- SC1091 (info): Not following: ./lib/beale-firewall-vlan-ssh.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:229:       ^-- SC1091 (info): Not following: ./lib/beale-services-adversarial.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:299:         ^-- SC1091 (info): Not following: runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:304:       ^-- SC1091 (info): Not following: ./lib/phase0-prerequisites.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:309:       ^-- SC1091 (info): Not following: ./lib/phase0-flatnet-recon.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:314:       ^-- SC1091 (info): Not following: ./lib/phase0-cloudkey.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:319:       ^-- SC1091 (info): Not following: ./lib/phase0-lxc.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:324:       ^-- SC1091 (info): Not following: ./lib/phase0-red-team.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:329:                                                        ^-- SC1091 (info): Not following: ./metrics-system.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:334:                                                       ^-- SC1091 (info): Not following: ./metrics-phase.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:344:       ^------------------------^ SC1091 (info): Not following: ./log.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:349:       ^--------------------------^ SC1091 (info): Not following: ./vault.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:354:       ^--------------------------^ SC1091 (info): Not following: ./retry.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:359:       ^-----------------------------^ SC1091 (info): Not following: ./validate.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:364:       ^----------------------------^ SC1091 (info): Not following: ./network.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:369:       ^---------------------------^ SC1091 (info): Not following: ./config.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:374:                                              ^------------------------^ SC1091 (info): Not following: ./ssh.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:379:                                                ^--------------------------^ SC1091 (info): Not following: ./ports.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:384:                                                        ^-- SC1091 (info): Not following: ./network-tests.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:389:                                                        ^-- SC1091 (info): Not following: ./firewall-vlan.sh: openBinaryFile: does not exist (No such file or directory)
+docs/shellcheck-full.log:414:       ^-- SC1091 (info): Not following: ./lib/uck-utils.sh: openBinaryFile: does not exist (No such file or directory)
+docs/precommit.log:59:       ^-- SC1091 (info): Not following: ./lib/ignite-utils.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:129:       ^-- SC1091 (info): Not following: ./lib/resurrect-preflight.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:134:       ^-- SC1091 (info): Not following: ./lib/resurrect-container.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:174:       ^-- SC1091 (info): Not following: ./lib/validate-output.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:179:       ^-- SC1091 (info): Not following: ./lib/validate-cross-host.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:184:       ^-- SC1091 (info): Not following: ./lib/validate-host-specific.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:189:         ^-- SC1091 (info): Not following: runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:274:       ^-- SC1091 (info): Not following: ./lib/beale-firewall-vlan-ssh.sh was not specified as input (see shellcheck -x).
+docs/precommit.log:279:       ^-- SC1091 (info): Not following: ./lib/beale-services-adversarial.sh was not specified as input (see shellcheck -x).
+05_network_migration/rollback.sh:21:# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
+05_network_migration/scripts/post-flight.sh:21:# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
+05_network_migration/scripts/push-vlans.sh:21:# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
+05_network_migration/scripts/migrate.sh:19:# shellcheck disable=SC1091
+05_network_migration/scripts/preview-changes.sh:21:# Render live (via API – silent on match)# shellcheck disable=SC1091source ../runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
+05_network_migration/scripts/pre-flight.sh:21:# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
+.git/logs/refs/heads/main:9:207331fe86c43dc4e35b1a50feb3cd6694396183 b9fc2023f373fe789122a6a24d2ac081bcba7394 T-Rylander <egx570@users.noreply.github.com> 1765453856 -0600	commit: fix(bash): SC1091 for untracked lib/ sources + SC2178 GROUPS builtin collision
+.git/logs/HEAD:40:207331fe86c43dc4e35b1a50feb3cd6694396183 b9fc2023f373fe789122a6a24d2ac081bcba7394 T-Rylander <egx570@users.noreply.github.com> 1765453856 -0600	commit: fix(bash): SC1091 for untracked lib/ sources + SC2178 GROUPS builtin collision
+scripts/ignite.sh:40:# shellcheck disable=SC1091
+scripts/ignite.sh:42:# shellcheck disable=SC1091
+scripts/ignite.sh:134:    # shellcheck disable=SC1091
+scripts/ignite.sh:143:    # shellcheck disable=SC1091
+scripts/ignite.sh:161:  # shellcheck disable=SC1091
+scripts/eternal-resurrect-unifi.sh:19:# Source helper libraries (SC1091: CI runs shellcheck -x for cross-file analysis)
+scripts/tools/holy-scholar/add-shellcheck-source-comments.sh:3:# Purpose: Automated ShellCheck SC1091 remediation — add source path comments for static analysis
+scripts/tools/holy-scholar/add-shellcheck-source-comments.sh:71:  log "Annotated $relative_path with SC1091 suppressions"
+scripts/tools/holy-scholar/add-shellcheck-source-comments.sh:82:Run shellcheck across repo to verify zero SC1091 warnings:
+scripts/debug-api.sh:15:# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
