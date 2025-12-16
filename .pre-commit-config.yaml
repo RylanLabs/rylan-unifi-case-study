@@ -8,132 +8,108 @@ repos:
         types: [python]
 
       - id: python-naming
-        name: python-naming-validator
+        name: python-naming-validator (Carter)
         entry: bash scripts/pre-commit/validate-python-naming.sh
         language: system
         types: [python]
-        pass_filenames: false
+        pass_filenames: true
+        exclude: '^\.venv/|^venv/|^\.git/|site-packages/'
 
-      - id: mypy-strict
-        name: mypy-strict-validation
-        entry: mypy
+      - id: ruff-check
+        name: ruff-lint-check
+        entry: bash -c 'ruff check .'
         language: system
         types: [python]
-        args: [--strict, --install-types, --non-interactive]
-        repos:
-          - repo: local
-            hooks:
-              - id: check-encoding
-                name: check-utf8-encoding
-                entry: bash -c 'file --mime "$@" | grep -q "charset=utf-8"'
-                language: system
-                types: [python]
 
-              - id: python-naming
-                name: python-naming-validator
-                entry: bash scripts/pre-commit/validate-python-naming.sh
-                language: system
-                types: [python]
-                pass_filenames: false
+      - id: ruff-format
+        name: ruff-format-check
+        entry: bash -c 'ruff format --check .'
+        language: system
+        types: [python]
 
-              - id: mypy-strict
-                name: mypy-strict-validation
-                entry: mypy
-                language: system
-                types: [python]
-                args: [--strict, --install-types, --non-interactive]
-                pass_filenames: false
+      - id: gatekeeper-bash
+        name: gatekeeper-bash-validator
+        entry: bash scripts/gatekeeper/validate-bash-standards.sh
+        language: system
+        types: [shell]
+        pass_filenames: false
 
-              - id: ruff-check
-                name: ruff-lint-check
-                entry: bash -c 'ruff check .'
-                language: system
-                types: [python]
+      - id: eternal-rule-count
+        name: Policy Rule Validator (≤10 rules)
+        entry: scripts/pre-commit/eternal-rule-count.sh
+        files: ^02_declarative_config/policy-table-rylan-v5\.json$
+        language: system
+        stages: [pre-push]
 
-              - id: ruff-format
-                name: ruff-format-check
-                entry: bash -c 'ruff format --check .'
-                language: system
-                types: [python]
+      - id: beale-harden
+        name: Beale Hardening Validation
+        entry: bash scripts/beale-harden.sh --ci
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
 
-              - id: gatekeeper-bash
-                name: gatekeeper-bash-validator
-                entry: bash scripts/gatekeeper/validate-bash-standards.sh
-                language: system
-                types: [shell]
-                pass_filenames: false
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        name: Eternal YAML Lint
+        files: ^(02_declarative_config|shared)/.*\.ya?ml$
+        types: [yaml]
+        stages: [pre-commit, pre-push]
 
-              - id: eternal-rule-count
-                name: Policy Rule Validator (≤10 rules)
-                entry: scripts/pre-commit/eternal-rule-count.sh
-                files: ^02_declarative_config/policy-table-rylan-v5\.json$
-                language: system
-                stages: [push]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']
+        exclude: '^(\.github/|bootstrap/|02_declarative_config/)'
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
 
-              - id: beale-harden
-                name: Beale Hardening Validation
-                entry: bash scripts/beale-harden.sh --ci
-                language: system
-                pass_filenames: false
-                always_run: true
-                stages: [push]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: ['--fix']
+      - id: ruff-format
 
-          - repo: https://github.com/adrienverge/yamllint
-            rev: v1.37.1
-            hooks:
-              - id: yamllint
-                name: Eternal YAML Lint
-                entry: yamllint -c .yamllint
-                files: ^(02_declarative_config|shared)/.*\.ya?ml$
-                types: [yaml]
-                stages: [commit, push]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        name: mypy-strict-validation
+        additional_dependencies:
+          - types-PyYAML
+          - types-requests
+        args:
+          - --strict
+          - --ignore-missing-imports
+          - --no-error-summary
+        exclude: '^(tests/|docs/|01_bootstrap/|02_declarative_config/|\.venv/|venv/)'
 
-          - repo: https://github.com/pre-commit/pre-commit-hooks
-            rev: v4.6.0
-            hooks:
-              - id: trailing-whitespace
-                args: [--markdown-linebreak-ext=md]
-              - id: end-of-file-fixer
-              - id: check-yaml
-                args: ['--unsafe']
-                exclude: '^(\.github/|bootstrap/|02_declarative_config/)'
-              - id: check-json
-              - id: check-added-large-files
-                args: ['--maxkb=1000']
-              - id: check-merge-conflict
-              - id: detect-private-key
-              - id: mixed-line-ending
-                args: ['--fix=lf']
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: ['-ll']
+        additional_dependencies: ['bandit[toml]']
+        exclude: '^(tests/|inventory/|\.venv/|venv/)'
 
-          - repo: https://github.com/astral-sh/ruff-pre-commit
-            rev: v0.8.4
-            hooks:
-              - id: ruff
-                args: ['--fix']
-              - id: ruff-format
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.46.0
+    hooks:
+      - id: markdownlint
+        exclude: 'README.md'
+        enabled: false
 
-          - repo: https://github.com/pre-commit/mirrors-mypy
-            rev: v1.13.0
-            hooks:
-              - id: mypy
-                additional_dependencies: [types-PyYAML, types-requests]
-                args: ['--ignore-missing-imports']
-                exclude: '^(tests/|docs/|01_bootstrap/|02_declarative_config/)'
-
-          - repo: https://github.com/igorshubovych/markdownlint-cli
-            rev: v0.46.0
-            hooks:
-              - id: markdownlint
-                exclude: 'README.md'
-                enabled: false
-
-          - repo: https://github.com/PyCQA/bandit
-            rev: 1.8.0
-            hooks:
-              - id: bandit
-                args: ['-ll']
-                additional_dependencies: ['bandit[toml]']
-                exclude: '^(tests/|inventory/)'
-
-        default_language_version:
-          python: python3
+default_language_version:
+  python: python3

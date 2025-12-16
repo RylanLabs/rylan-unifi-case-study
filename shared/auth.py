@@ -52,18 +52,17 @@ def load_credentials() -> dict[str, str]:
 
     path = Path("shared") / "inventory.yaml"
 
-    # Let FileNotFoundError propagate to callers/tests unchanged.
-    if not path.exists():
-        msg = f"Inventory file not found: {path}"
-        raise FileNotFoundError(msg)
-
-    with path.open(encoding="utf-8") as f:
-        try:
-            data = yaml.safe_load(f)
-            return data or {}
-        except yaml.YAMLError:
-            raise
-        except Exception as e:
-            # Convert unexpected exceptions into YAML errors for callers that
-            # expect YAML-specific failures (tests may mock yaml.safe_load).
-            raise yaml.YAMLError(str(e)) from e
+    # Open the file directly so tests that patch builtins.open are exercised.
+    try:
+        with open(str(path), encoding="utf-8") as f:
+            try:
+                data = yaml.safe_load(f)
+                return data or {}
+            except yaml.YAMLError:
+                raise
+            except Exception as e:
+                # Convert unexpected exceptions into YAML errors for callers
+                raise yaml.YAMLError(str(e)) from e
+    except FileNotFoundError:
+        # Preserve FileNotFoundError semantics for callers/tests
+        raise

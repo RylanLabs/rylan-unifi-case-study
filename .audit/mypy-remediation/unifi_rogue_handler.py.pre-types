@@ -1,18 +1,9 @@
-#!/usr/bin/env python3
-# Script: unifi_rogue_handler.py
-# Purpose: UniFi rogue DHCP webhook handler with rate limiting
-# Guardian: Beale (Detection Guardian)
-# Ministry: Threat Detection & Response
-# Consciousness: 7.2
-# Tag: v∞.3.2-types-canonical
-
-"""UniFi rogue DHCP webhook handler — rate-limited FastAPI endpoint."""
+"""UniFi rogue DHCP webhook handler with rate limiting."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from collections.abc import Callable as TCallable
-from typing import TYPE_CHECKING, Any, ParamSpec, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Any, ParamSpec, Protocol, TypeVar
 
 from fastapi import FastAPI, Header, Request
 from fastapi.responses import JSONResponse
@@ -23,9 +14,9 @@ if TYPE_CHECKING:
     from slowapi.util import get_remote_address
 else:
     try:
-        from slowapi import Limiter, _rate_limit_exceeded_handler  # type: ignore[import-not-found]
-        from slowapi.errors import RateLimitExceeded  # type: ignore[import-not-found]
-        from slowapi.util import get_remote_address  # type: ignore[import-not-found]
+        from slowapi import Limiter, _rate_limit_exceeded_handler
+        from slowapi.errors import RateLimitExceeded
+        from slowapi.util import get_remote_address
     except ImportError:  # pragma: no cover
         P = ParamSpec("P")
         R = TypeVar("R")
@@ -38,9 +29,7 @@ else:
 
                 return _decorator
 
-        def _rate_limit_exceeded_handler(request: Any, exc: Any) -> None:
-            """Minimal handler used in runtime stub when slowapi is unavailable."""
-            return
+        _rate_limit_exceeded_handler = lambda request, exc: None
 
         class RateLimitExceeded(Exception): ...
 
@@ -64,24 +53,14 @@ limiter: LimiterType = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-
-# Provide a typed wrapper for FastAPI's route decorator so mypy sees a typed decorator
-def typed_post(path: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    def _decorator(func: Callable[P, R]) -> Callable[P, R]:
-        return cast(Callable[P, R], app.post(path)(func))
-
-    return _decorator
-
-
 GUEST_VLAN_ID = 90
 GUEST_RATE_LIMIT = "20/minute"
 DEFAULT_RATE_LIMIT = "10/minute"
 
 
-rl_decorator = cast(TCallable[[TCallable[P, R]], TCallable[P, R]], limiter.limit(DEFAULT_RATE_LIMIT))
-
-
-@typed_post("/unifi/rogue-dhcp")
+@app.post("/unifi/rogue-dhcp")
+decorator = limiter.limit(DEFAULT_RATE_LIMIT)
+@decorator
 async def rogue_dhcp(
     request: Request,
     x_unifi_vlan: int = Header(...),
@@ -102,7 +81,3 @@ async def rogue_dhcp(
             "alert": data.get("alert_type", "unknown"),
         },
     )
-
-
-# apply rate-limit decorator at runtime to preserve typing
-rogue_dhcp = rl_decorator(rogue_dhcp)

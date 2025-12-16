@@ -70,9 +70,8 @@ exclude = [
     'site-packages',
     '\.audit',
     'build',
-    'dist',
-    '\.venv-stubs',
-]
+    'dist'
+    '\ .venv-stubs']
 
 # Module-specific overrides
 [[tool.mypy.overrides]]
@@ -213,8 +212,4 @@ hellodeolu_compliant = true
 
 [[tool.mypy.overrides]]
 module = ["spacy.*", "tldextract.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["slowapi.*"]
 ignore_missing_imports = true

@@ -3,7 +3,6 @@
 Validates HTTP request formatting, endpoint handling, and response parsing.
 """
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,19 +14,19 @@ from shared.unifi_client import UniFiClient
 class TestUniFiClientInit:
     """Test UniFiClient instantiation."""
 
-    def test_client_init_basic(self) -> None:
+    def test_client_init_basic(self):
         """Initialize UniFiClient with URL and defaults."""
         client = UniFiClient("https://controller.local")
         assert client.base_url == "https://controller.local"
         assert client.verify_ssl is True
         assert client.session is not None
 
-    def test_client_init_trailing_slash_removed(self) -> None:
+    def test_client_init_trailing_slash_removed(self):
         """Client strips trailing slashes from base_url."""
         client = UniFiClient("https://controller.local/")
         assert client.base_url == "https://controller.local"
 
-    def test_client_init_ssl_verification_disabled(self) -> None:
+    def test_client_init_ssl_verification_disabled(self):
         """Client respects verify_ssl=False."""
         client = UniFiClient("https://controller.local", verify_ssl=False)
         assert client.verify_ssl is False
@@ -37,7 +36,7 @@ class TestUniFiClientRequests:
     """Test HTTP request methods."""
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_get_request(self, mock_session_func: Any) -> None:
+    def test_get_request(self, mock_session_func):
         """Test GET request formatting."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"data": [{"id": "1", "name": "VLAN10"}]}
@@ -55,7 +54,7 @@ class TestUniFiClientRequests:
         assert result == [{"id": "1", "name": "VLAN10"}]
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_post_request(self, mock_session_func: Any) -> None:
+    def test_post_request(self, mock_session_func):
         """Test POST request with JSON payload."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"data": {"id": "new_id"}}
@@ -74,7 +73,7 @@ class TestUniFiClientRequests:
         assert result == {"id": "new_id"}
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_put_request(self, mock_session_func: Any) -> None:
+    def test_put_request(self, mock_session_func):
         """Test PUT request for updates."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"data": {"id": "existing_id", "updated": True}}
@@ -96,7 +95,7 @@ class TestUniFiClientNetworkMethods:
     """Test network-specific API methods."""
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_list_networks(self, mock_session_func: Any) -> None:
+    def test_list_networks(self, mock_session_func):
         """list_networks() returns network list."""
         mock_response = MagicMock()
         mock_response.json.return_value = {
@@ -117,7 +116,7 @@ class TestUniFiClientNetworkMethods:
         assert networks[1]["vlan"] == 30
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_create_network(self, mock_session_func: Any) -> None:
+    def test_create_network(self, mock_session_func):
         """create_network() creates and returns network."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"data": {"_id": "new_id", "name": "VLAN40", "vlan": 40}}
@@ -137,7 +136,7 @@ class TestUniFiClientErrorHandling:
     """Test error handling and edge cases."""
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_request_http_error(self, mock_session_func: Any) -> None:
+    def test_request_http_error(self, mock_session_func):
         """HTTP errors are raised."""
         mock_response = MagicMock()
         mock_response.raise_for_status.side_effect = requests.HTTPError("401 Unauthorized")
@@ -150,7 +149,7 @@ class TestUniFiClientErrorHandling:
             client.get("rest/networkconf")
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_request_empty_data_response(self, mock_session_func: Any) -> None:
+    def test_request_empty_data_response(self, mock_session_func):
         """Response with no 'data' key returns empty list/dict."""
         mock_response = MagicMock()
         mock_response.json.return_value = {}  # No 'data' key
@@ -165,7 +164,7 @@ class TestUniFiClientErrorHandling:
         assert result == []
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_endpoint_url_construction(self, mock_session_func: Any) -> None:
+    def test_endpoint_url_construction(self, mock_session_func):
         """Endpoint URLs are correctly constructed."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"data": []}
@@ -184,7 +183,7 @@ class TestUniFiClientErrorHandling:
         assert "rest/networkconf" in url
 
     @patch("shared.unifi_client.get_authenticated_session")
-    def test_verify_ssl_respected_in_requests(self, mock_session_func: Any) -> None:
+    def test_verify_ssl_respected_in_requests(self, mock_session_func):
         """verify_ssl parameter is passed to session requests."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"data": []}

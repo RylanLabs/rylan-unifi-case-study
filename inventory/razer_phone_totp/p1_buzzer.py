@@ -5,10 +5,11 @@ Consciousness: 8.0
 """
 
 #!/usr/bin/env python3
-import requests
 import os
-import time
 import subprocess
+import time
+
+import requests
 
 URL = "https://10.0.30.40/api/httpapi/tickets"
 HEADERS = {"X-API-Key": os.environ["OSTICKET_KEY"], "X-Real-IP": "10.0.30.45"}

@@ -20,7 +20,6 @@ Pre-Commit Validation:
 
 import subprocess
 import sys
-from typing import Tuple
 
 FREEPBX_HOST = "10.0.20.20"
 FREEPBX_SSH_USER = "root"  # SSH user for FreePBX access
@@ -35,7 +34,7 @@ def log(msg: str) -> None:
     print(f"[{datetime.now().isoformat()}] {msg}")
 
 
-def check_sip_registration(extension: str) -> Tuple[bool, str]:
+def check_sip_registration(extension: str) -> tuple[bool, str]:
     """
     Check if SIP extension is registered via asterisk CLI.
 
@@ -56,9 +55,7 @@ def check_sip_registration(extension: str) -> Tuple[bool, str]:
             f"asterisk -rx 'sip show peers' | grep -E '^{extension}\\s'",
         ]
 
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=10, check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
 
         if result.returncode == 0 and result.stdout.strip():
             # Parse output: "101/101  10.0.40.15  D  A  5060  OK (1 ms)"
@@ -75,7 +72,7 @@ def check_sip_registration(extension: str) -> Tuple[bool, str]:
         return (False, "")
 
 
-def check_dscp_marking(peer_ip: str) -> Tuple[bool, str]:
+def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
     """
     Verify DSCP EF (46) marking on RTP packets from peer.
 
@@ -95,9 +92,7 @@ def check_dscp_marking(peer_ip: str) -> Tuple[bool, str]:
             f"timeout 5 tcpdump -c 10 -nn -v 'src {peer_ip} and udp' 2>/dev/null | grep -oP 'tos 0x[0-9a-f]+' | head -1",
         ]
 
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=10, check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
 
         if result.returncode == 0 and result.stdout.strip():
             # Parse: "tos 0xb8" (EF = 0xb8 = DSCP 46 << 2)
@@ -141,9 +136,7 @@ def validate_voip_isolation() -> bool:
             )
 
             if result.returncode == 0:
-                log(
-                    f"  ✗ FAIL: VoIP can reach {description} ({target_ip}:{port}) - ISOLATION BREACH"
-                )
+                log(f"  ✗ FAIL: VoIP can reach {description} ({target_ip}:{port}) - ISOLATION BREACH")
                 all_blocked = False
             else:
                 log(f"  ✓ PASS: {description} blocked (expected)")
@@ -178,9 +171,7 @@ def main() -> int:
                 log(f"    ✓ DSCP marking correct (DSCP={dscp})")
                 tests_passed += 1
             else:
-                log(
-                    f"    ✗ DSCP marking incorrect (expected {EXPECTED_DSCP}, got {dscp})"
-                )
+                log(f"    ✗ DSCP marking incorrect (expected {EXPECTED_DSCP}, got {dscp})")
                 tests_failed += 1
         else:
             log(f"  ✗ Extension {ext} NOT registered")

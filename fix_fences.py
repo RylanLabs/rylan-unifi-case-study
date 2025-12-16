@@ -59,7 +59,7 @@ def fix_fences(content: str) -> str:
     return "\n".join(result)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: fix_fences.py <file1.md> [file2.md ...]")
         sys.exit(1)

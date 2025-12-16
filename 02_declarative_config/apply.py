@@ -147,9 +147,7 @@ def reconcile(  # noqa: C901, PLR0912
         return 0
 
     existing_networks = client.list_networks()
-    existing_by_vlan = {
-        net.get("vlan"): net for net in existing_networks if "vlan" in net
-    }
+    existing_by_vlan = {net.get("vlan"): net for net in existing_networks if "vlan" in net}
 
     to_create: list[VLAN] = []
     to_update: list[VLAN] = []
@@ -259,8 +257,7 @@ def main() -> None:
         client = UniFiClient.from_env()
         if not client:
             logger.error(
-                "Authentication failed: Missing UniFi credentials "
-                "(env or inventory.yaml)",
+                "Authentication failed: Missing UniFi credentials " "(env or inventory.yaml)",
             )
             sys.exit(1)
 

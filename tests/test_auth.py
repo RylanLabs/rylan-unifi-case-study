@@ -3,12 +3,14 @@
 Validates HTTP session setup and credential loading.
 """
 
+from unittest.mock import mock_open, patch
+
 import pytest
-from unittest.mock import patch, mock_open
+import yaml
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+
 from shared.auth import get_authenticated_session, load_credentials
-import yaml
 
 
 class TestGetAuthenticatedSession:
@@ -62,9 +64,7 @@ class TestLoadCredentials:
         creds = load_credentials()
         assert creds["unifi_user"] == "admin"
         assert creds["unifi_pass"] == "secret123"
-        mock_file.assert_called_once_with(
-            "shared/inventory.yaml", "r", encoding="utf-8"
-        )
+        mock_file.assert_called_once_with("shared/inventory.yaml", "r", encoding="utf-8")
 
     @patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found"))
     def test_load_credentials_file_not_found(self, mock_file):

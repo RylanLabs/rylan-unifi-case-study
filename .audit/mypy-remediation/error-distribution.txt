@@ -1,0 +1,10 @@
+      3 shared/auth.py
+      3 03_ai_helpdesk/webhooks/unifi_rogue_handler.py
+      2 templates/tests/test_bootstrap.py
+      2 shared/unifi_client.py
+      2 fix_fences.py
+      2 app/guardrails.py
+      1 templates/tests/test_unifi_client.py
+      1 templates/tests/test_auth.py
+      1 app/exceptions.py
+      1 /home/egx570/.local/lib/python3.12/site-packages/transformers/models/dia/processing_dia.py

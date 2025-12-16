@@ -40,7 +40,7 @@ else:
 
         def _rate_limit_exceeded_handler(request: Any, exc: Any) -> None:
             """Minimal handler used in runtime stub when slowapi is unavailable."""
-            return
+            return None
 
         class RateLimitExceeded(Exception): ...
 

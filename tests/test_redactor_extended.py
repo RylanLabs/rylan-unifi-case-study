@@ -1,13 +1,13 @@
 """Extended tests for redactor.py Presidio integration and edge cases."""
 
-import unittest
-from unittest.mock import patch, MagicMock
 import sys
+import unittest
+from unittest.mock import MagicMock, patch
 
 # Add app to path
 sys.path.insert(0, "/home/egx570/repos/rylan-unifi-case-study")
 
-from app.redactor import redact_pii, is_pii_present, redact_file
+from app.redactor import is_pii_present, redact_file, redact_pii
 
 
 class TestPresidioFallbackPath(unittest.TestCase):

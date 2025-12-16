@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
@@ -33,7 +33,7 @@ def audit_log(message: str) -> None:
     """
 
     AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     entry = f"[{timestamp}] {message}\n"
     with AUDIT_LOG.open("a", encoding="utf-8") as f:
         f.write(entry)
@@ -54,22 +54,14 @@ def validate_policy_table() -> None:
     rule_count = len(data.get("rules", []))
 
     if rule_count > MAX_RULES:
-        audit_log(
-            ("FAIL: Rule count %d exceeds USG-3P max %d " "(hardware offload broken)")
-            % (rule_count, MAX_RULES)
-        )
+        audit_log(("FAIL: Rule count %d exceeds USG-3P max %d " "(hardware offload broken)") % (rule_count, MAX_RULES))
         sys.exit(1)
 
     if rule_count == 0:
-        audit_log(
-            "FAIL: Policy table has 0 rules (zero-trust requires explicit allows)"
-        )
+        audit_log("FAIL: Policy table has 0 rules (zero-trust requires explicit allows)")
         sys.exit(1)
 
-    audit_log(
-        "Policy table: %d/%d rules (Phase 3 endgame, hardware offload safe)"
-        % (rule_count, MAX_RULES)
-    )
+    audit_log("Policy table: %d/%d rules (Phase 3 endgame, hardware offload safe)" % (rule_count, MAX_RULES))
 
 
 def validate_json_configs() -> None:
