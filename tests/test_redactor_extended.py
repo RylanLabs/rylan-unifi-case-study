@@ -2,6 +2,7 @@
 
 import sys
 import unittest
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 # Add app to path
@@ -15,7 +16,7 @@ class TestPresidioFallbackPath(unittest.TestCase):
 
     @patch("app.redactor.PRESIDIO_AVAILABLE", True)
     @patch("app.redactor.AnalyzerEngine")
-    def test_presidio_import_error_fallback(self, mock_analyzer_cls) -> None:
+    def test_presidio_import_error_fallback(self, mock_analyzer_cls: Any) -> None:
         """When Presidio init fails, fallback to regex."""
         mock_analyzer_cls.side_effect = ImportError("Presidio not found")
 
@@ -91,7 +92,7 @@ class TestRedactFileIntegration(unittest.TestCase):
 
     @patch("builtins.open", create=True)
     @patch("os.path.exists")
-    def test_redact_file_read_and_write(self, mock_exists, mock_open_fn) -> None:
+    def test_redact_file_read_and_write(self, mock_exists: Any, mock_open_fn: Any) -> None:
         """Test file reading and writing."""
         mock_exists.return_value = True
         mock_file = MagicMock()
@@ -106,7 +107,7 @@ class TestRedactFileIntegration(unittest.TestCase):
         self.assertIn("[REDACTED]", result)
 
     @patch("os.path.exists")
-    def test_redact_file_nonexistent(self, mock_exists) -> None:
+    def test_redact_file_nonexistent(self, mock_exists: Any) -> None:
         """Test handling of nonexistent file."""
         mock_exists.return_value = False
         with self.assertRaises(FileNotFoundError):
