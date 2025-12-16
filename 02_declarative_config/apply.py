@@ -199,8 +199,13 @@ def reconcile(  # noqa: C901, PLR0912
     # Apply updates
     for vlan in to_update:
         existing = existing_by_vlan[vlan.id]
+        nid = existing.get("_id")
+        if not isinstance(nid, str):
+            logger.error("Unexpected '_id' type for VLAN %d: %r", vlan.id, nid)
+            errors.append(vlan.id)
+            continue
         try:
-            client.update_network(existing["_id"], build_payload(vlan))
+            client.update_network(nid, build_payload(vlan))
             logger.info("Updated VLAN %d (%s)", vlan.id, vlan.name)
         except Exception:
             logger.exception("Failed to update VLAN %d", vlan.id)
