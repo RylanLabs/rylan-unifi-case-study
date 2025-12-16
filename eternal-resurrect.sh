@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # 1. Restore the eternal version (A+ Beale-integrated)
 cat >eternal-resurrect.sh <<'EOF'
 #!/usr/bin/env bash

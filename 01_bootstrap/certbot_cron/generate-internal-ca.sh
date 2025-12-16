@@ -1,8 +1,8 @@
+#!/usr/bin/env bash
 # feat(canon): full production-ready generate-internal-ca.sh prototype
 
 # Full File (Copy-Paste Merge-Ready)
 
-#!/usr/bin/env bash
 # Script: 01_bootstrap/certbot_cron/generate-internal-ca.sh
 # Purpose: Generate air-gapped internal root CA for fortress (RADIUS, UniFi, Samba)
 # Guardian: Carter
