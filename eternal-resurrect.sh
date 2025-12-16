@@ -1,5 +1,5 @@
 # 1. Restore the eternal version (A+ Beale-integrated)
-cat > eternal-resurrect.sh << 'EOF'
+cat >eternal-resurrect.sh <<'EOF'
 #!/usr/bin/env bash
 # Script: eternal-resurrect.sh
 # Purpose: One-command fortress resurrection with full Beale validation

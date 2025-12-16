@@ -24,7 +24,7 @@ set -euo pipefail
 # Get the directory where this script is located
 METRICS_LIB_DIR="${BASH_SOURCE[0]%/*}"
 if [[ "$METRICS_LIB_DIR" != /* ]]; then
-  METRICS_LIB_DIR="$(cd "$METRICS_LIB_DIR" 2>/dev/null && pwd)" || METRICS_LIB_DIR="."
+	METRICS_LIB_DIR="$(cd "$METRICS_LIB_DIR" 2>/dev/null && pwd)" || METRICS_LIB_DIR="."
 fi
 
 # Source all metrics sub-modules

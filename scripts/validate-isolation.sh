@@ -9,9 +9,15 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Beale Doctrine: Silence on success, fail loud with proof
 # ─────────────────────────────────────────────────────
-log()   { [[ "$QUIET" == false ]] && echo "[Isolation] $*"; }
-audit() { echo "$(date -Iseconds) | Isolation | $1 | $2" >> /var/log/beale-audit.log; }
-fail()  { echo "❌ ISOLATION BREACH: $1"; echo "📋 Proof:"; echo "$2"; audit "FAIL" "$1"; exit 1; }
+log() { [[ "$QUIET" == false ]] && echo "[Isolation] $*"; }
+audit() { echo "$(date -Iseconds) | Isolation | $1 | $2" >>/var/log/beale-audit.log; }
+fail() {
+	echo "❌ ISOLATION BREACH: $1"
+	echo "📋 Proof:"
+	echo "$2"
+	audit "FAIL" "$1"
+	exit 1
+}
 
 QUIET=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
@@ -29,11 +35,11 @@ log "Phase 1: Scanning trusted VLANs (limited open ports expected)"
 open_ports=$(sudo timeout 120 nmap -sV --top-ports 100 -T4 "$TARGET_NETWORKS" 2>/dev/null | grep -c "^[0-9]*/.*open" || echo 0)
 
 # Expected: SSH (22), UniFi (8080,8443), etc. — adjust threshold per environment
-EXPECTED_MAX=20  # Tune based on known services
+EXPECTED_MAX=20 # Tune based on known services
 
 if [[ $open_ports -gt $EXPECTED_MAX ]]; then
-  proof=$(sudo nmap -sV --top-ports 100 "$TARGET_NETWORKS" | grep "open")
-  fail "Unexpected open ports in trusted VLANs ($open_ports > $EXPECTED_MAX)" "$proof"
+	proof=$(sudo nmap -sV --top-ports 100 "$TARGET_NETWORKS" | grep "open")
+	fail "Unexpected open ports in trusted VLANs ($open_ports > $EXPECTED_MAX)" "$proof"
 fi
 log "✅ Trusted VLANs: $open_ports open ports (≤ $EXPECTED_MAX)"
 
@@ -42,8 +48,8 @@ log "Phase 2: Scanning quarantine VLAN 99 (must be isolated)"
 quarantine_open=$(sudo timeout 60 nmap -sn -T4 10.0.99.0/24 2>/dev/null | grep -c "Host is up" || echo 0)
 
 if [[ $quarantine_open -gt 0 ]]; then
-  proof=$(sudo nmap -sn 10.0.99.0/24 | grep "Nmap scan report")
-  fail "Devices reachable in quarantine VLAN 99 ($quarantine_open hosts)" "$proof"
+	proof=$(sudo nmap -sn 10.0.99.0/24 | grep "Nmap scan report")
+	fail "Devices reachable in quarantine VLAN 99 ($quarantine_open hosts)" "$proof"
 fi
 
 port_scan=$(sudo timeout 60 nmap -p- -T4 10.0.99.0/24 2>/dev/null | grep -c "open" || echo 0)
@@ -54,7 +60,7 @@ log "✅ Quarantine VLAN 99 fully isolated (0 hosts, 0 ports)"
 # ─────────────────────────────────────────────────────
 # Eternal Banner Drop
 # ─────────────────────────────────────────────────────
-[[ "$QUIET" == false ]] && cat << 'EOF'
+[[ "$QUIET" == false ]] && cat <<'EOF'
 
 
 ╔══════════════════════════════════════════════════════════════════════════════╗

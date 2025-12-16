@@ -6,6 +6,7 @@ of critical bootstrap artifacts pass. Real implementation lives
 elsewhere in the project.
 """
 
+
 def main():
     # no-op placeholder
     return 0

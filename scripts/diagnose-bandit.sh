@@ -24,8 +24,8 @@ readonly REPO_ROOT
 # Diagnostics helpers (Beale: Never raise voice)
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
-  exit 1
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+	exit 1
 }
 warn() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] WARN: $*" >&2; }
 
@@ -36,10 +36,10 @@ log "🔍 Bandit diagnostics starting..."
 # Step 1: Check config file
 log "Step 1: Checking .bandit config..."
 if [ -f .bandit ]; then
-  log "Found .bandit; dumping for review:"
-  sed 's/^/  /' <.bandit
+	log "Found .bandit; dumping for review:"
+	sed 's/^/  /' <.bandit
 else
-  warn "No .bandit file; Bandit will use defaults"
+	warn "No .bandit file; Bandit will use defaults"
 fi
 
 # Step 2: Verify Bandit installation
@@ -50,13 +50,13 @@ log "Bandit version: $BANDIT_VERSION"
 # Step 3: Test config parsing
 log "Step 3: Testing .bandit parse (with config)..."
 if PARSE_TEST=$(bandit -c .bandit -r . -f json 2>&1 | head -10); then
-  if echo "$PARSE_TEST" | grep -q "ERROR"; then
-    die "Config parse failed: $PARSE_TEST"
-  else
-    log "✅ Config parsed successfully"
-  fi
+	if echo "$PARSE_TEST" | grep -q "ERROR"; then
+		die "Config parse failed: $PARSE_TEST"
+	else
+		log "✅ Config parsed successfully"
+	fi
 else
-  die "Bandit execution failed"
+	die "Bandit execution failed"
 fi
 
 # Step 4: Full JSON scan (no config error handling)
@@ -66,14 +66,14 @@ BANDIT_JSON=$(bandit -r . -f json 2>/dev/null)
 BANDIT_EXIT=$?
 set -e
 if [ $BANDIT_EXIT -ne 0 ] && [ -z "$BANDIT_JSON" ]; then
-  die "Bandit scan produced no output (exit $BANDIT_EXIT)"
+	die "Bandit scan produced no output (exit $BANDIT_EXIT)"
 fi
 log "✅ Bandit scan complete"
 
 # Step 5: Validate JSON
 log "Step 5: Validating JSON output..."
 if ! echo "$BANDIT_JSON" | jq . >/dev/null 2>&1; then
-  die "Invalid JSON from Bandit (jq parse failed)"
+	die "Invalid JSON from Bandit (jq parse failed)"
 fi
 log "✅ JSON valid"
 
@@ -92,10 +92,10 @@ log "  LOW severity:   $LOW"
 
 # Step 7: Exit criteria (Hellodeolu: Zero high/medium)
 if [ "$HIGH" -eq 0 ] && [ "$MEDIUM" -eq 0 ]; then
-  log "✅ Zero HIGH/MEDIUM findings; CI gate passes"
-  exit 0
+	log "✅ Zero HIGH/MEDIUM findings; CI gate passes"
+	exit 0
 else
-  warn "Found HIGH/MEDIUM findings (exit 1 for CI):"
-  echo "$BANDIT_JSON" | jq '.results[] | select(.severity == "HIGH" or .severity == "MEDIUM") | {severity, issue_text, line_number}'
-  exit 1
+	warn "Found HIGH/MEDIUM findings (exit 1 for CI):"
+	echo "$BANDIT_JSON" | jq '.results[] | select(.severity == "HIGH" or .severity == "MEDIUM") | {severity, issue_text, line_number}'
+	exit 1
 fi

@@ -17,7 +17,10 @@ readonly _SCRIPT_NAME
 _SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
-die() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; exit 1; }
+die() {
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+	exit 1
+}
 
 readonly REPO_ROOT="${HOME}/repos/rylan-unifi-case-study"
 [[ -d "$REPO_ROOT" ]] || die "Repo missing — Carter identity failed"
@@ -48,13 +51,13 @@ Principles:
 EOF
 
 SCATTERED_COUNT=$(find "$REPO_ROOT" -name '*.bak' 2>/dev/null | wc -l)
-echo "[$(date -Iseconds)] Heresy detected: $SCATTERED_COUNT scattered .bak files" >> "$AUDIT_LOG"
+echo "[$(date -Iseconds)] Heresy detected: $SCATTERED_COUNT scattered .bak files" >>"$AUDIT_LOG"
 
 if [[ $SCATTERED_COUNT -eq 0 ]]; then
-  log "Fortress clean — no scattered .bak heresy found"
+	log "Fortress clean — no scattered .bak heresy found"
 else
-  log "Heresy detected: $SCATTERED_COUNT scattered .bak files"
-  cat <<EOF
+	log "Heresy detected: $SCATTERED_COUNT scattered .bak files"
+	cat <<EOF
 Current violations logged to: $AUDIT_LOG
 Recommended migration (one-time):
   MIGRATION_DIR=".backups/heresy-migration-$(date +%Y%m%d-%H%M%S)"

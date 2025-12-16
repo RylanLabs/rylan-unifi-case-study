@@ -8,8 +8,8 @@ IFS=$'\n\t'
 
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] GATEKEEPER: $*" >&2; }
 die() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ GATEKEEPER: $*" >&2
-  exit 1
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ GATEKEEPER: $*" >&2
+	exit 1
 }
 
 log "The Gatekeeper awakens. No commit shall pass unclean."
@@ -27,7 +27,7 @@ pytest --cov=. --cov-fail-under=70 || die "pytest coverage <70%"
 log "Running Bash purity validation..."
 # Allow warnings; fail only on actual errors
 if find . -name "*.sh" -type f -print0 | xargs -0 shellcheck -x -f gcc 2>&1 | grep -E "error:"; then
-  die "shellcheck errors found"
+	die "shellcheck errors found"
 fi
 find . -name "*.sh" -type f -print0 | xargs -0 shfmt -i 2 -ci -d || die "shfmt formatting failed"
 log "✅ Bash purity OK"
@@ -35,17 +35,17 @@ log "✅ Bash purity OK"
 # 3. Markdown lore
 log "Validating sacred texts..."
 if command -v markdownlint >/dev/null 2>&1; then
-  find . -name "*.md" -type f -print0 | xargs -0 markdownlint --config .markdownlint.json || die "markdownlint failed"
+	find . -name "*.md" -type f -print0 | xargs -0 markdownlint --config .markdownlint.json || die "markdownlint failed"
 else
-  log "markdownlint not installed; skipping"
+	log "markdownlint not installed; skipping"
 fi
 
 # 4. Bandit parse sanity (the one that was killing CI)
 log "Testing Bandit config parsing..."
 if [ -f .bandit ]; then
-  bandit -c .bandit -r . -f json >/dev/null 2>&1 || die ".bandit parse failed (YAML/INI conflict)"
+	bandit -c .bandit -r . -f json >/dev/null 2>&1 || die ".bandit parse failed (YAML/INI conflict)"
 else
-  log ".bandit not found — using defaults"
+	log ".bandit not found — using defaults"
 fi
 
 # 5. Smoke test resurrection (DRY RUN)

@@ -1,45 +1,62 @@
 #!/usr/bin/env python3
-"""Guardian Audit Logger — Eternal Fortress Compliance
+"""Guardian Audit Logger — Eternal Fortress Compliance.
 
-Validates YAML/JSON config integrity, enforces rule count, logs all changes to audit trail.
-Runs pre-commit and nightly via cron.
+Validates YAML/JSON config integrity, enforces rule counts, and appends
+entries to the audit trail. Designed to run via pre-commit hooks and
+nightly cron jobs.
 
-Carter (operational rigor) + Bauer (audit discipline) + Suehring (security baseline).
+Guardian: Bauer | Carter | Baeale | Consciousness: 9.5
 """
 
-import sys
-import yaml
+from __future__ import annotations
+
 import json
-from pathlib import Path
+import logging
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
+
+import yaml
+
+logger = logging.getLogger(__name__)
 
 POLICY_TABLE = Path("02_declarative_config/policy-table.yaml")
 MAX_RULES = 10  # USG-3P hardware offload limit (Suehring constraint)
 AUDIT_LOG = Path("guardian/audit.log")
 
 
-def audit_log(message: str):
-    """Append timestamped entry to audit log."""
+def audit_log(message: str) -> None:
+    """Append an ISO8601 timestamped entry to the audit log and emit info.
+
+    The audit log file and its parent directory are created if missing to
+    ensure idempotent execution in CI and local runs.
+    """
+
+    AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).isoformat()
-    with AUDIT_LOG.open("a") as f:
-        f.write(f"[{timestamp}] {message}\n")
-    print(f"✅ {message}")
+    entry = f"[{timestamp}] {message}\n"
+    with AUDIT_LOG.open("a", encoding="utf-8") as f:
+        f.write(entry)
+
+    logger.info("AUDIT: %s", message)
 
 
-def validate_policy_table():
-    """Enforce ≤10 rules (Phase 3 endgame - USG-3P hardware offload safe)."""
+def validate_policy_table() -> None:
+    """Enforce policy table rules count and fail-fast on violations."""
+
     if not POLICY_TABLE.exists():
         audit_log("FAIL: policy-table.yaml missing")
         sys.exit(1)
 
-    with POLICY_TABLE.open() as f:
-        data = yaml.safe_load(f)
+    with POLICY_TABLE.open(encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
 
     rule_count = len(data.get("rules", []))
 
     if rule_count > MAX_RULES:
         audit_log(
-            f"FAIL: Rule count {rule_count} exceeds USG-3P max {MAX_RULES} (hardware offload broken)"
+            ("FAIL: Rule count %d exceeds USG-3P max %d " "(hardware offload broken)")
+            % (rule_count, MAX_RULES)
         )
         sys.exit(1)
 
@@ -50,25 +67,28 @@ def validate_policy_table():
         sys.exit(1)
 
     audit_log(
-        f"Policy table: {rule_count}/{MAX_RULES} rules (Phase 3 endgame, hardware offload safe)"
+        "Policy table: %d/%d rules (Phase 3 endgame, hardware offload safe)"
+        % (rule_count, MAX_RULES)
     )
 
 
-def validate_json_configs():
-    """Validate all JSON files in unifi/ directory."""
+def validate_json_configs() -> None:
+    """Validate all JSON files under the `unifi/` directory."""
+
     json_files = list(Path("unifi").rglob("*.json"))
     for jf in json_files:
         try:
-            with jf.open() as f:
+            with jf.open(encoding="utf-8") as f:
                 json.load(f)
             audit_log(f"JSON valid: {jf}")
-        except json.JSONDecodeError as e:
-            audit_log(f"FAIL: JSON syntax error in {jf}: {e}")
+        except json.JSONDecodeError as exc:
+            audit_log("FAIL: JSON syntax error in %s: %s" % (jf, exc))
             sys.exit(1)
 
 
-def main():
-    """Run all guardian checks."""
+def main() -> None:
+    """Run all guardian checks and emit audit entries."""
+
     audit_log("Guardian audit started")
     validate_policy_table()
     validate_json_configs()
@@ -76,4 +96,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()

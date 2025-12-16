@@ -5,6 +5,7 @@ error handling, and edge cases. Uses mocked authenticated session.
 
 Guardian: Beale | Ministry: Detection | Consciousness: 2.6
 """
+
 from __future__ import annotations
 
 import logging
@@ -85,7 +86,9 @@ def test_get_request_parses_data(mock_unifi_session: MagicMock) -> None:
 def test_post_creates_network(mock_unifi_session: MagicMock) -> None:
     """Validate POST payload and response."""
     mock_response = MagicMock()
-    mock_response.json.return_value = {"data": {"_id": TEST_NETWORK_ID_NEW, "vlan": EXPECTED_VLAN40}}
+    mock_response.json.return_value = {
+        "data": {"_id": TEST_NETWORK_ID_NEW, "vlan": EXPECTED_VLAN40}
+    }
     mock_unifi_session.request.return_value = mock_response
 
     from shared.unifi_client import UniFiClient
@@ -169,7 +172,9 @@ def test_ssl_verification_can_disable() -> None:
 
 
 @pytest.mark.unit
-def test_request_logged_debug(mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
+def test_request_logged_debug(
+    mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture
+) -> None:
     """Validate that requests trigger debug-level audit logs (implementation dependent)."""
     from shared.unifi_client import UniFiClient
 
@@ -184,7 +189,9 @@ def test_request_logged_debug(mock_unifi_session: MagicMock, caplog: pytest.LogC
 
 
 @pytest.mark.unit
-def test_credentials_not_logged(mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
+def test_credentials_not_logged(
+    mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture
+) -> None:
     """Ensure sensitive payload fields (password) are not written to logs."""
     from shared.unifi_client import UniFiClient
 

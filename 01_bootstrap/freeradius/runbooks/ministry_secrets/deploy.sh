@@ -13,7 +13,6 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
-
 source "${REPO_ROOT}/lib/ignite-utils.sh"
 
 # Configuration
@@ -40,6 +39,6 @@ source "${REPO_ROOT}/lib/freeradius/deploy_lib.sh"
 
 # Main execution
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  deploy
-  start_service
+	deploy
+	start_service
 fi

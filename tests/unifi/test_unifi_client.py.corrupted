@@ -1,0 +1,101 @@
+"""Corrupted backup of tests/unifi/test_unifi_client.py
+
+Created as a backup before canonical rewrite.
+"""
+
+"""Unit tests for shared.unifi_client.
+
+These tests validate request construction and basic response parsing.
+They use a patched authenticated session to avoid live network access.
+
+Guardian: Beale | Ministry: Detection
+"""
+
+from __future__ import annotations
+
+import logging
+import sys
+from pathlib import Path
+from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
+
+import pytest
+import requests
+
+# Ensure repo root on sys.path so `shared` package imports work when running tests
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from shared.unifi_client import UniFiClient
+
+if TYPE_CHECKING:
+    from typing import Generator
+
+logger = logging.getLogger(__name__)
+
+
+# Test constants
+TEST_CONTROLLER_URL = "https://controller.local"
+TEST_NETWORK_ID_NEW = "new_id"
+EXPECTED_VLAN40 = 40
+
+
+@pytest.fixture
+def mock_unifi_session() -> Generator[MagicMock, None, None]:
+    """Provide a mocked authenticated session for UniFiClient tests."""
+    with patch("shared.unifi_client.get_authenticated_session") as mock_func:
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"data": []}
+        mock_session.request.return_value = mock_response
+        mock_func.return_value = mock_session
+        yield mock_session
+
+
+@pytest.fixture
+def client() -> UniFiClient:
+    """Return a UniFiClient configured with the test controller URL."""
+    return UniFiClient(TEST_CONTROLLER_URL)
+
+
+@pytest.mark.unit
+def test_get_request_parses_data(mock_unifi_session: MagicMock) -> None:
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"data": [{"id": "1", "name": "VLAN10"}]}
+    mock_unifi_session.request.return_value = mock_response
+
+    c = UniFiClient(TEST_CONTROLLER_URL)
+    result = c.get("rest/networkconf")
+
+    mock_unifi_session.request.assert_called_once()
+    assert isinstance(result, list)
+    assert result == [{"id": "1", "name": "VLAN10"}]
+
+
+@pytest.mark.unit
+def test_post_creates_network(mock_unifi_session: MagicMock) -> None:
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"data": {"_id": TEST_NETWORK_ID_NEW, "vlan": EXPECTED_VLAN40}}
+    mock_unifi_session.request.return_value = mock_response
+
+    c = UniFiClient(TEST_CONTROLLER_URL)
+    payload = {"name": "VLAN40", "vlan": EXPECTED_VLAN40}
+    result = c.create_network(payload)
+
+    mock_unifi_session.request.assert_called_once()
+    assert result["_id"] == TEST_NETWORK_ID_NEW
+    assert result["vlan"] == EXPECTED_VLAN40
+
+
+@pytest.mark.unit
+def test_timeout_raised(mock_unifi_session: MagicMock) -> None:
+    mock_unifi_session.request.side_effect = requests.Timeout("timeout")
+    c = UniFiClient(TEST_CONTROLLER_URL)
+    with pytest.raises(requests.Timeout):
+        c.get("rest/networkconf")
+"""Corrupted backup of tests/unifi/test_unifi_client.py
+
+Created as a backup before canonical rewrite.
+"""
+
+# Original corrupted content preserved below:
+"""

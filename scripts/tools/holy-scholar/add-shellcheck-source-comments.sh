@@ -20,7 +20,10 @@ readonly SCRIPT_NAME
 readonly SCRIPT_NAME="$SCRIPT_NAME_TMP"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
-die() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2; exit 1; }
+die() {
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+	exit 1
+}
 
 # Carter: Identity validation
 readonly REPO_ROOT="$HOME/repos/rylan-unifi-case-study"
@@ -45,34 +48,34 @@ log "Guardian: Holy Scholar | Ministry: Documentation"
 
 # Find scripts sourcing lib/ (covers ${SCRIPT_DIR}, relative, and direct paths)
 mapfile -t SCRIPT_FILES < <(
-  grep -Rl --include='*.sh' \
-    -E 'source[[:space:]]+["'"'"']?(\$\{?SCRIPT_DIR\}?/?)?(\.\./?)*lib/[^[:space:]"'"'"']+' \
-    "$REPO_ROOT" 2>/dev/null | sort -u
+	grep -Rl --include='*.sh' \
+		-E 'source[[:space:]]+["'"'"']?(\$\{?SCRIPT_DIR\}?/?)?(\.\./?)*lib/[^[:space:]"'"'"']+' \
+		"$REPO_ROOT" 2>/dev/null | sort -u
 )
 
 [[ ${#SCRIPT_FILES[@]} -eq 0 ]] && {
-  log "No scripts sourcing libraries found — nothing to annotate"
-  exit 0
+	log "No scripts sourcing libraries found — nothing to annotate"
+	exit 0
 }
 
 log "Found ${#SCRIPT_FILES[@]} scripts sourcing libraries — processing"
 
 for script in "${SCRIPT_FILES[@]}"; do
-  relative_path="${script#"${REPO_ROOT}"/}"
-  backup_file="${BACKUP_DIR}/${relative_path}"
-  mkdir -p "$(dirname "$backup_file")"
-  cp --preserve=timestamps "$script" "$backup_file"
-  log "Backed up $relative_path"
+	relative_path="${script#"${REPO_ROOT}"/}"
+	backup_file="${BACKUP_DIR}/${relative_path}"
+	mkdir -p "$(dirname "$backup_file")"
+	cp --preserve=timestamps "$script" "$backup_file"
+	log "Backed up $relative_path"
 
-  # Insert suppression before each matching source line
-  perl -i -pe <<'PERL'
+	# Insert suppression before each matching source line
+	perl -i -pe <<'PERL'
 if (/^\s*source\s+["']?(\$\{?SCRIPT_DIR\}?\/)?((?:\.{1,2}\/)*lib\/[^"'\s]+)["']?/) {
   $_ = "# shellcheck source=/dev/null\n" . $_;
 }
 PERL
-  "$script"
+	"$script"
 
-  log "Annotated $relative_path with SC1091 suppressions"
+	log "Annotated $relative_path with SC1091 suppressions"
 done
 
 log "Processing complete — ${#SCRIPT_FILES[@]} scripts updated"

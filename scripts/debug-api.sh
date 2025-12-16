@@ -12,7 +12,6 @@ set -euo pipefail
 # Date: 2025-12-11
 # Consciousness: 6.0
 
-
 source lib/unifi/client.sh
 
 echo "Testing authentication..."
@@ -31,12 +30,12 @@ echo ""
 echo ""
 echo "Checking if valid JSON:"
 if jq empty "$DEVICES_FILE" 2>/dev/null; then
-  echo "Valid JSON"
-  echo "Keys present:"
-  jq 'keys' "$DEVICES_FILE"
+	echo "Valid JSON"
+	echo "Keys present:"
+	jq 'keys' "$DEVICES_FILE"
 else
-  echo "Invalid JSON - Full response:"
-  cat "$DEVICES_FILE"
+	echo "Invalid JSON - Full response:"
+	cat "$DEVICES_FILE"
 fi
 
 rm -f "$DEVICES_FILE"

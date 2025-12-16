@@ -1,8 +1,5 @@
-# Eternal Python Dependencies — Hellodeolu v6 Compliant
-# Pinned for RTO <15 min; bandit zero; pytest ≥93%
-presidio-analyzer==2.2.358  # Whitaker: Lazy PII redaction (app/redactor.py)
-pytest==8.3.3               # Tests: 93% cov + mock breaches (tests/test_*.py)
-pytest-cov==5.0.0           # Coverage enforcement
-mypy==1.11.2                # Strict typing (Python heresy protocol)
-ruff==0.6.8                 # Linting + formatting (10/10 score)
-bandit==1.7.9               # Security scans (zero high/medium)
+## Runtime dependencies (minimal, production)
+# Keep runtime set small; dev/test tools belong in requirements-dev.txt
+pyyaml>=6.0
+requests>=2.31.0
+urllib3>=2.0.0

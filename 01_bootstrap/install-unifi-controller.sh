@@ -5,6 +5,6 @@ set -euo pipefail
 # This file exists to satisfy repository tests that check for the
 # presence of critical bootstrap artifacts.
 
-printf '%s\n' "# install-unifi-controller placeholder" > /dev/null
+printf '%s\n' "# install-unifi-controller placeholder" >/dev/null
 
 exit 0

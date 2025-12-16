@@ -32,8 +32,6 @@ def get_authenticated_session() -> requests.Session:
     return session
 
 
-
-
 def load_credentials() -> dict[str, str]:
     """Load credentials from `shared/inventory.yaml`.
 
@@ -69,4 +67,3 @@ def load_credentials() -> dict[str, str]:
             # Convert unexpected exceptions into YAML errors for callers that
             # expect YAML-specific failures (tests may mock yaml.safe_load).
             raise yaml.YAMLError(str(e)) from e
-

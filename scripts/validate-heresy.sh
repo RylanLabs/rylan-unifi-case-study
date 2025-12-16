@@ -12,8 +12,8 @@ IFS=$'\n\t'
 
 readonly TARGET="${1:-}"
 [[ -f "${TARGET}" ]] || {
-  echo "Usage: $0 path/to/wrapper.sh"
-  exit 1
+	echo "Usage: $0 path/to/wrapper.sh"
+	exit 1
 }
 
 echo "Validating heresy wrapper: ${TARGET}"
@@ -29,34 +29,34 @@ LINE_COUNT="$(awk '
 ' "${TARGET}")"
 readonly LINE_COUNT
 if [[ ${LINE_COUNT} -gt 19 ]]; then
-  echo "❌ FAIL: Wrapper exceeds 19 executable lines (found: ${LINE_COUNT})"
-  exit 1
+	echo "❌ FAIL: Wrapper exceeds 19 executable lines (found: ${LINE_COUNT})"
+	exit 1
 fi
 
 # Check 2: Required header present
 if ! grep -q "Canonical Heresy Wrapper" "${TARGET}"; then
-  echo "❌ FAIL: Missing canonical header"
-  exit 1
+	echo "❌ FAIL: Missing canonical header"
+	exit 1
 fi
 
 # Check 3: Magic comments ≤4
 MAGIC_COUNT="$(grep -c "shellcheck disable=" "${TARGET}" || true)"
 readonly MAGIC_COUNT
 if [[ ${MAGIC_COUNT} -gt 4 ]]; then
-  echo "❌ FAIL: Too many magic comments (found: ${MAGIC_COUNT}, max: 4)"
-  exit 1
+	echo "❌ FAIL: Too many magic comments (found: ${MAGIC_COUNT}, max: 4)"
+	exit 1
 fi
 
 # Check 4: ShellCheck passes
 if ! shellcheck -x "${TARGET}" 2>/dev/null; then
-  echo "❌ FAIL: ShellCheck errors detected"
-  exit 1
+	echo "❌ FAIL: ShellCheck errors detected"
+	exit 1
 fi
 
 # Check 5: Python payload exists (heredoc OR standalone .py)
 if ! grep -qE 'exec python3 (-|"\$\{SCRIPT_DIR\}/.+\.py")' "${TARGET}"; then
-  echo "❌ FAIL: Missing Python payload execution (exec python3 - or exec python3 \"\${SCRIPT_DIR}/*.py\")"
-  exit 1
+	echo "❌ FAIL: Missing Python payload execution (exec python3 - or exec python3 \"\${SCRIPT_DIR}/*.py\")"
+	exit 1
 fi
 
 echo "✓ All checks passed: ${TARGET} is canon-compliant"

@@ -14,19 +14,19 @@ set -euo pipefail
 
 IFS=$'\n\t'
 # shellcheck disable=SC2155
-readonly SCRIPT_DIR;
+readonly SCRIPT_DIR
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC2155
-readonly SCRIPT_NAME;
+readonly SCRIPT_NAME
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 # shellcheck disable=SC2155
-readonly HOSTNAME_SHORT;
+readonly HOSTNAME_SHORT
 HOSTNAME_SHORT="$(hostname -s)"
 
 log() { printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
 die() {
-  log "ERROR: $*" >&2
-  exit 1
+	log "ERROR: $*" >&2
+	exit 1
 }
 
 # Directory-agnostic: derive repo root from script location
@@ -46,36 +46,36 @@ log "Identity folder: ${IDENTITY_DIR}"
 
 # 2. Migrate keys from /root/.ssh/ (idempotent: skip if already migrated)
 if [[ -f /root/.ssh/authorized_keys ]] && [[ ! -f "${AUTHORIZED_KEYS}" ]]; then
-  grep -v '^$' /root/.ssh/authorized_keys | sort -u >"${AUTHORIZED_KEYS}.tmp"
-  mv "${AUTHORIZED_KEYS}.tmp" "${AUTHORIZED_KEYS}"
-  chmod 600 "${AUTHORIZED_KEYS}"
-  log "Keys migrated: $(wc -l <"${AUTHORIZED_KEYS}") eternal keys"
+	grep -v '^$' /root/.ssh/authorized_keys | sort -u >"${AUTHORIZED_KEYS}.tmp"
+	mv "${AUTHORIZED_KEYS}.tmp" "${AUTHORIZED_KEYS}"
+	chmod 600 "${AUTHORIZED_KEYS}"
+	log "Keys migrated: $(wc -l <"${AUTHORIZED_KEYS}") eternal keys"
 elif [[ -f "${AUTHORIZED_KEYS}" ]]; then
-  log "Keys already repo-bound — idempotent skip"
+	log "Keys already repo-bound — idempotent skip"
 else
-  die "No source keys in /root/.ssh/authorized_keys"
+	die "No source keys in /root/.ssh/authorized_keys"
 fi
 
 # 3. Point sshd to repo-based keys (idempotent)
 if [[ -f "${SSHD_CONF}" ]]; then
-  log "sshd config exists — idempotent skip"
+	log "sshd config exists — idempotent skip"
 else
-  cat >"${SSHD_CONF}" <<EOF
+	cat >"${SSHD_CONF}" <<EOF
 # Bauer Eternal: Keys live in the repo (Phase 1.1 glow-up)
 AuthorizedKeysFile ${IDENTITY_DIR}/authorized_keys
 EOF
-  sshd -t || die "sshd config invalid"
-  systemctl reload sshd || die "sshd reload failed"
-  log "sshd_config updated — keys now repo-bound"
+	sshd -t || die "sshd config invalid"
+	systemctl reload sshd || die "sshd reload failed"
+	log "sshd_config updated — keys now repo-bound"
 fi
 
 # 4. Daily refresh cron (optional: only if allowed_keys/ exists)
 if [[ -d "${REPO_DIR}/allowed_keys" ]] && ! crontab -l 2>/dev/null | grep -q "refresh-keys.sh"; then
-  (
-    crontab -l 2>/dev/null | grep -v refresh-keys
-    echo "0 2 * * * ${REFRESH_SCRIPT}"
-  ) | crontab -
-  log "Daily cron: keys refresh from repo at 2 AM"
+	(
+		crontab -l 2>/dev/null | grep -v refresh-keys
+		echo "0 2 * * * ${REFRESH_SCRIPT}"
+	) | crontab -
+	log "Daily cron: keys refresh from repo at 2 AM"
 fi
 
 cat <<BANNER

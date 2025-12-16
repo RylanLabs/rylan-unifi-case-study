@@ -20,7 +20,6 @@ readonly LOG_DIR
 LOG_FILE="${LOG_DIR}/freeradius-ignite-$(date +%Y%m%d-%H%M%S).log"
 readonly LOG_FILE
 
-
 source "${SCRIPT_DIR}/lib/ignite-utils.sh"
 
 source "${SCRIPT_DIR}/lib/ignite-orchestration.sh"
@@ -38,20 +37,20 @@ START_TIME=$(date +%s)
 
 # Cleanup handler
 cleanup() {
-  local exit_code=$?
-  if [[ $exit_code -ne 0 ]]; then
-    log error "Deployment failed with exit code $exit_code"
-    if [[ -n "$BACKUP_DIR" && -d "$BACKUP_DIR" ]]; then
-      log step "Backup available at: $BACKUP_DIR"
-    fi
-  fi
-  return $exit_code
+	local exit_code=$?
+	if [[ $exit_code -ne 0 ]]; then
+		log error "Deployment failed with exit code $exit_code"
+		if [[ -n "$BACKUP_DIR" && -d "$BACKUP_DIR" ]]; then
+			log step "Backup available at: $BACKUP_DIR"
+		fi
+	fi
+	return $exit_code
 }
 
 trap cleanup EXIT
 
 display_banner() {
-  cat <<'BANNER'
+	cat <<'BANNER'
 ================================================================================
                     FreeRADIUS ETERNAL DEPLOYMENT
 ================================================================================
@@ -64,22 +63,22 @@ BANNER
 }
 
 parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      --skip-phase)
-        SKIP_PHASE="$2"
-        shift 2
-        ;;
-      --rollback)
-        ROLLBACK_DIR="$2"
-        shift 2
-        ;;
-      -h | --help)
-        cat <<HELP
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+		--dry-run)
+			DRY_RUN=true
+			shift
+			;;
+		--skip-phase)
+			SKIP_PHASE="$2"
+			shift 2
+			;;
+		--rollback)
+			ROLLBACK_DIR="$2"
+			shift 2
+			;;
+		-h | --help)
+			cat <<HELP
 Usage: $(basename "$0") [OPTIONS]
 
 Description:
@@ -123,139 +122,139 @@ Examples:
 Logs: ${LOG_FILE}
 
 HELP
-        exit 0
-        ;;
-      *)
-        die "Unknown option: $1"
-        ;;
-    esac
-  done
+			exit 0
+			;;
+		*)
+			die "Unknown option: $1"
+			;;
+		esac
+	done
 }
 
 preflight() {
-  log phase "PRE-FLIGHT CHECKS"
+	log phase "PRE-FLIGHT CHECKS"
 
-  # Create log directory
-  mkdir -p "$LOG_DIR"
+	# Create log directory
+	mkdir -p "$LOG_DIR"
 
-  # Redirect output to log file + terminal
-  exec 1> >(tee -a "$LOG_FILE")
-  exec 2>&1
+	# Redirect output to log file + terminal
+	exec 1> >(tee -a "$LOG_FILE")
+	exec 2>&1
 
-  log step "Execution log: $LOG_FILE"
+	log step "Execution log: $LOG_FILE"
 
-  # Root check
-  if [[ $EUID -ne 0 ]]; then
-    die "Root access required"
-  fi
+	# Root check
+	if [[ $EUID -ne 0 ]]; then
+		die "Root access required"
+	fi
 
-  # OS check
-  if ! grep -qi "ubuntu\|debian" /etc/os-release; then
-    die "Unsupported OS: Only Ubuntu/Debian supported"
-  fi
+	# OS check
+	if ! grep -qi "ubuntu\|debian" /etc/os-release; then
+		die "Unsupported OS: Only Ubuntu/Debian supported"
+	fi
 
-  # Dry-run mode
-  if [[ "$DRY_RUN" == "true" ]]; then
-    log step "MODE: DRY-RUN (no changes will be made)"
-    export DRY_RUN=true
-  fi
+	# Dry-run mode
+	if [[ "$DRY_RUN" == "true" ]]; then
+		log step "MODE: DRY-RUN (no changes will be made)"
+		export DRY_RUN=true
+	fi
 
-  log success "Pre-flight checks complete"
+	log success "Pre-flight checks complete"
 }
 
 run_phases() {
-  # Phase 1: Ministry of Secrets (Carter)
-  if [[ "$SKIP_PHASE" != "1" ]]; then
-    if bash "${SCRIPT_DIR}/runbooks/ministry_secrets/deploy.sh"; then
-      PHASES_RUN+=("1")
-    else
-      PHASES_FAILED+=("1")
-      die "Phase 1 failed"
-    fi
-  fi
+	# Phase 1: Ministry of Secrets (Carter)
+	if [[ "$SKIP_PHASE" != "1" ]]; then
+		if bash "${SCRIPT_DIR}/runbooks/ministry_secrets/deploy.sh"; then
+			PHASES_RUN+=("1")
+		else
+			PHASES_FAILED+=("1")
+			die "Phase 1 failed"
+		fi
+	fi
 
-  # Phase 2: Ministry of Whispers (Bauer)
-  if [[ "$SKIP_PHASE" != "2" ]]; then
-    if bash "${SCRIPT_DIR}/runbooks/ministry_whispers/harden.sh"; then
-      PHASES_RUN+=("2")
-    else
-      PHASES_FAILED+=("2")
-      die "Phase 2 failed"
-    fi
-  fi
+	# Phase 2: Ministry of Whispers (Bauer)
+	if [[ "$SKIP_PHASE" != "2" ]]; then
+		if bash "${SCRIPT_DIR}/runbooks/ministry_whispers/harden.sh"; then
+			PHASES_RUN+=("2")
+		else
+			PHASES_FAILED+=("2")
+			die "Phase 2 failed"
+		fi
+	fi
 
-  # Phase 3: Ministry of Detection (Beale)
-  if [[ "$SKIP_PHASE" != "3" ]]; then
-    if bash "${SCRIPT_DIR}/runbooks/ministry_detection/apply.sh"; then
-      PHASES_RUN+=("3")
-    else
-      PHASES_FAILED+=("3")
-      die "Phase 3 failed"
-    fi
-  fi
+	# Phase 3: Ministry of Detection (Beale)
+	if [[ "$SKIP_PHASE" != "3" ]]; then
+		if bash "${SCRIPT_DIR}/runbooks/ministry_detection/apply.sh"; then
+			PHASES_RUN+=("3")
+		else
+			PHASES_FAILED+=("3")
+			die "Phase 3 failed"
+		fi
+	fi
 }
 
 validate_postconditions() {
-  log phase "FINAL VALIDATION"
+	log phase "FINAL VALIDATION"
 
-  log step "Verifying FreeRADIUS service"
-  if ! systemctl is-active --quiet freeradius; then
-    die "FreeRADIUS service not active"
-  fi
+	log step "Verifying FreeRADIUS service"
+	if ! systemctl is-active --quiet freeradius; then
+		die "FreeRADIUS service not active"
+	fi
 
-  log step "Verifying configuration syntax"
-  if ! freeradius -C 2>/dev/null; then
-    die "FreeRADIUS configuration invalid"
-  fi
+	log step "Verifying configuration syntax"
+	if ! freeradius -C 2>/dev/null; then
+		die "FreeRADIUS configuration invalid"
+	fi
 
-  log step "Verifying certificates"
-  if [[ ! -f /etc/freeradius/3.0/certs/server.pem ]]; then
-    die "Server certificate missing"
-  fi
+	log step "Verifying certificates"
+	if [[ ! -f /etc/freeradius/3.0/certs/server.pem ]]; then
+		die "Server certificate missing"
+	fi
 
-  log success "All postconditions validated"
+	log success "All postconditions validated"
 }
 
 create_backup() {
-  BACKUP_DIR="/var/backups/freeradius-$(date +%Y%m%d-%H%M%S)"
+	BACKUP_DIR="/var/backups/freeradius-$(date +%Y%m%d-%H%M%S)"
 
-  log step "Creating system backup: $BACKUP_DIR"
-  mkdir -p "$BACKUP_DIR"
+	log step "Creating system backup: $BACKUP_DIR"
+	mkdir -p "$BACKUP_DIR"
 
-  if [[ -d /etc/freeradius ]]; then
-    cp -r /etc/freeradius "$BACKUP_DIR/" || die "Backup failed"
-  fi
+	if [[ -d /etc/freeradius ]]; then
+		cp -r /etc/freeradius "$BACKUP_DIR/" || die "Backup failed"
+	fi
 
-  log success "Backup created: $BACKUP_DIR"
+	log success "Backup created: $BACKUP_DIR"
 }
 
 rollback() {
-  if [[ -z "$ROLLBACK_DIR" || ! -d "$ROLLBACK_DIR" ]]; then
-    die "Invalid rollback directory: $ROLLBACK_DIR"
-  fi
+	if [[ -z "$ROLLBACK_DIR" || ! -d "$ROLLBACK_DIR" ]]; then
+		die "Invalid rollback directory: $ROLLBACK_DIR"
+	fi
 
-  log phase "ROLLBACK: Restoring from $ROLLBACK_DIR"
+	log phase "ROLLBACK: Restoring from $ROLLBACK_DIR"
 
-  systemctl stop freeradius || true
+	systemctl stop freeradius || true
 
-  if [[ -d "$ROLLBACK_DIR/freeradius" ]]; then
-    rm -rf /etc/freeradius
-    cp -r "$ROLLBACK_DIR/freeradius" /etc/ || die "Rollback failed"
-    log success "Configuration restored"
-  fi
+	if [[ -d "$ROLLBACK_DIR/freeradius" ]]; then
+		rm -rf /etc/freeradius
+		cp -r "$ROLLBACK_DIR/freeradius" /etc/ || die "Rollback failed"
+		log success "Configuration restored"
+	fi
 
-  systemctl start freeradius || true
-  log success "Rollback complete"
-  exit 0
+	systemctl start freeradius || true
+	log success "Rollback complete"
+	exit 0
 }
 
 generate_report() {
-  local end_time
-  end_time=$(date +%s)
-  local elapsed;
-  elapsed=$((end_time - START_TIME))
+	local end_time
+	end_time=$(date +%s)
+	local elapsed
+	elapsed=$((end_time - START_TIME))
 
-  cat <<REPORT
+	cat <<REPORT
 
 ================================================================================
 DEPLOYMENT REPORT
@@ -281,35 +280,35 @@ REPORT
 }
 
 main() {
-  display_banner
+	display_banner
 
-  parse_args "$@"
+	parse_args "$@"
 
-  # Handle rollback mode
-  if [[ -n "$ROLLBACK_DIR" ]]; then
-    rollback
-  fi
+	# Handle rollback mode
+	if [[ -n "$ROLLBACK_DIR" ]]; then
+		rollback
+	fi
 
-  # Pre-flight checks
-  preflight
+	# Pre-flight checks
+	preflight
 
-  # Create backup before changes
-  create_backup
+	# Create backup before changes
+	create_backup
 
-  # Run phases
-  run_phases
+	# Run phases
+	run_phases
 
-  # Validate postconditions
-  validate_postconditions
+	# Validate postconditions
+	validate_postconditions
 
-  # Generate report
-  generate_report
+	# Generate report
+	generate_report
 
-  log success "DEPLOYMENT COMPLETE — Fortress Eternal"
-  exit 0
+	log success "DEPLOYMENT COMPLETE — Fortress Eternal"
+	exit 0
 }
 
 # Execute main
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  main "$@"
+	main "$@"
 fi

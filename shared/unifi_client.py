@@ -32,7 +32,9 @@ class UniFiClient:
         self.session = get_authenticated_session()
         self.verify_ssl = verify_ssl
 
-    def _request(self, method: str, endpoint: str, **kwargs: object) -> requests.Response:
+    def _request(
+        self, method: str, endpoint: str, **kwargs: object
+    ) -> requests.Response:
         """Perform an HTTP request against the controller.
 
         This method centralizes URL building and default request options.
@@ -98,7 +100,9 @@ class UniFiClient:
 
         return self.post("rest/networkconf", json=payload)
 
-    def update_network(self, network_id: str, payload: dict[str, object]) -> dict[str, object]:
+    def update_network(
+        self, network_id: str, payload: dict[str, object]
+    ) -> dict[str, object]:
         """Update a network by id with `payload`."""
 
         return self.put(f"rest/networkconf/{network_id}", json=payload)

@@ -42,13 +42,13 @@ readonly NC='\033[0m'
 
 # Logging helpers (SC2317: Called indirectly via orchestration functions)
 # shellcheck disable=SC2317
-log_info()  { printf '%b %s\n' "${BLUE}[RESURRECT]${NC}" "$*"; }
+log_info() { printf '%b %s\n' "${BLUE}[RESURRECT]${NC}" "$*"; }
 # shellcheck disable=SC2317
 log_success() { printf '%b %s\n' "${GREEN}[RESURRECT]${NC} ✅" "$*"; }
 # shellcheck disable=SC2317
 log_error() {
-  printf '%b %s\n' "${RED}[RESURRECT]${NC} ❌" "$*"
-  exit 1
+	printf '%b %s\n' "${RED}[RESURRECT]${NC} ❌" "$*"
+	exit 1
 }
 # shellcheck disable=SC2317
 log_warn() { printf '%b %s\n' "${YELLOW}[RESURRECT]${NC} ⚠️" "$*"; }
