@@ -194,3 +194,4 @@ temp/
 05_network_migration/configs/*.json
 05_network_migration/configs/*.json
 /.backups/
+.venv-stubs/
