@@ -67,8 +67,17 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Provide a typed wrapper for FastAPI's route decorator so mypy sees a typed decorator
 def typed_post(path: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    """Provide a typed wrapper for FastAPI's route decorator.
+
+    Using `Callable[..., Any]` here keeps the wrapper compatible with FastAPI's
+    dynamic decorator while avoiding mypy contradictions across different
+    mypy versions (redundant-cast vs return Any complaints).
+    """
+
     def _decorator(func: Callable[P, R]) -> Callable[P, R]:
-        return cast(Callable[P, R], app.post(path)(func))
+        # app.post(path)(func) can be seen as returning Any by mypy; ignore that
+        # specific error while keeping the decorator fully typed for callers.
+        return app.post(path)(func)  # type: ignore[no-any-return]
 
     return _decorator
 
