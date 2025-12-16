@@ -3,6 +3,7 @@
 Validates HTTP session setup and credential loading.
 """
 
+from typing import Any
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -58,7 +59,7 @@ class TestLoadCredentials:
         read_data="unifi_user: admin\nunifi_pass: secret123\n",
     )
     @patch("yaml.safe_load")
-    def test_load_credentials_success(self, mock_yaml, mock_file) -> None:
+    def test_load_credentials_success(self, mock_yaml: Any, mock_file: Any) -> None:
         """Load credentials from inventory.yaml."""
         mock_yaml.return_value = {"unifi_user": "admin", "unifi_pass": "secret123"}
         creds = load_credentials()
@@ -69,20 +70,23 @@ class TestLoadCredentials:
     @patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found"))
     def test_load_credentials_file_not_found(self, _mock_file: Any) -> None:
         """Handle missing inventory.yaml gracefully."""
+        del _mock_file
         with pytest.raises(FileNotFoundError):
             load_credentials()
 
     @patch("builtins.open", new_callable=mock_open, read_data="invalid: yaml: content:")
     @patch("yaml.safe_load", side_effect=Exception("Invalid YAML"))
-    def test_load_credentials_invalid_yaml(self, mock_yaml, mock_file) -> None:
+    def test_load_credentials_invalid_yaml(self, _mock_yaml: Any, _mock_file: Any) -> None:
         """Handle invalid YAML gracefully."""
+        del _mock_yaml, _mock_file
         with pytest.raises(yaml.YAMLError):
             load_credentials()
 
     @patch("builtins.open", new_callable=mock_open, read_data="{}")
     @patch("yaml.safe_load")
-    def test_load_credentials_empty(self, mock_yaml, mock_file) -> None:
+    def test_load_credentials_empty(self, mock_yaml: Any, _mock_file: Any) -> None:
         """Handle empty credentials file."""
+        del _mock_file
         mock_yaml.return_value = {}
         creds = load_credentials()
         assert creds == {}
