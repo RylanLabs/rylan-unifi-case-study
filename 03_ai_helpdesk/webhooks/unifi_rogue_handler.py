@@ -75,9 +75,10 @@ def typed_post(path: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """
 
     def _decorator(func: Callable[P, R]) -> Callable[P, R]:
-        # app.post(path)(func) can be seen as returning Any by mypy; ignore that
-        # specific error while keeping the decorator fully typed for callers.
-        return app.post(path)(func)  # type: ignore[no-any-return]
+        # app.post(path)(func) can be seen as returning Any by mypy.
+        # Keep the decorator fully typed for callers and return the wrapped
+        # endpoint directly at runtime.
+        return app.post(path)(func)
 
     return _decorator
 
