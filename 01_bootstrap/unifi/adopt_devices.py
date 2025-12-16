@@ -20,6 +20,7 @@ import logging
 import os
 import sys
 import time
+from typing import Any, NoReturn, cast
 
 import requests
 import urllib3
@@ -35,7 +36,7 @@ HTTP_OK = 200
 DEVICE_STATE_ADOPTED = 1
 
 
-def fail(msg: str) -> None:
+def fail(msg: str) -> NoReturn:
     """Log error and exit."""
     logger.error(msg)
     sys.exit(1)
@@ -53,13 +54,26 @@ def login(url: str, username: str, password: str) -> None:
     logger.info("Authenticated")
 
 
-def list_devices(url: str, site: str) -> list[dict]:
-    """Retrieve all devices from controller."""
+def list_devices(url: str, site: str) -> list[dict[str, Any]]:
+    """Retrieve all devices from controller.
+
+    This validates the controller response at runtime and returns a
+    `list[dict[str, Any]]` so callers can rely on the element shape.
+    """
     endpoint = f"{url}/proxy/network/api/s/{site}/stat/device"
     resp = SESSION.get(endpoint, verify=False)
     if resp.status_code != HTTP_OK:
         fail(f"Device list failed ({resp.status_code})")
-    return resp.json().get("data", [])
+
+    data = resp.json().get("data", [])
+    if not isinstance(data, list):
+        return []
+
+    out: list[dict[str, Any]] = []
+    for item in data:
+        if isinstance(item, dict):
+            out.append(cast(dict[str, Any], item))
+    return out
 
 
 def adopt(url: str, site: str, mac: str) -> None:
@@ -138,7 +152,7 @@ def main() -> None:
 
     for d in pending:
         mac = d.get("mac")
-        if mac:
+        if isinstance(mac, str):
             adopt(url, args.site, mac)
         time.sleep(2)
 
