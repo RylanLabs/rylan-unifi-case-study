@@ -12,14 +12,16 @@ import logging
 import sys
 from pathlib import Path
 from typing import Any
+import importlib
 
 import yaml
 from pydantic import BaseModel, Field, ValidationError
 
+DeepDiff: Any | None = None
 try:
-    from deepdiff import DeepDiff
-except ImportError:
-    DeepDiff = None  # type: ignore[assignment]
+    DeepDiff = importlib.import_module("deepdiff").DeepDiff
+except Exception:
+    DeepDiff = None
 
 # Import from parent directory
 sys.path.insert(0, str(Path(__file__).parent.parent))
