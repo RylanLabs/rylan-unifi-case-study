@@ -39,7 +39,7 @@ class UniFiClient:
 
         url = f"{self.base_url}/api/s/{endpoint.lstrip('/')}"
         kwargs.setdefault("verify", self.verify_ssl)
-        response = self.session.request(method, url, **kwargs)  # type: ignore[arg-type]
+        response = self.session.request(method, url, **kwargs)
         response.raise_for_status()
         return response
 
