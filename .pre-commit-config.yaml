@@ -3,7 +3,7 @@ repos:
     hooks:
       - id: check-encoding
         name: check-utf8-encoding
-        entry: bash -c 'file --mime "$@" | grep -q "charset=utf-8"'
+        entry: bash -c 'file --mime "$@" | grep -Eq "charset=(utf-8|us-ascii)"'
         language: system
         types: [python]
 
