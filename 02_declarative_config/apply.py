@@ -261,7 +261,7 @@ def main() -> None:
         client = None
         logger.info("Dry-run mode enabled: validation only")
     else:
-        client = UniFiClient.from_env()
+        client = UniFiClient.from_env_or_inventory()
         if not client:
             logger.error(
                 "Authentication failed: Missing UniFi credentials " "(env or inventory.yaml)",
