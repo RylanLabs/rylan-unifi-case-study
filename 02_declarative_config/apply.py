@@ -74,7 +74,7 @@ class VLANState(BaseModel):
     vlans: list[VLAN]
 
     @classmethod
-    def from_yaml_structure(cls, data: dict) -> VLANState:
+    def from_yaml_structure(cls, data: dict[str, Any]) -> VLANState:
         """Parse nested YAML structure into flat VLAN list."""
         all_vlans: list[dict[str, Any]] = []
         for item in data.get("vlans", []):
