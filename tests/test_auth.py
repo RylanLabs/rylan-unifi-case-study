@@ -67,7 +67,7 @@ class TestLoadCredentials:
         mock_file.assert_called_once_with("shared/inventory.yaml", "r", encoding="utf-8")
 
     @patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found"))
-    def test_load_credentials_file_not_found(self, mock_file) -> None:
+    def test_load_credentials_file_not_found(self, _mock_file: Any) -> None:
         """Handle missing inventory.yaml gracefully."""
         with pytest.raises(FileNotFoundError):
             load_credentials()
