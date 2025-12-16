@@ -22,7 +22,7 @@ import sys
 import time
 
 import requests
-import urllib3  # type: ignore[import-untyped]
+import urllib3
 
 urllib3.disable_warnings()  # self-signed certs
 
