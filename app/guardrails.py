@@ -53,8 +53,13 @@ def guardrail(*, guardian: str) -> Callable:
                     "module": func.__module__,
                 }
 
+                # Compose a shorter message to satisfy line-length checks
+                err_msg = (
+                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s | "
+                    "Error=%s | Trace=%s"
+                )
                 logger.error(
-                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s | Error=%s | Trace=%s",
+                    err_msg,
                     guardian,
                     func.__name__,
                     str(e),

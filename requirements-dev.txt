@@ -1,0 +1,7 @@
+types-requests
+types-PyYAML
+types-setuptools
+# Developer tooling (optional)
+mypy
+ruff
+pytest

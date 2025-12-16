@@ -1,4 +1,0 @@
-scripts/eternal-resurrect-unifi.sh:15:31: warning: Expanding an array without an index only gives the first element. [SC2128]
-scripts/eternal-resurrect-unifi.sh:17:27: warning: Expanding an array without an index only gives the first element. [SC2128]
-scripts/eternal-resurrect-unifi.sh:21:8: note: Not following: ./lib/resurrect-preflight.sh was not specified as input (see shellcheck -x). [SC1091]
-scripts/eternal-resurrect-unifi.sh:24:8: note: Not following: ./lib/resurrect-container.sh was not specified as input (see shellcheck -x). [SC1091]

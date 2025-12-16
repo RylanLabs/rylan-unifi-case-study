@@ -1,3 +1,0 @@
-scripts/beale-harden.sh:150:5: note: The mentioned syntax error was in this simple command. [SC1009]
-scripts/beale-harden.sh:153:7: error: Couldn't parse this single quoted string. Fix to allow more checks. [SC1073]
-scripts/beale-harden.sh:168:7: error: Expected end of single quoted string. Fix any mentioned problems and try again. [SC1072]

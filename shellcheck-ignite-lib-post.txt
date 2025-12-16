@@ -1,4 +1,0 @@
-lib/proxmox/ignite_lib.sh:208:5: note: The mentioned syntax error was in this case expression. [SC1009]
-lib/proxmox/ignite_lib.sh:242:7: error: Couldn't parse this case item. Fix to allow more checks. [SC1073]
-lib/proxmox/ignite_lib.sh:242:9: error: Expected ) to open a new case item. Fix any mentioned problems and try again. [SC1072]
-lib/proxmox/ignite_lib.sh:242:9: error: Did you forget to move the ;; after extending this case item? [SC1085]

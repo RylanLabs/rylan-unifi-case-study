@@ -1,6 +1,0 @@
-scripts/eternal-resurrect-unifi.sh:20:8: note: Not following: /home/egx570/repos/rylan-unifi-case-study/scripts/lib/resurrect-preflight.sh was not specified as input (see shellcheck -x). [SC1091]
-scripts/eternal-resurrect-unifi.sh:22:8: note: Not following: /home/egx570/repos/rylan-unifi-case-study/scripts/lib/resurrect-container.sh was not specified as input (see shellcheck -x). [SC1091]
-scripts/eternal-resurrect-unifi.sh:44:17: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-scripts/eternal-resurrect-unifi.sh:46:3: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-scripts/eternal-resurrect-unifi.sh:47:3: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-scripts/eternal-resurrect-unifi.sh:49:14: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]

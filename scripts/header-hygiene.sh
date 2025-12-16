@@ -61,14 +61,16 @@ git ls-files | while IFS= read -r f; do
             # copy existing shebang
             sed -n '1p' -- "$f" > "$tmp"
           fi
-          # ensure set -euo pipefail present after shebang
-          echo "set -euo pipefail" >> "$tmp"
-          echo "# Script: $f" >> "$tmp"
-          echo "# Purpose: Header hygiene inserted" >> "$tmp"
-          echo "# Guardian: $GUARDIAN" >> "$tmp"
-          echo "# Date: $DATE_ISO" >> "$tmp"
-          echo "# Consciousness: $CONSCIOUSNESS" >> "$tmp"
-          echo >> "$tmp"
+          # ensure set -euo pipefail present after shebang (grouped redirection)
+          {
+            echo "set -euo pipefail"
+            echo "# Script: $f"
+            echo "# Purpose: Header hygiene inserted"
+            echo "# Guardian: $GUARDIAN"
+            echo "# Date: $DATE_ISO"
+            echo "# Consciousness: $CONSCIOUSNESS"
+            echo
+          } >> "$tmp"
           # if original had shebang and we already wrote it, skip its first line when appending
           if [[ $need_shebang -eq 1 ]]; then
             tail -n +1 -- "$f" >> "$tmp"
@@ -94,12 +96,14 @@ git ls-files | while IFS= read -r f; do
         modified_files+=("$f")
       else
         tmp=$(mktemp)
-        echo '"""' > "$tmp"
-        echo "Module: $f" >> "$tmp"
-        echo "Purpose: Header hygiene inserted" >> "$tmp"
-        echo "Consciousness: $CONSCIOUSNESS" >> "$tmp"
-        echo '"""' >> "$tmp"
-        echo >> "$tmp"
+        {
+          echo '"""'
+          echo "Module: $f"
+          echo "Purpose: Header hygiene inserted"
+          echo "Consciousness: $CONSCIOUSNESS"
+          echo '"""'
+          echo
+        } > "$tmp"
         cat -- "$f" >> "$tmp"
         mv "$tmp" "$f"
         echo "updated: $f"

@@ -1,2 +1,0 @@
-01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:164:12: warning: url is referenced but not assigned. [SC2154]
-01_bootstrap/proxmox/01_proxmox_hardening/fetch-cloud-init-iso.sh:166:25: error: Invalid key=value pair? Ignoring the rest of this directive starting here. [SC1125]

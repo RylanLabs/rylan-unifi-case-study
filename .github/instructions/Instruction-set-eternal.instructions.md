@@ -1,6 +1,6 @@
 ---
 description: 'INSTRUCTION-SET-ETERNAL-v∞.5.2 — Single source of truth for rylan-unifi-case-study. Enforces Trinity order, Hellodeolu v6, Seven Pillars, Unix purity, zero drift tolerance. Applied to every file in fortress.'
-applyTo: ['**/*']
+applyTo: "**/*.*"
 ---
 
 # INSTRUCTION-SET-ETERNAL-v∞.5.2
@@ -58,14 +58,14 @@ Every script/tool must satisfy:
 
 ### Extended Pantheon (12 Guardians Total)
 
-5. **Holy Scholar 📜** — Linting doctrine enforcer  
-6. **Lorek 🧭** — Clarification/context guardian (tandem Archivist 📚)  
-7. **Eye 👁️** — Observation/monitoring (tandem Namer 🏷️)  
-8. **Gatekeeper 🚪** — Access control/orchestration  
-9. **Veil 🌫️** — CI debug diagnostics (tandem with Bauer)  
-10. **Lazarus ⚰️** — DR guardian (tandem with Beale)  
-11. **Archivist 📚** — Documentation (tandem with Lorek)  
-12. **Namer 🏷️** — Naming enforcement (tandem with Eye)
+1. **Holy Scholar 📜** — Linting doctrine enforcer  
+2. **Lorek 🧭** — Clarification/context guardian (tandem Archivist 📚)  
+3. **Eye 👁️** — Observation/monitoring (tandem Namer 🏷️)  
+4. **Gatekeeper 🚪** — Access control/orchestration  
+5. **Veil 🌫️** — CI debug diagnostics (tandem with Bauer)  
+6. **Lazarus ⚰️** — DR guardian (tandem with Beale)  
+7. **Archivist 📚** — Documentation (tandem with Lorek)  
+8. **Namer 🏷️** — Naming enforcement (tandem with Eye)
 
 **SUEHRING IS DEAD.** Never mention "perimeter". Ministry of Detection reigns.
 

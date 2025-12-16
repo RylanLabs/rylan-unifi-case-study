@@ -1,4 +1,0 @@
-scripts/eternal-resurrect-unifi.sh:48:17: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-scripts/eternal-resurrect-unifi.sh:50:3: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-scripts/eternal-resurrect-unifi.sh:51:3: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]
-scripts/eternal-resurrect-unifi.sh:53:14: note: Command appears to be unreachable. Check usage (or ignore if invoked indirectly). [SC2317]

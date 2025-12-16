@@ -25,10 +25,8 @@ except ImportError:  # pragma: no cover
     AnalyzerEngine = AnalyzerResult = None  # type: ignore
 
 if not PRESIDIO_AVAILABLE:
-    logging.warning(
-        "Presidio unavailable—using regex fallback. "
-        "Install: pip install presidio-analyzer presidio-anonymizer"
-    )
+    logging.warning("Presidio unavailable—using regex fallback.")
+    logging.warning("Install: pip install presidio-analyzer presidio-anonymizer")
 
 # Regex patterns for common PII/secrets
 PATTERNS = {
@@ -49,7 +47,8 @@ def redact_pii(text: str, method: str = "auto") -> str:
 
     Args:
         text: Input text to redact
-        method: "presidio" (requires library), "regex", or "auto" (try Presidio, fallback to regex)
+        method: "presidio" (requires library), "regex", or "auto"
+            (try Presidio first, fallback to regex)
 
     Returns:
         Redacted text with PII replaced by [REDACTED]
@@ -119,7 +118,8 @@ def redact_file(filepath: str, output_filepath: Optional[str] = None) -> str:
 
     Args:
         filepath: Path to file to redact
-        output_filepath: Optional path to write redacted content (if None, returns string)
+        output_filepath: Optional path to write redacted content
+            (if None, returns string)
 
     Returns:
         Redacted content as string

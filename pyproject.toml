@@ -8,6 +8,7 @@ version = "5.0.0"
 testpaths = ["tests"]
 addopts = "-ra"
 cache_dir = ".pytest_cache"
+markers = ["unit: mark a test as a fast unit test"]
 
 # Bandit configuration
 [tool.bandit]

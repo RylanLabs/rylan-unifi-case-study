@@ -124,12 +124,22 @@ create_system_backup() {
 
   log step "Creating pre-deployment system backup: $backup_dir"
 
-  # Backup critical configs (suppress SC2015: A && B || C is intentional; ignore if mkdir fails)
-  # shellcheck disable=SC2015
-  [[ -d /etc/samba ]] && cp -r /etc/samba "$backup_dir/" 2>/dev/null || true
-  [[ -d /etc/nftables ]] && cp -r /etc/nftables "$backup_dir/" 2>/dev/null || true
-  [[ -f /etc/sysctl.conf ]] && cp /etc/sysctl.conf "$backup_dir/" 2>/dev/null || true
-  [[ -d /etc/ssh ]] && cp -r /etc/ssh "$backup_dir/" 2>/dev/null || true
+  # Backup critical configs (use explicit if/then for clarity and to satisfy shellcheck)
+  if [[ -d /etc/samba ]]; then
+    cp -r /etc/samba "$backup_dir/" 2>/dev/null || true
+  fi
+
+  if [[ -d /etc/nftables ]]; then
+    cp -r /etc/nftables "$backup_dir/" 2>/dev/null || true
+  fi
+
+  if [[ -f /etc/sysctl.conf ]]; then
+    cp /etc/sysctl.conf "$backup_dir/" 2>/dev/null || true
+  fi
+
+  if [[ -d /etc/ssh ]]; then
+    cp -r /etc/ssh "$backup_dir/" 2>/dev/null || true
+  fi
 
   log step "Backup created at: $backup_dir"
   echo "$backup_dir"

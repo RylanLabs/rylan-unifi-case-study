@@ -11,10 +11,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-readonly _SCRIPT_DIR
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly _SCRIPT_NAME
+readonly _SCRIPT_DIR
 _SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+readonly _SCRIPT_NAME
 
 # shellcheck source=/home/egx570/repos/rylan-unifi-case-study/scripts/lib/beale-firewall-vlan-ssh.sh
 source "${_SCRIPT_DIR}/lib/beale-firewall-vlan-ssh.sh"
@@ -24,10 +24,13 @@ source "${_SCRIPT_DIR}/lib/beale-services-adversarial.sh"
 # ─────────────────────────────────────────────────────
 # Configuration (Carter: Single Source of Truth)
 # ─────────────────────────────────────────────────────
-readonly VLAN_QUARANTINE="10.0.99.0/24"
-readonly VLAN_GATEWAY="10.0.99.1"
-readonly MAX_FIREWALL_RULES=10
-readonly AUDIT_LOG="/var/log/beale-audit.log"
+# Note: keep these as regular variables (not readonly) so
+# phase functions may declare local parameters with the same
+# names when invoked.
+VLAN_QUARANTINE="10.0.99.0/24"
+VLAN_GATEWAY="10.0.99.1"
+MAX_FIREWALL_RULES=10
+AUDIT_LOG="/var/log/beale-audit.log"
 
 # Fallback audit location if /var/log not writable
 if ! mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null; then
@@ -79,8 +82,17 @@ done
 log() { [[ "${QUIET}" == false ]] && echo "$@"; }
 
 audit() {
-  mkdir -p "$(dirname "${AUDIT_LOG}")"
-  printf '%s | %s | %s | %s\n' "$(date -Iseconds)" "$1" "$2" "$3" >> "${AUDIT_LOG}"
+  local entry
+  entry=$(printf '%s | %s | %s | %s\n' "$(date -Iseconds)" "$1" "$2" "$3")
+  # Try to ensure the configured audit directory exists and is writable.
+  if mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null && printf '%s' "$entry" >> "${AUDIT_LOG}" 2>/dev/null; then
+    return 0
+  fi
+
+  # Fallback to repository-local audit path when /var/log isn't writable.
+  AUDIT_LOG="${_SCRIPT_DIR}/.fortress/audit/beale-audit.log"
+  mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null || true
+  printf '%s' "$entry" >> "${AUDIT_LOG}" 2>/dev/null || true
 }
 
 fail() {

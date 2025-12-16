@@ -1,2 +1,0 @@
-scripts/eternal-resurrect-unifi.sh:21:8: note: Not following: ./lib/resurrect-preflight.sh was not specified as input (see shellcheck -x). [SC1091]
-scripts/eternal-resurrect-unifi.sh:24:8: note: Not following: ./lib/resurrect-container.sh was not specified as input (see shellcheck -x). [SC1091]

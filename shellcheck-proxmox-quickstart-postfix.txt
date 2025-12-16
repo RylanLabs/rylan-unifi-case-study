@@ -1,1 +1,0 @@
-01_bootstrap/proxmox/proxmox-ignite-quickstart.sh:21:8: note: Not following: lib/quickstart_lib.sh was not specified as input (see shellcheck -x). [SC1091]

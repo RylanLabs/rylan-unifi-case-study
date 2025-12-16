@@ -2,6 +2,8 @@
 
 This repository has been migrated to the RylanLabs organization.
 
+![Consciousness](https://img.shields.io/badge/consciousness-4.9-blue)
+
 **New Location**: https://github.com/RylanLabs/rylan-unifi-case-study
 
 **Migration Date**: 2025-12-15  
