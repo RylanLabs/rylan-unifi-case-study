@@ -39,18 +39,17 @@ skips = [
     "B607",  # start_process_with_partial_path
     "B110"   # try_except_pass
 ]
-# Severity: only report medium and high
 severity = "medium"
 
 # ============================================================================
 # Mypy Type Checking Configuration (Strict Mode)
-# -----------------------------------------------------------------------------
-# Mypy Type Checking (Strict Mode)
-# - Excludes site-packages to avoid transformers 4.57.3 INTERNAL ERROR
-# - sentence-transformers: currently installed (NLP dependency), will be used in
-#   Ollama + Qdrant AI workstation
-# - Future: Add Ollama + Qdrant overrides when AI workstation is active
-# -----------------------------------------------------------------------------
+# ============================================================================
+# Strict mode enabled for production-grade type safety.
+# Excludes site-packages to avoid transformers 4.57.3 INTERNAL ERROR.
+# sentence-transformers: currently installed (NLP dependency), will be used in
+# Ollama + Qdrant AI workstation. Future: activate Ollama/Qdrant overrides when
+# AI workstation is operational.
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -65,9 +64,10 @@ warn_no_return = true
 check_untyped_defs = true
 strict_equality = true
 
-# Exclude third-party packages, build artifacts, and AI/ML dependencies
+# Exclude patterns: third-party packages, build artifacts, AI/ML dependencies
 exclude = [
     ".audit",
+    ".git",
     ".mypy_cache",
     ".pytest_cache",
     ".venv",
@@ -75,55 +75,56 @@ exclude = [
     "__pycache__",
     "build",
     "dist",
-    "(^|/)(site-packages)(/|$)",
-    "templates",
-    "(^|/)(transformers)(/|$)",
-    "venv",
     "sentence-transformers",
+    "site-packages",
+    "templates",
+    "transformers",
+    "venv",
 ]
 
-# -----------------------------------------------------------------------------
-# Consolidated module-specific overrides (ordered for clarity)
-# Order: presidio → transformers/sentence-transformers → fastapi →
-#        requests/urllib3/yaml → spacy/tldextract → slowapi → ollama/qdrant
-# -----------------------------------------------------------------------------
+# Mypy overrides for third-party packages with incomplete type stubs
+# NLP/ML packages
 [[tool.mypy.overrides]]
-# PII redaction modules
+module = ["sentence_transformers.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["transformers.*"]
+ignore_errors = true
+
+# Security/PII packages
+[[tool.mypy.overrides]]
 module = ["presidio_analyzer", "presidio_anonymizer"]
 ignore_missing_imports = true
 
-[[tool.mypy.overrides]]
-# NLP / ML packages
-module = ["transformers.*", "sentence_transformers.*"]
-# Transformers is excluded globally; keep override conservative
-ignore_errors = true
-
-[[tool.mypy.overrides]]
 # Web frameworks
+[[tool.mypy.overrides]]
 module = ["fastapi.*"]
 ignore_missing_imports = true
 
+# HTTP/networking packages
 [[tool.mypy.overrides]]
-# HTTP libraries & YAML
 module = ["requests.*", "urllib3.*", "yaml.*"]
 ignore_missing_imports = true
 
+# NLP/text processing packages
 [[tool.mypy.overrides]]
-# NLP extras
 module = ["spacy.*", "tldextract.*"]
 ignore_missing_imports = true
 
+# Rate limiting
 [[tool.mypy.overrides]]
-# Rate-limiting / utility libs
 module = ["slowapi.*"]
 ignore_missing_imports = true
 
+# Future: Ollama + Qdrant AI workstation (activate when AI workstation is operational)
 [[tool.mypy.overrides]]
-# Future AI workstation packages
-module = ["ollama.*", "qdrant_client.*"]
+module = ["ollama.*"]
 ignore_missing_imports = true
 
-# Note: Install stubs with: pip install types-requests types-PyYAML types-urllib3
+[[tool.mypy.overrides]]
+module = ["qdrant_client.*"]
+ignore_missing_imports = true
 
 # ============================================================================
 # Ruff Linter Configuration
@@ -132,15 +133,15 @@ ignore_missing_imports = true
 line-length = 120
 target-version = "py312"
 exclude = [
-    ".venv",
-    "venv",
-    ".git",
-    "__pycache__",
-    ".pytest_cache",
-    ".mypy_cache",
     ".audit",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".venv",
+    "__pycache__",
     "build",
-    "dist"
+    "dist",
+    "venv",
 ]
 
 [tool.ruff.lint]
@@ -210,7 +211,7 @@ exclude_lines = [
 # ============================================================================
 [tool.black]
 line-length = 120
-target-version = ['py312']
+target-version = ["py312"]
 exclude = '''
 /(
     \.venv
@@ -243,11 +244,3 @@ consciousness = "5.8"
 trinity = ["Carter", "Bauer", "Beale"]
 grade = "A"
 hellodeolu_compliant = true
-
-[[tool.mypy.overrides]]
-module = ["spacy.*", "tldextract.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["slowapi.*"]
-ignore_missing_imports = true
