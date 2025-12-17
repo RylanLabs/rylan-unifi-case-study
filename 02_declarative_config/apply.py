@@ -7,12 +7,12 @@ v5.0 locked — eternal green edition.
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import logging
 import sys
 from pathlib import Path
 from typing import Any
-import importlib
 
 import yaml
 from pydantic import BaseModel, Field, ValidationError
