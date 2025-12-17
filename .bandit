@@ -1,16 +1,4 @@
-# Eternal Bandit Config — YAML canonical top-level
-# Guardian: Beale | Purpose: Ensure Bandit can parse config reliably
-exclude_dirs:
-  - inventory
-  - tests
-  - .venv
-  - venv
-  - .audit
-  - .git
-  - __pycache__
-skips:
-  - B404
-  - B603
-  - B607
-  - B110
-severity: medium
+[bandit]
+exclude_dirs = inventory,tests,.venv,venv,.audit,.git,__pycache__
+skips = B404,B603,B607,B110
+severity = medium
