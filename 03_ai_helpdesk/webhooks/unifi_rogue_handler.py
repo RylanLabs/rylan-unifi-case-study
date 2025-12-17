@@ -31,20 +31,20 @@ else:
         R = TypeVar("R")
 
         class Limiter:  # minimal runtime stub for mypy
-            def __init__(self, key_func: Any) -> None: ...
-            def limit(self, value: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+            def __init__(self, _key_func: Callable[..., str]) -> None: ...
+            def limit(self, _value: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
                 def _decorator(func: Callable[P, R]) -> Callable[P, R]:
                     return func
 
                 return _decorator
 
-        def _rate_limit_exceeded_handler(request: Any, exc: Any) -> None:
+        def _rate_limit_exceeded_handler(_request: Request, _exc: Exception) -> None:
             """Minimal handler used in runtime stub when slowapi is unavailable."""
             return
 
         class RateLimitExceeded(Exception): ...
 
-        def get_remote_address(request: Any) -> str:
+        def get_remote_address(_request: Request) -> str:
             return "127.0.0.1"
 
 
@@ -55,8 +55,8 @@ R = TypeVar("R")
 class LimiterType(Protocol):
     _storage: Any
 
-    def __init__(self, key_func: Any) -> None: ...
-    def limit(self, value: str) -> Callable[[Callable[P, R]], Callable[P, R]]: ...
+    def __init__(self, _key_func: Callable[..., str]) -> None: ...
+    def limit(self, _value: str) -> Callable[[Callable[P, R]], Callable[P, R]]: ...
 
 
 app = FastAPI()
@@ -78,7 +78,7 @@ def typed_post(path: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
         # app.post(path)(func) can be seen as returning Any by mypy.
         # Keep the decorator fully typed for callers and return the wrapped
         # endpoint directly at runtime.
-        return app.post(path)(func)
+        return cast(Callable[P, R], app.post(path)(func))
 
     return _decorator
 
