@@ -90,9 +90,22 @@ jobs:
           pip install ruff mypy bandit pytest pytest-cov
           pip install -r requirements.txt || true
 
-      - name: Run validate-python.sh
-        run: bash ./scripts/validate-python.sh
+      - name: Mypy environment debug
+        run: |
+          echo "== Mypy & package versions =="
+          mypy --version || true
+          pip list | grep -E "mypy|transformers" || true
         shell: bash
+
+      - name: Run validate-python.sh (CI mode)
+        run: bash ./scripts/validate-python.sh --ci
+        shell: bash
+
+      - name: Upload Gatekeeper artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatekeeper-logs
+          path: .audit/gatekeeper/**
 
   test-python:
     name: "🧪 Python Coverage (pytest >=70%)"
