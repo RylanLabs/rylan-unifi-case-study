@@ -42,6 +42,12 @@ jobs:
           shfmt --version
         shell: bash
 
+      - name: Install bash validation dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y sshpass nmap net-tools jq
+        shell: bash
+
       - name: Run validate-bash.sh (with diagnostic capture)
         run: |
           echo "::group::File Discovery Debug"
