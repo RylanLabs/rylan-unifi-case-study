@@ -34,17 +34,30 @@ JSON
 log_validator() {
   local name="$1" status="$2" duration_ms="$3" error="$4"
   # Use Python to merge JSON safely (avoid jq dependency)
-  python3 - <<PYTHON
+  python3 - "$name" "$status" "$duration_ms" "$error" <<'PYTHON'
 import json,sys
 p='$GK_DIR/gatekeeper-latest.tmp.json'
+name=sys.argv[1]
+status=sys.argv[2]
+duration=sys.argv[3]
+error=sys.argv[4]
 with open(p,'r',encoding='utf-8') as f:
     d=json.load(f)
 if 'validators' not in d:
     d['validators']={}
-d['validators']['%s']={
-    'status':'%s',
-    'duration_ms':int(%s) if %s else None,
-    'error':%s
+try:
+    dur_val = int(duration) if duration and duration.isdigit() else None
+except Exception:
+    dur_val = None
+if error=='':
+    err_val = None
+else:
+    err_val = error
+
+d['validators'][name] = {
+    'status': status,
+    'duration_ms': dur_val,
+    'error': err_val
 }
 with open(p,'w',encoding='utf-8') as f:
     json.dump(d,f)
@@ -55,15 +68,17 @@ PYTHON
 log_push_end() {
   local result="$1"
   local END_TS=$(ts)
-  python3 - <<PYTHON
-import json
+  python3 - "$result" "$END_TS" <<'PYTHON'
+import json,sys
 p='$GK_DIR/gatekeeper-latest.tmp.json'
+result=sys.argv[1]
+end_ts=sys.argv[2]
 with open(p,'r',encoding='utf-8') as f:
     d=json.load(f)
 if 'validators' not in d:
     d['validators']={}
-d['push_result']='%s'
-d['timestamp_end']='%s'
+d['push_result']=result
+d['timestamp_end']=end_ts
 # write canonical latest
 with open('$GK_DIR/gatekeeper-latest.json','w',encoding='utf-8') as f:
     json.dump(d,f,indent=2)
