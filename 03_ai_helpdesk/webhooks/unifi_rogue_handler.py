@@ -75,10 +75,10 @@ def typed_post(path: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """
 
     def _decorator(func: Callable[P, R]) -> Callable[P, R]:
-        # app.post(path)(func) can be seen as returning Any by mypy.
-        # Keep the decorator fully typed for callers and return the wrapped
-        # endpoint directly at runtime.
-        return cast(Callable[P, R], app.post(path)(func))
+        # Register the endpoint at runtime (FastAPI returns Any from decorator).
+        # Return the original function to keep typing precise for callers.
+        app.post(path)(func)
+        return func
 
     return _decorator
 
