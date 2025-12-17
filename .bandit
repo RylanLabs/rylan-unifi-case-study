@@ -1,6 +1,13 @@
-﻿[bandit]
-# Eternal Bandit Config — INI variant for legacy parsers
-# Guardian: Beale | Purpose: Ensure Bandit can parse config in all CI variants
-exclude_dirs = /inventory,/tests,/.git,/__pycache__
-skips = B404,B603,B607,B110
-severity = LOW
+﻿bandit:
+  # Eternal Bandit Config — YAML canonical form
+  exclude_dirs:
+    - /inventory
+    - /tests
+    - /.git
+    - /__pycache__
+  skips:
+    - B404
+    - B603
+    - B607
+    - B110
+  severity: low
