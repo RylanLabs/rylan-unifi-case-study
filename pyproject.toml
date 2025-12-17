@@ -44,11 +44,15 @@ severity = "medium"
 # ============================================================================
 # Mypy Type Checking Configuration (Strict Mode)
 # ============================================================================
-# Strict mode enabled for production-grade type safety.
-# Excludes site-packages to avoid transformers 4.57.3 INTERNAL ERROR.
-# sentence-transformers: currently installed (NLP dependency), will be used in
-# Ollama + Qdrant AI workstation. Future: activate Ollama/Qdrant overrides when
-# AI workstation is operational.
+# Mypy Type Checking (Strict Mode)
+# -----------------------------------------------------------------------------
+# Mypy Type Checking (Strict Mode)
+# - Strict mode enabled for production-grade type safety.
+# - Excludes site-packages to avoid transformers 4.57.3 INTERNAL ERROR.
+# - sentence-transformers: currently installed (NLP dependency), will be used in
+#   Ollama + Qdrant AI workstation.
+# - Future: activate Ollama/Qdrant overrides when AI workstation is operational.
+# -----------------------------------------------------------------------------
 
 [tool.mypy]
 python_version = "3.12"
@@ -65,14 +69,15 @@ check_untyped_defs = true
 strict_equality = true
 
 # Exclude patterns: third-party packages, build artifacts, AI/ML dependencies
+# Note: Use precise entries to avoid scanning installed site-packages
 exclude = [
+    "__pycache__",
     ".audit",
     ".git",
     ".mypy_cache",
     ".pytest_cache",
     ".venv",
     ".venv-stubs",
-    "__pycache__",
     "build",
     "dist",
     "sentence-transformers",
@@ -88,9 +93,8 @@ exclude = [
 module = ["sentence_transformers.*"]
 ignore_missing_imports = true
 
-[[tool.mypy.overrides]]
-module = ["transformers.*"]
-ignore_errors = true
+# Note: transformers is excluded via 'exclude' above to avoid CI mypy INTERNAL ERROR
+# If transformers sources are ever checked, add a conservative override here.
 
 # Security/PII packages
 [[tool.mypy.overrides]]
@@ -119,11 +123,7 @@ ignore_missing_imports = true
 
 # Future: Ollama + Qdrant AI workstation (activate when AI workstation is operational)
 [[tool.mypy.overrides]]
-module = ["ollama.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["qdrant_client.*"]
+module = ["ollama.*", "qdrant_client.*"]
 ignore_missing_imports = true
 
 # ============================================================================
