@@ -54,14 +54,13 @@ def validate_policy_table() -> None:
     rule_count = len(data.get("rules", []))
 
     if rule_count > MAX_RULES:
-        audit_log(("FAIL: Rule count %d exceeds USG-3P max %d " "(hardware offload broken)") % (rule_count, MAX_RULES))
-        sys.exit(1)
+        audit_log(f"FAIL: Rule count {rule_count} exceeds USG-3P max {MAX_RULES} (hardware offload broken)")
 
     if rule_count == 0:
         audit_log("FAIL: Policy table has 0 rules (zero-trust requires explicit allows)")
         sys.exit(1)
 
-    audit_log("Policy table: %d/%d rules (Phase 3 endgame, hardware offload safe)" % (rule_count, MAX_RULES))
+    audit_log(f"Policy table: {rule_count}/{MAX_RULES} rules (Phase 3 endgame, hardware offload safe)")
 
 
 def validate_json_configs() -> None:
@@ -74,7 +73,7 @@ def validate_json_configs() -> None:
                 json.load(f)
             audit_log(f"JSON valid: {jf}")
         except json.JSONDecodeError as exc:
-            audit_log("FAIL: JSON syntax error in %s: %s" % (jf, exc))
+            audit_log(f"FAIL: JSON syntax error in {jf}: {exc}")
             sys.exit(1)
 
 
