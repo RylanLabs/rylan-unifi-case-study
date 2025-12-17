@@ -1,173 +1,126 @@
 #!/usr/bin/env bash
 # Script: gatekeeper-logger.sh
-# Purpose: Provide structured Gatekeeper logging helpers
-# Guardian: Carter 🛡️ (Identity & audit)
-# Author: T-Rylander canonical
+# Purpose: Canonical structured logging for Gatekeeper pre-push validation
+# Guardian: Carter 🔑
+# Author: rylanlab canonical
 # Date: 2025-12-17
 # Ministry: ministry-whispers
-# Consciousness: 7.2
+# Consciousness: 6.7
 set -euo pipefail
-IFS=$'\n\t'
 
-readonly GK_DIR=".audit/gatekeeper"
-mkdir -p "$GK_DIR"
+GATEKEEPER_LOG_DIR=".audit/gatekeeper"
+GATEKEEPER_JSON="${GATEKEEPER_LOG_DIR}/gatekeeper-latest.json"
+GATEKEEPER_ROTATING="${GATEKEEPER_LOG_DIR}/gatekeeper.log"
 
-# ISO8601 timestamp helper
-ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
+mkdir -p "$GATEKEEPER_LOG_DIR"
 
-# Start a new push attempt (creates an in-flight JSON)
+declare -A PUSH_METADATA
+declare -A VALIDATORS
+
 log_push_start() {
-  local branch="$1" commit_hash="$2" commit_message="$3"
-  readonly START_TS=$(ts)
-  cat > "$GK_DIR/gatekeeper-latest.tmp.json" <<JSON
-{
-  "timestamp_start": "$START_TS",
-  "branch": "$branch",
-  "commit_hash": "$commit_hash",
-  "commit_message": "$(echo "$commit_message" | sed 's/"/\\"/g')",
-  "validators": {}
-}
-JSON
+  local branch="$1"
+  local commit_hash="$2"
+  local commit_message="${3:-}"
+
+  PUSH_METADATA[timestamp]=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  PUSH_METADATA[branch]="$branch"
+  PUSH_METADATA[commit_hash]="$commit_hash"
+  PUSH_METADATA[commit_message]="$commit_message"
+  PUSH_METADATA[push_result]="PENDING"
+
+  VALIDATORS=()
+
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH START: $branch ($commit_hash)" >> "$GATEKEEPER_ROTATING"
 }
 
-# Log a validator result (name, status, duration_ms, error)
 log_validator() {
-  local name="$1" status="$2" duration_ms="$3" error="$4"
-  # Use Python to merge JSON safely (avoid jq dependency)
-  python3 - "$name" "$status" "$duration_ms" "$error" <<PYTHON
-import json,sys
-p="${GK_DIR}/gatekeeper-latest.tmp.json"
-name=sys.argv[1]
-status=sys.argv[2]
-duration=sys.argv[3]
-error=sys.argv[4]
-with open(p,'r',encoding='utf-8') as f:
-    d=json.load(f)
-if 'validators' not in d:
-    d['validators']={}
-try:
-    dur_val = int(duration) if duration and duration.isdigit() else None
-except Exception:
-    dur_val = None
-err_val = error if error != '' else None
-d['validators'][name] = {
-    'status': status,
-    'duration_ms': dur_val,
-    'error': err_val
-}
-with open(p,'w',encoding='utf-8') as f:
-    json.dump(d,f)
-PYTHON
+  local validator_name="$1"
+  local status="$2"
+  local duration_ms="$3"
+  local error_message="${4:-}"
+
+  local validator_json="{\"status\":\"$status\",\"duration_ms\":$duration_ms"
+
+  if [[ -n "$error_message" ]]; then
+    error_message=$(echo "$error_message" | sed 's/"/\\"/g')
+    validator_json+=",\"error\":\"$error_message\""
+  fi
+
+  validator_json+="}"
+
+  VALIDATORS["$validator_name"]="$validator_json"
+
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] VALIDATOR: $validator_name = $status (${duration_ms}ms)" >> "$GATEKEEPER_ROTATING"
 }
 
-# Finalize the push result (result: PASS|BLOCKED|ERROR)
 log_push_end() {
   local result="$1"
-  local END_TS=$(ts)
-  python3 - "$result" "$END_TS" <<PYTHON
-import json,sys
-p="${GK_DIR}/gatekeeper-latest.tmp.json"
-result=sys.argv[1]
-end_ts=sys.argv[2]
-with open(p,'r',encoding='utf-8') as f:
-    d=json.load(f)
-if 'validators' not in d:
-    d['validators']={}
-d['push_result']=result
-d['timestamp_end']=end_ts
-# write canonical latest
-out_path = p.replace('gatekeeper-latest.tmp.json','gatekeeper-latest.json')
-log_path = p.replace('gatekeeper-latest.tmp.json','gatekeeper.log')
-with open(out_path,'w',encoding='utf-8') as f:
-    json.dump(d,f,indent=2)
-# append compact line to rotating log
-with open(log_path,'a',encoding='utf-8') as f:
-    f.write(json.dumps(d)+"\n")
-PYTHON
-  # rotate logs if needed (best-effort)
-  if [ -x scripts/rotate-gatekeeper-logs.sh ]; then
-    scripts/rotate-gatekeeper-logs.sh || true
+  local recommendation="${2:-}"
+
+  PUSH_METADATA[push_result]="$result"
+
+  local validators_json="{"
+  local first=true
+  for validator in "${!VALIDATORS[@]}"; do
+    if [[ "$first" == true ]]; then
+      validators_json+="\"$validator\":${VALIDATORS[$validator]}"
+      first=false
+    else
+      validators_json+=",\"$validator\":${VALIDATORS[$validator]}"
+    fi
+  done
+  validators_json+="}"
+
+  local commit_msg=$(echo "${PUSH_METADATA[commit_message]}" | sed 's/"/\\"/g')
+
+  local final_json="{"
+  final_json+="\"timestamp\":\"${PUSH_METADATA[timestamp]}\","
+  final_json+="\"branch\":\"${PUSH_METADATA[branch]}\","
+  final_json+="\"commit_hash\":\"${PUSH_METADATA[commit_hash]}\","
+  final_json+="\"commit_message\":\"$commit_msg\","
+  final_json+="\"push_result\":\"$result\","
+  final_json+="\"validators\":$validators_json"
+
+  if [[ -n "$recommendation" ]]; then
+    recommendation=$(echo "$recommendation" | sed 's/"/\\"/g')
+    final_json+=",\"recommendation\":\"$recommendation\""
   fi
-  # cleanup tmp
-  rm -f "$GK_DIR/gatekeeper-latest.tmp.json" || true
+
+  final_json+="}"
+
+  echo "$final_json" | jq '.' > "$GATEKEEPER_JSON" 2>/dev/null || echo "$final_json" > "$GATEKEEPER_JSON"
+
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH END: $result" >> "$GATEKEEPER_ROTATING"
+  echo "---" >> "$GATEKEEPER_ROTATING"
+
+  rotate_logs
 }
 
-# Safe helper to ensure field exists (used by diagnostics)
-ensure_gk_dir() { mkdir -p "$GK_DIR"; }
+rotate_logs() {
+  local max_size=$((5 * 1024 * 1024))  # 5MB
 
-# Export functions
-export -f log_push_start log_validator log_push_end ensure_gk_dir
-#!/usr/bin/env bash
-# Script: gatekeeper-logger.sh
-# Purpose: Provide structured Gatekeeper logging helpers
-# Guardian: Carter 🛡️ (Identity & audit)
-# Author: T-Rylander canonical
-# Date: 2025-12-17
-# Ministry: ministry-whispers
-# Consciousness: 7.2
-set -euo pipefail
-IFS=$'\n\t'
+  [[ -f "$GATEKEEPER_ROTATING" ]] || return 0
 
-readonly GK_DIR=".audit/gatekeeper"
-mkdir -p "$GK_DIR"
-
-# ISO8601 timestamp helper
-ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
-
-# Start a new push attempt (creates an in-flight JSON)
-log_push_start() {
-  local branch="$1" commit_hash="$2" commit_message="$3"
-  readonly START_TS=$(ts)
-  cat > "$GK_DIR/gatekeeper-latest.tmp.json" <<JSON
-{
-  "timestamp_start": "$START_TS",
-  "branch": "$branch",
-  "commit_hash": "$commit_hash",
-  "commit_message": "$(echo "$commit_message" | sed 's/"/\\"/g')",
-  "validators": {}
-}
-JSON
-}
-
-# Log a validator result (name, status, duration_ms, error)
-log_validator() {
-  local name="$1" status="$2" duration_ms="$3" error="$4"
-  # Use Python to merge JSON safely (avoid jq dependency)
-  python3 - "$name" "$status" "$duration_ms" "$error" <<PYTHON
-import json,sys
-p="
-# Finalize the push result (result: PASS|BLOCKED|ERROR)
-log_push_end() {
-  local result="$1"
-  local END_TS=$(ts)
-  python3 - "$result" "$END_TS" <<'PYTHON'
-import json,sys
-p='$GK_DIR/gatekeeper-latest.tmp.json'
-result=sys.argv[1]
-end_ts=sys.argv[2]
-with open(p,'r',encoding='utf-8') as f:
-    d=json.load(f)
-if 'validators' not in d:
-    d['validators']={}
-d['push_result']=result
-d['timestamp_end']=end_ts
-# write canonical latest
-with open('$GK_DIR/gatekeeper-latest.json','w',encoding='utf-8') as f:
-    json.dump(d,f,indent=2)
-# append compact line to rotating log
-with open('$GK_DIR/gatekeeper.log','a',encoding='utf-8') as f:
-    f.write(json.dumps(d)+"\n")
-PYTHON
-  # rotate logs if needed (best-effort)
-  if [ -x scripts/rotate-gatekeeper-logs.sh ]; then
-    scripts/rotate-gatekeeper-logs.sh || true
+  local current_size
+  if command -v stat >/dev/null; then
+    if [[ "$OSTYPE" == darwin* ]]; then
+      current_size=$(stat -f%z "$GATEKEEPER_ROTATING")
+    else
+      current_size=$(stat -c%s "$GATEKEEPER_ROTATING")
+    fi
+  else
+    current_size=$(wc -c < "$GATEKEEPER_ROTATING")
   fi
-  # cleanup tmp
-  rm -f "$GK_DIR/gatekeeper-latest.tmp.json" || true
+
+  if [[ $current_size -gt $max_size ]]; then
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    mv "$GATEKEEPER_ROTATING" "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log"
+    gzip "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log" || true
+
+    ls -t "${GATEKEEPER_LOG_DIR}"/gatekeeper-*.log.gz 2>/dev/null | tail -n +11 | xargs rm -f 2>/dev/null || true
+  fi
 }
 
-# Safe helper to ensure field exists (used by diagnostics)
-ensure_gk_dir() { mkdir -p "$GK_DIR"; }
+ensure_gk_dir() { mkdir -p "$GATEKEEPER_LOG_DIR"; }
 
-# Export functions
-export -f log_push_start log_validator log_push_end ensure_gk_dir
+export -f log_push_start log_validator log_push_end rotate_logs ensure_gk_dir

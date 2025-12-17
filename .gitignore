@@ -188,6 +188,13 @@ Desktop.ini
 *.log
 logs/
 
+# Gatekeeper logs (local, not committed)
+.audit/gatekeeper/*.log
+.audit/gatekeeper/push-*.log
+# Keep only metadata JSON and README
+!.audit/gatekeeper/gatekeeper-latest.json
+!.audit/gatekeeper/README.md
+
 # Temporary files
 tmp/
 temp/
