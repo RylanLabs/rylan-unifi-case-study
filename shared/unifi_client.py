@@ -31,24 +31,26 @@ class UniFiClient:
         self.session = get_authenticated_session()
         self.verify_ssl = verify_ssl
 
-    def _request(self, method: str, endpoint: str, **kwargs: object) -> requests.Response:
+    def _request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:  # noqa: ANN401
         """Perform an HTTP request against the controller.
 
         This method centralizes URL building and default request options.
         """
 
+        # Any: forwarded to requests.Session.request (dynamic kwargs accepted by requests)
         url = f"{self.base_url}/api/s/{endpoint.lstrip('/')}"
         kwargs.setdefault("verify", self.verify_ssl)
         response = self.session.request(method, url, **kwargs)
         response.raise_for_status()
         return response
 
-    def get(self, endpoint: str, **kwargs: object) -> list[dict[str, object]]:
+    def get(self, endpoint: str, **kwargs: Any) -> list[dict[str, object]]:  # noqa: ANN401
         """HTTP GET, returning the parsed ``data`` element as a list.
 
         Returns an empty list when ``data`` is absent.
         """
 
+        # Any: forwarded to requests.Session.request
         raw: Any = self._request("GET", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
             # Defensive: unexpected JSON structure
@@ -58,12 +60,13 @@ class UniFiClient:
             return cast(list[dict[str, object]], data)
         return []
 
-    def post(self, endpoint: str, **kwargs: object) -> dict[str, object]:
+    def post(self, endpoint: str, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """HTTP POST, returning the parsed ``data`` element as a dict.
 
         Returns an empty dict when ``data`` is absent.
         """
 
+        # Any: forwarded to requests.Session.request
         raw: Any = self._request("POST", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
             raise ValueError("Invalid JSON response: expected an object with 'data'")
@@ -72,12 +75,13 @@ class UniFiClient:
             return cast(dict[str, object], data)
         return {}
 
-    def put(self, endpoint: str, **kwargs: object) -> dict[str, object]:
+    def put(self, endpoint: str, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """HTTP PUT, returning the parsed ``data`` element as a dict.
 
         Returns an empty dict when ``data`` is absent.
         """
 
+        # Any: forwarded to requests.Session.request
         raw: Any = self._request("PUT", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
             raise ValueError("Invalid JSON response: expected an object with 'data'")
