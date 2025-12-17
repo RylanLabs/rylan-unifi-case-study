@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-12-17T23:10:07Z",
+  "branch": "fix/test-unifi-client-prodify",
+  "commit_hash": "4af004f",
+  "commit_message": "Smoke test",
+  "push_result": "BLOCKED",
+  "validators": {
+    "mypy": {
+      "status": "FAIL",
+      "duration_ms": 1823,
+      "error": "INTERNAL_ERROR in transformers"
+    },
+    "bandit": {
+      "status": "PASS",
+      "duration_ms": 245
+    }
+  },
+  "recommendation": "CI admin: upgrade mypy or exclude site-packages"
+}
