@@ -100,11 +100,18 @@ class TestRedactFileIntegration(unittest.TestCase):
         mock_file.read.return_value = "Email: admin@example.com"
         mock_open_fn.return_value = mock_file
 
-        # This would normally write to a file
-        # Just verify the function runs without error
-        result = redact_file("/tmp/test.txt")
-        # Result should be redacted text
-        self.assertIn("[REDACTED]", result)
+        # Use a secure temporary file for the test
+        import tempfile
+
+        data = "Email: admin@example.com"
+        with tempfile.NamedTemporaryFile(mode="w", delete=True, suffix=".txt", encoding="utf-8") as tf:
+            tf.write(data)
+            tf.flush()
+            temp_path = tf.name
+
+            result = redact_file(temp_path)
+            # Result should be redacted text
+            self.assertIn("[REDACTED]", result)
 
     @patch("os.path.exists")
     def test_redact_file_nonexistent(self, mock_exists: Any) -> None:
