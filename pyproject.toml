@@ -44,7 +44,13 @@ severity = "medium"
 
 # ============================================================================
 # Mypy Type Checking Configuration (Strict Mode)
-# ============================================================================
+# -----------------------------------------------------------------------------
+# Mypy Type Checking (Strict Mode)
+# - Excludes site-packages to avoid transformers 4.57.3 INTERNAL ERROR
+# - sentence-transformers: currently installed (NLP dependency), will be used in
+#   Ollama + Qdrant AI workstation
+# - Future: Add Ollama + Qdrant overrides when AI workstation is active
+# -----------------------------------------------------------------------------
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -59,40 +65,64 @@ warn_no_return = true
 check_untyped_defs = true
 strict_equality = true
 
-# Exclude patterns
+# Exclude third-party packages, build artifacts, and AI/ML dependencies
 exclude = [
-    '\.venv',
-    'venv',
-    '\.git',
-    '__pycache__',
-    '\.pytest_cache',
-    '\.mypy_cache',
-    "transformers",
+    ".audit",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".venv",
+    ".venv-stubs",
+    "__pycache__",
+    "build",
+    "dist",
+    "(^|/)(site-packages)(/|$)",
+    "templates",
+    "(^|/)(transformers)(/|$)",
+    "venv",
     "sentence-transformers",
-    'templates',
-    'site-packages',
-    '\.audit',
-    'build',
-    'dist',
-    '\.venv-stubs',
 ]
 
-# Module-specific overrides
+# -----------------------------------------------------------------------------
+# Consolidated module-specific overrides (ordered for clarity)
+# Order: presidio → transformers/sentence-transformers → fastapi →
+#        requests/urllib3/yaml → spacy/tldextract → slowapi → ollama/qdrant
+# -----------------------------------------------------------------------------
 [[tool.mypy.overrides]]
+# PII redaction modules
 module = ["presidio_analyzer", "presidio_anonymizer"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["transformers.*"]
+# NLP / ML packages
+module = ["transformers.*", "sentence_transformers.*"]
+# Transformers is excluded globally; keep override conservative
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+# Web frameworks
 module = ["fastapi.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+# HTTP libraries & YAML
 module = ["requests.*", "urllib3.*", "yaml.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# NLP extras
+module = ["spacy.*", "tldextract.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Rate-limiting / utility libs
+module = ["slowapi.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Future AI workstation packages
+module = ["ollama.*", "qdrant_client.*"]
+ignore_missing_imports = true
+
 # Note: Install stubs with: pip install types-requests types-PyYAML types-urllib3
 
 # ============================================================================
