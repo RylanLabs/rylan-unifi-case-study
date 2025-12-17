@@ -76,10 +76,12 @@ if 'validators' not in d:
 d['push_result']=result
 d['timestamp_end']=end_ts
 # write canonical latest
-with open('${GK_DIR}/gatekeeper-latest.json','w',encoding='utf-8') as f:
+out_path = p.replace('gatekeeper-latest.tmp.json','gatekeeper-latest.json')
+log_path = p.replace('gatekeeper-latest.tmp.json','gatekeeper.log')
+with open(out_path,'w',encoding='utf-8') as f:
     json.dump(d,f,indent=2)
 # append compact line to rotating log
-with open('${GK_DIR}/gatekeeper.log','a',encoding='utf-8') as f:
+with open(log_path,'a',encoding='utf-8') as f:
     f.write(json.dumps(d)+"\n")
 PYTHON
   # rotate logs if needed (best-effort)
