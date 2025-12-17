@@ -1,4 +1,19 @@
 [bandit]
-exclude_dirs = inventory,tests,.venv,venv,.audit,.git,__pycache__
+
+exclude_dirs =
+    .archive,
+    .venv,
+    venv,
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .mypy_cache,
+    .audit,
+    inventory,
+    tests,
+    templates,
+    scripts/archive
+
 skips = B404,B603,B607,B110
+
 severity = medium
