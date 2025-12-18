@@ -99,7 +99,9 @@ fi
 # 4. Bandit parse sanity (the one that was killing CI)
 log "Testing Bandit config parsing..."
 if [ -f .bandit ]; then
-  run_and_log bandit_parse true bandit -c .bandit -r . -f json >/dev/null 2>&1
+  # Provide bandit with explicit exclude list to avoid scanning virtualenvs/backups
+EXCLUDE_BANDIT=$(IFS=, ; echo "${EXCLUDE_PATHS[*]}")
+run_and_log bandit_parse true bandit -c .bandit -r . --exclude "$EXCLUDE_BANDIT" -f json >/dev/null 2>&1
 else
   log ".bandit not found — using defaults"
 fi

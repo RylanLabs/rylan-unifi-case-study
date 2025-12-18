@@ -49,7 +49,9 @@ log "Bandit version: $BANDIT_VERSION"
 
 # Step 3: Test config parsing
 log "Step 3: Testing .bandit parse (with config)..."
-if PARSE_TEST=$(bandit -c .bandit -r . -f json 2>&1 | head -10); then
+# Avoid scanning virtualenvs/backups in parse test
+EXCLUDE_BANDIT=$(IFS=, ; echo "${EXCLUDE_PATHS[*]:-.venv,.archive,.backups}")
+if PARSE_TEST=$(bandit -c .bandit -r . --exclude "$EXCLUDE_BANDIT" -f json 2>&1 | head -10); then
   if echo "$PARSE_TEST" | grep -q "ERROR"; then
     die "Config parse failed: $PARSE_TEST"
   else
