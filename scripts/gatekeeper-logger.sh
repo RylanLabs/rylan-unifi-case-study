@@ -30,7 +30,7 @@ log_push_start() {
 
   VALIDATORS=()
 
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH START: $branch ($commit_hash)" >> "$GATEKEEPER_ROTATING"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH START: $branch ($commit_hash)" >>"$GATEKEEPER_ROTATING"
 }
 
 log_validator() {
@@ -50,7 +50,7 @@ log_validator() {
 
   VALIDATORS["$validator_name"]="$validator_json"
 
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] VALIDATOR: $validator_name = $status (${duration_ms}ms)" >> "$GATEKEEPER_ROTATING"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] VALIDATOR: $validator_name = $status (${duration_ms}ms)" >>"$GATEKEEPER_ROTATING"
 }
 
 log_push_end() {
@@ -88,16 +88,16 @@ log_push_end() {
 
   final_json+="}"
 
-  echo "$final_json" | jq '.' > "$GATEKEEPER_JSON" 2>/dev/null || echo "$final_json" > "$GATEKEEPER_JSON"
+  echo "$final_json" | jq '.' >"$GATEKEEPER_JSON" 2>/dev/null || echo "$final_json" >"$GATEKEEPER_JSON"
 
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH END: $result" >> "$GATEKEEPER_ROTATING"
-  echo "---" >> "$GATEKEEPER_ROTATING"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH END: $result" >>"$GATEKEEPER_ROTATING"
+  echo "---" >>"$GATEKEEPER_ROTATING"
 
   rotate_logs
 }
 
 rotate_logs() {
-  local max_size=$((5 * 1024 * 1024))  # 5MB
+  local max_size=$((5 * 1024 * 1024)) # 5MB
 
   [[ -f "$GATEKEEPER_ROTATING" ]] || return 0
 
@@ -109,7 +109,7 @@ rotate_logs() {
       current_size=$(stat -c%s "$GATEKEEPER_ROTATING")
     fi
   else
-    current_size=$(wc -c < "$GATEKEEPER_ROTATING")
+    current_size=$(wc -c <"$GATEKEEPER_ROTATING")
   fi
 
   if [[ $current_size -gt $max_size ]]; then

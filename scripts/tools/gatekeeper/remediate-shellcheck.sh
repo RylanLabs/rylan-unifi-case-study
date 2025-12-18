@@ -18,8 +18,8 @@ readonly REPO_ROOT
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() {
-	echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
-	exit 1
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+  exit 1
 }
 
 [[ "$(basename "$REPO_ROOT")" == "rylan-unifi-case-study" ]] || die "Must run from fortress repo"
@@ -38,8 +38,8 @@ EOF
 
 read -rp "Proceed with full orchestrated remediation? [y/N] " confirm
 [[ "$confirm" =~ ^[Yy]$ ]] || {
-	log "Aborted by operator"
-	exit 0
+  log "Aborted by operator"
+  exit 0
 }
 
 log "Phase 1: Auditing current violations"
@@ -47,17 +47,17 @@ log "Phase 1: Auditing current violations"
 
 read -rp "Audit complete. Continue to remediation phases? [y/N] " confirm
 [[ "$confirm" =~ ^[Yy]$ ]] || {
-	log "Paused after audit"
-	exit 0
+  log "Paused after audit"
+  exit 0
 }
 
 log "Phase 2: Remediation SC2155 (masked exit codes)"
 "$REPO_ROOT/scripts/tools/holy-scholar/fix-sc2155.sh" \
-	'scripts/**/*.sh' '01_bootstrap/**/*.sh' 'runbooks/**/*.sh' '*.sh'
+  'scripts/**/*.sh' '01_bootstrap/**/*.sh' 'runbooks/**/*.sh' '*.sh'
 
 log "Phase 3: Remediation SC2034 (unused variables)"
 "$REPO_ROOT/scripts/tools/bauer/fix-sc2034.sh" \
-	'scripts/**/*.sh' '01_bootstrap/**/*.sh' 'runbooks/**/*.sh' '*.sh'
+  'scripts/**/*.sh' '01_bootstrap/**/*.sh' 'runbooks/**/*.sh' '*.sh'
 
 log "Phase 4: Final verification"
 remaining_2034=$(shellcheck ./**/*.sh ./01_bootstrap/**/*.sh ./runbooks/**/*.sh ./*.sh 2>/dev/null | grep -c "SC2034" || true)

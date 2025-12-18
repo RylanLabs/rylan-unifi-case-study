@@ -24,8 +24,8 @@ for f in "$GK_DIR"/push-*.log; do
   gzip -f "$target" || true
   # append minimal metadata line to rotating log
   migrated_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  echo "{\"migrated_from\": \"$fname\", \"migrated_to\": \"$(basename "$target").gz\", \"migrated_at\": \"$migrated_at\"}" >> "$GK_DIR/gatekeeper.log"
-  migrated=$((migrated+1))
+  echo "{\"migrated_from\": \"$fname\", \"migrated_to\": \"$(basename "$target").gz\", \"migrated_at\": \"$migrated_at\"}" >>"$GK_DIR/gatekeeper.log"
+  migrated=$((migrated + 1))
 done
 
 echo "Migrated $migrated push logs."

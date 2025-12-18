@@ -24,27 +24,27 @@ find scripts .githooks -type f -name "*.sh" -o -type f -executable 2>/dev/null |
   # ensure Purpose
   if ! grep -q "^# Script:" "$f"; then
     sed -i "1s|^\(#!.*\)$|\1\nset -euo pipefail\n# Script: $(basename "$f")\n# Purpose: Header hygiene: added missing metadata\n# Guardian: $GUARDIAN_DEFAULT\n# Date: $DATE_ISO\n# Consciousness: $CONSCIOUSNESS_DEFAULT\n|" "$f"
-    changed=$((changed+1))
+    changed=$((changed + 1))
     continue
   fi
 
   # add missing individual labels after first set -euo pipefail or shebang
   if ! grep -q "^# Purpose:" "$f"; then
-    awk 'NR==1{print;next} 1{print}' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    awk 'NR==1{print;next} 1{print}' "$f" >"$f.tmp" && mv "$f.tmp" "$f"
     sed -i "/^set -euo pipefail/a # Purpose: Header hygiene: added missing metadata" "$f"
-    changed=$((changed+1))
+    changed=$((changed + 1))
   fi
   if ! grep -q "^# Guardian:" "$f"; then
     sed -i "/^# Purpose:/a # Guardian: $GUARDIAN_DEFAULT" "$f" || true
-    changed=$((changed+1))
+    changed=$((changed + 1))
   fi
   if ! grep -q "^# Date:" "$f"; then
     sed -i "/# Guardian:/a # Date: $DATE_ISO" "$f" || true
-    changed=$((changed+1))
+    changed=$((changed + 1))
   fi
   if ! grep -q "^# Consciousness:" "$f"; then
     sed -i "/# Date:/a # Consciousness: $CONSCIOUSNESS_DEFAULT" "$f" || true
-    changed=$((changed+1))
+    changed=$((changed + 1))
   fi
 done
 

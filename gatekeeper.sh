@@ -6,10 +6,27 @@ set -euo pipefail
 # Date: 2025-12-11
 IFS=$'\n\t'
 
+# Canonical exclusion patterns to avoid scanning backups/venvs (Hellodeolu v6)
+readonly EXCLUDE_PATHS=(
+  ".archive/"
+  ".backups/"
+  ".backup*/"
+  "venv/"
+  ".venv/"
+  "node_modules/"
+  ".git/"
+  "__pycache__/"
+  "*.egg-info/"
+)
+EXCLUDE_FIND_EXPR=()
+for p in "${EXCLUDE_PATHS[@]}"; do
+  EXCLUDE_FIND_EXPR+=('!' -path "*/${p}*")
+done
+
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] GATEKEEPER: $*" >&2; }
 die() {
-	echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ GATEKEEPER: $*" >&2
-	exit 1
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ GATEKEEPER: $*" >&2
+  exit 1
 }
 
 log "The Gatekeeper awakens. No commit shall pass unclean."
@@ -28,10 +45,11 @@ log_push_start "$BRANCH" "$COMMIT_HASH" "$COMMIT_MSG" || true
 
 # Helper: run a command, measure, log validator, and optionally die on failure
 run_and_log() {
-  local name="$1" critical=${2:-false}; shift 2 || true
+  local name="$1" critical=${2:-false}
+  shift 2 || true
   local start end dur rc err
   start=$(date +%s%3N)
-  if ! "$@" 2> .audit/gatekeeper/${name}.stderr.log; then
+  if ! "$@" 2>.audit/gatekeeper/${name}.stderr.log; then
     rc=$?
     err=$(sed -n '1,200p' .audit/gatekeeper/${name}.stderr.log | sed 's/"/\\"/g' | tr '\n' ' ')
   else
@@ -39,8 +57,8 @@ run_and_log() {
     err=""
   fi
   end=$(date +%s%3N)
-  dur=$((end-start))
-  log_validator "$name" "$( [ "$rc" -eq 0 ] && echo PASS || echo FAIL )" "$dur" "$err" || true
+  dur=$((end - start))
+  log_validator "$name" "$([ "$rc" -eq 0 ] && echo PASS || echo FAIL)" "$dur" "$err" || true
   if [ "$rc" -ne 0 ] && [ "$critical" = true ]; then
     log_push_end "BLOCKED" || true
     die "$name failed (rc=$rc)"
@@ -64,26 +82,26 @@ run_and_log pytest true pytest --cov=. --cov-fail-under=70
 # 2. Bash purity
 log "Running Bash purity validation..."
 # Allow warnings; fail only on actual errors
-if find . -name "*.sh" -type f -print0 | xargs -0 shellcheck -x -f gcc 2>&1 | grep -E "error:"; then
-	die "shellcheck errors found"
+if find . -name "*.sh" -type f "${EXCLUDE_FIND_EXPR[@]}" -print0 | xargs -0 shellcheck -x -f gcc 2>&1 | grep -E "error:"; then
+  die "shellcheck errors found"
 fi
-find . -name "*.sh" -type f -print0 | xargs -0 shfmt -i 2 -ci -d || die "shfmt formatting failed"
+find . -name "*.sh" -type f "${EXCLUDE_FIND_EXPR[@]}" -print0 | xargs -0 shfmt -i 2 -ci -d || die "shfmt formatting failed"
 log "✅ Bash purity OK"
 
 # 3. Markdown lore
 log "Validating sacred texts..."
 if command -v markdownlint >/dev/null 2>&1; then
-	find . -name "*.md" -type f -print0 | xargs -0 markdownlint --config .markdownlint.json || die "markdownlint failed"
+  find . -name "*.md" -type f -print0 | xargs -0 markdownlint --config .markdownlint.json || die "markdownlint failed"
 else
-	log "markdownlint not installed; skipping"
+  log "markdownlint not installed; skipping"
 fi
 
 # 4. Bandit parse sanity (the one that was killing CI)
 log "Testing Bandit config parsing..."
 if [ -f .bandit ]; then
-	run_and_log bandit_parse true bandit -c .bandit -r . -f json >/dev/null 2>&1
+  run_and_log bandit_parse true bandit -c .bandit -r . -f json >/dev/null 2>&1
 else
-	log ".bandit not found — using defaults"
+  log ".bandit not found — using defaults"
 fi
 
 # 5. Smoke test resurrection (DRY RUN)

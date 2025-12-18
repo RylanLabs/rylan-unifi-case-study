@@ -9,18 +9,18 @@ set -euo pipefail
 
 DRY_RUN=1
 if [[ ${1-} == --apply ]]; then
-	DRY_RUN=0
+  DRY_RUN=0
 fi
 
 changed=0
 
 process_file() {
-	local f="$1"
-	local tmp
-	tmp=$(mktemp)
+  local f="$1"
+  local tmp
+  tmp=$(mktemp)
 
-	# Use Python for robust multi-line processing (avoid awk quoting issues)
-	python3 - "$f" <<'PY' >"$tmp"
+  # Use Python for robust multi-line processing (avoid awk quoting issues)
+  python3 - "$f" <<'PY' >"$tmp"
 import sys,io
 fpath = sys.argv[1]
 text = open(fpath, 'r', encoding='utf-8', errors='surrogateescape').read()
@@ -68,47 +68,47 @@ for ln in rest:
 
 sys.stdout.write('\n'.join(out)+('\n' if text.endswith('\n') else ''))
 PY
-	# pass filename to python via positional arg
-	# write with python's stdout redirected to tmp
-	# Note: we used heredoc with access to $f, so replace placeholder
-	sed -n '1,$p' "$tmp" >/dev/null 2>&1 || true
+  # pass filename to python via positional arg
+  # write with python's stdout redirected to tmp
+  # Note: we used heredoc with access to $f, so replace placeholder
+  sed -n '1,$p' "$tmp" >/dev/null 2>&1 || true
 
-	if ! cmp -s -- "$f" "$tmp"; then
-		if [[ $DRY_RUN -eq 1 ]]; then
-			echo "would cleanup: $f"
-		else
-			mv "$tmp" "$f"
-			chmod +x "$f" || true
-			echo "cleaned: $f"
-			changed=$((changed + 1))
-		fi
-	else
-		rm -f "$tmp"
-	fi
+  if ! cmp -s -- "$f" "$tmp"; then
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "would cleanup: $f"
+    else
+      mv "$tmp" "$f"
+      chmod +x "$f" || true
+      echo "cleaned: $f"
+      changed=$((changed + 1))
+    fi
+  else
+    rm -f "$tmp"
+  fi
 }
 
 while IFS= read -r file; do
-	[[ -f $file ]] || continue
-	case "$file" in
-	*.sh | .githooks/*)
-		process_file "$file"
-		;;
-	*) ;;
-	esac
+  [[ -f $file ]] || continue
+  case "$file" in
+    *.sh | .githooks/*)
+      process_file "$file"
+      ;;
+    *) ;;
+  esac
 done < <(git ls-files)
 
 if [[ $DRY_RUN -eq 1 ]]; then
-	echo
-	echo "Dry-run complete. Files that would be cleaned: (see list above)"
-	exit 0
+  echo
+  echo "Dry-run complete. Files that would be cleaned: (see list above)"
+  exit 0
 else
-	if [[ $changed -gt 0 ]]; then
-		git add -A || true
-		echo
-		echo "Applied cleanup. Files modified: $changed"
-	else
-		echo
-		echo "No changes required."
-	fi
-	exit 0
+  if [[ $changed -gt 0 ]]; then
+    git add -A || true
+    echo
+    echo "Applied cleanup. Files modified: $changed"
+  else
+    echo
+    echo "No changes required."
+  fi
+  exit 0
 fi

@@ -24,8 +24,8 @@ echo "$LIVE_VLANS" >/tmp/live-vlans.json
 
 # Diff (jq sort for stability)
 diff -u \
-	<(jq -S . configs/vlans.json) \
-	<(echo "$LIVE_VLANS" | jq -S .) || true
+  <(jq -S . configs/vlans.json) \
+  <(echo "$LIVE_VLANS" | jq -S .) || true
 
 rm -f /tmp/live-vlans.json
 echo "✅ Preview complete. Green diff → safe to migrate. Run ./scripts/migrate.sh when ready."

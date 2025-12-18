@@ -18,8 +18,8 @@ readonly SCRIPT_DIR SCRIPT_NAME
 
 log() { printf '%b\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${SCRIPT_NAME}: $*"; }
 die() {
-	log "ERROR: $*" >&2
-	exit 1
+  log "ERROR: $*" >&2
+  exit 1
 }
 
 # shellcheck disable=SC2155

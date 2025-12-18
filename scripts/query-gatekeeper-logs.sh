@@ -22,8 +22,12 @@ Commands:
 USAGE
 }
 
-if [ $# -lt 1 ]; then usage; exit 1; fi
-cmd="$1"; shift || true
+if [ $# -lt 1 ]; then
+  usage
+  exit 1
+fi
+cmd="$1"
+shift || true
 
 jq_exists() { command -v jq >/dev/null 2>&1; }
 
@@ -52,14 +56,20 @@ case "$cmd" in
     ;;
   error_type)
     t=${1:-}
-    if [ -z "$t" ]; then echo "Missing error type"; exit 1; fi
+    if [ -z "$t" ]; then
+      echo "Missing error type"
+      exit 1
+    fi
     if [ -f "$GK_DIR/gatekeeper-latest.json" ]; then
       jq --arg t "$t" '.validators | to_entries | map(select(.value.error == $t))' "$GK_DIR/gatekeeper-latest.json" || true
     fi
     ;;
   branch)
     b=${1:-}
-    if [ -z "$b" ]; then echo "Missing branch"; exit 1; fi
+    if [ -z "$b" ]; then
+      echo "Missing branch"
+      exit 1
+    fi
     if [ -f "$GK_DIR/gatekeeper-latest.json" ]; then
       jq --arg b "$b" 'select(.branch==$b)' "$GK_DIR/gatekeeper-latest.json" || true
     fi
@@ -72,5 +82,8 @@ case "$cmd" in
       tail -r "$GK_DIR/gatekeeper.log" | head -n "$n" || tail -n "$n" "$GK_DIR/gatekeeper.log"
     fi
     ;;
-  *) usage; exit 2 ;;
+  *)
+    usage
+    exit 2
+    ;;
 esac

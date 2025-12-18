@@ -1,18 +1,6 @@
 [bandit]
 
-exclude_dirs =
-    .archive,
-    .venv,
-    venv,
-    .git,
-    __pycache__,
-    .pytest_cache,
-    .mypy_cache,
-    .audit,
-    inventory,
-    tests,
-    templates,
-    scripts/archive
+exclude_dirs = inventory,tests,templates,inventory,scripts/archive,.audit,.archive,.venv,venv,.pytest_cache,.mypy_cache,__pycache__
 
 skips = B404,B603,B607,B110
 

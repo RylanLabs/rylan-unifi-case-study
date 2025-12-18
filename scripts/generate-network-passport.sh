@@ -16,18 +16,18 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 mkdir -p "$(dirname "${OUTPUT}")"
 
 [[ -f /opt/rylan/.secrets/unifi-api-key ]] || {
-	echo "❌ UniFi API key missing"
-	exit 1
+  echo "❌ UniFi API key missing"
+  exit 1
 }
 
 UNIFI_KEY=$(cat /opt/rylan/.secrets/unifi-api-key)
 UNIFI_HOST="https://10.0.10.10:8443"
 
 NETWORKS=$(curl -sk -H "Authorization: Bearer ${UNIFI_KEY}" \
-	"${UNIFI_HOST}/api/s/default/rest/networkconf" 2>/dev/null | jq -c '.data[]' 2>/dev/null || echo '[]')
+  "${UNIFI_HOST}/api/s/default/rest/networkconf" 2>/dev/null | jq -c '.data[]' 2>/dev/null || echo '[]')
 
 FIREWALL=$(curl -sk -H "Authorization: Bearer ${UNIFI_KEY}" \
-	"${UNIFI_HOST}/api/s/default/rest/firewallrule" 2>/dev/null | jq -c '.data[]' 2>/dev/null || echo '[]')
+  "${UNIFI_HOST}/api/s/default/rest/firewallrule" 2>/dev/null | jq -c '.data[]' 2>/dev/null || echo '[]')
 
 DNS_ZONES=$(samba-tool dns zonelist -U administrator 2>/dev/null | grep -v "pszZoneName" | awk '{print $1}' | jq -R '.' | jq -s '.' 2>/dev/null || echo '[]')
 
@@ -44,8 +44,8 @@ cat >"${OUTPUT}" <<EOF
 EOF
 
 jq empty "${OUTPUT}" || {
-	echo "❌ Invalid JSON"
-	exit 1
+  echo "❌ Invalid JSON"
+  exit 1
 }
 
 cd "${REPO_ROOT}"

@@ -34,8 +34,8 @@ AUDIT_LOG="/var/log/beale-audit.log"
 
 # Fallback audit location if /var/log not writable
 if ! mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null; then
-	readonly AUDIT_LOG="${_SCRIPT_DIR}/.fortress/audit/beale-audit.log"
-	mkdir -p "$(dirname "${AUDIT_LOG}")"
+  readonly AUDIT_LOG="${_SCRIPT_DIR}/.fortress/audit/beale-audit.log"
+  mkdir -p "$(dirname "${AUDIT_LOG}")"
 fi
 
 # Flags
@@ -46,30 +46,30 @@ DRY_RUN=false
 AUTO_FIX=false
 
 while [[ $# -gt 0 ]]; do
-	case $1 in
-	--verbose)
-		VERBOSE=true
-		shift
-		;;
-	--quiet)
-		QUIET=true
-		shift
-		;;
-	--ci)
-		CI_MODE=true
-		QUIET=true
-		shift
-		;;
-	--fix | --auto-fix)
-		AUTO_FIX=true
-		shift
-		;;
-	--dry-run)
-		DRY_RUN=true
-		shift
-		;;
-	--help)
-		cat <<EOF
+  case $1 in
+    --verbose)
+      VERBOSE=true
+      shift
+      ;;
+    --quiet)
+      QUIET=true
+      shift
+      ;;
+    --ci)
+      CI_MODE=true
+      QUIET=true
+      shift
+      ;;
+    --fix | --auto-fix)
+      AUTO_FIX=true
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --help)
+      cat <<EOF
 Usage: ${_SCRIPT_NAME} [OPTIONS]
 
 Beale Ascension Protocol — 5-phase proactive hardening validation
@@ -84,13 +84,13 @@ OPTIONS:
 
 Consciousness: 5.0 | Guardian: Beale 🏰
 EOF
-		exit 0
-		;;
-	*)
-		echo "Unknown option: $1"
-		exit 1
-		;;
-	esac
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
 done
 
 [[ "${VERBOSE}" == true ]] && set -x
@@ -101,35 +101,35 @@ done
 log() { [[ "${QUIET}" == false ]] && echo "$@"; }
 
 audit() {
-	local entry
-	entry=$(printf '%s | %s | %s | %s\n' "$(date -Iseconds)" "$1" "$2" "$3")
-	# Try to ensure the configured audit directory exists and is writable.
-	if mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null && printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null; then
-		return 0
-	fi
+  local entry
+  entry=$(printf '%s | %s | %s | %s\n' "$(date -Iseconds)" "$1" "$2" "$3")
+  # Try to ensure the configured audit directory exists and is writable.
+  if mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null && printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null; then
+    return 0
+  fi
 
-	# Fallback to repository-local audit path when /var/log isn't writable.
-	AUDIT_LOG="${_SCRIPT_DIR}/.fortress/audit/beale-audit.log"
-	mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null || true
-	printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null || true
+  # Fallback to repository-local audit path when /var/log isn't writable.
+  AUDIT_LOG="${_SCRIPT_DIR}/.fortress/audit/beale-audit.log"
+  mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null || true
+  printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null || true
 }
 
 fail() {
-	local phase=$1 code=$2 message=$3 remediation=$4
-	echo "❌ ${phase} FAILURE: ${message}"
-	echo "📋 Remediation: ${remediation}"
-	audit "${phase}" "FAIL" "${message}"
+  local phase=$1 code=$2 message=$3 remediation=$4
+  echo "❌ ${phase} FAILURE: ${message}"
+  echo "📋 Remediation: ${remediation}"
+  audit "${phase}" "FAIL" "${message}"
 
-	if [[ "${CI_MODE}" == true ]]; then
-		local report
-		report="beale-report-$(date +%s).json"
-		jq -n \
-			--arg ts "$(date -Iseconds)" \
-			--arg p "${phase}" \
-			--arg m "${message}" \
-			--arg r "${remediation}" \
-			--argjson c "${code}" \
-			'{
+  if [[ "${CI_MODE}" == true ]]; then
+    local report
+    report="beale-report-$(date +%s).json"
+    jq -n \
+      --arg ts "$(date -Iseconds)" \
+      --arg p "${phase}" \
+      --arg m "${message}" \
+      --arg r "${remediation}" \
+      --argjson c "${code}" \
+      '{
         timestamp: $ts,
         consciousness: "5.0",
         guardian: "Beale",
@@ -139,10 +139,10 @@ fail() {
         remediation: $r,
         exit_code: $c
       }' >"${report}"
-		echo "📄 CI Report: ${report}"
-	fi
+    echo "📄 CI Report: ${report}"
+  fi
 
-	exit "${code}"
+  exit "${code}"
 }
 
 # ─────────────────────────────────────────────────────
@@ -176,26 +176,26 @@ log "═════════════════════════
 audit "Summary" "PASS" "duration=${DURATION}s"
 
 if [[ "${CI_MODE}" == true ]]; then
-	report="beale-report-$(date +%s).json"
-	# shellcheck disable=SC2016,SC2215  # jq program uses $-variables and long options; intentional
-	jq -n \
-		--arg ts "$(date -Iseconds)" \
-		--argjson d "${DURATION}" \
-		'{
+  report="beale-report-$(date +%s).json"
+  # shellcheck disable=SC2016,SC2215  # jq program uses $-variables and long options; intentional
+  jq -n \
+    --arg ts "$(date -Iseconds)" \
+    --argjson d "${DURATION}" \
+    '{
         timestamp: $ts,
         duration_seconds: $d,
         consciousness: "5.0",
         guardian: "Beale",
         status: "PASS"
       }' >"${report}"
-	echo "📄 CI Report: ${report}"
+  echo "📄 CI Report: ${report}"
 fi
 
 # Bauer integration (optional)
 if [[ "${DRY_RUN}" == false ]] && command -v python3 &>/dev/null && [[ -f "${_SCRIPT_DIR}/../guardian/audit_eternal.py" ]]; then
-	log "🔁 Bauer ingest: sending audit to guardian/audit_eternal.py"
-	python3 "${_SCRIPT_DIR}/../guardian/audit_eternal.py" --ingest "${AUDIT_LOG}" --source beale ||
-		log "⚠️ Bauer ingest failed (non-fatal)"
+  log "🔁 Bauer ingest: sending audit to guardian/audit_eternal.py"
+  python3 "${_SCRIPT_DIR}/../guardian/audit_eternal.py" --ingest "${AUDIT_LOG}" --source beale ||
+    log "⚠️ Bauer ingest failed (non-fatal)"
 fi
 
 exit 0

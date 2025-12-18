@@ -18,16 +18,16 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 mkdir -p "$(dirname "${OUTPUT}")"
 
 [[ -f /opt/rylan/.secrets/unifi-api-key ]] || {
-	echo "❌ UniFi API key missing"
-	exit 1
+  echo "❌ UniFi API key missing"
+  exit 1
 }
 
 UNIFI_KEY=$(cat /opt/rylan/.secrets/unifi-api-key)
 UNIFI_HOST="https://10.0.10.10:8443"
 
 APS=$(curl -sk -H "Authorization: Bearer ${UNIFI_KEY}" \
-	"${UNIFI_HOST}/api/s/default/stat/device" 2>/dev/null |
-	jq -c '[.data[] | select(.type == "uap") | {
+  "${UNIFI_HOST}/api/s/default/stat/device" 2>/dev/null |
+  jq -c '[.data[] | select(.type == "uap") | {
     name: .name,
     mac: .mac,
     model: .model,
@@ -52,8 +52,8 @@ cat >"${OUTPUT}" <<EOF
 EOF
 
 jq empty "${OUTPUT}" || {
-	echo "❌ Invalid JSON"
-	exit 1
+  echo "❌ Invalid JSON"
+  exit 1
 }
 
 cd "${REPO_ROOT}"

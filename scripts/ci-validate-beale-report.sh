@@ -11,24 +11,24 @@ set -euo pipefail
 
 REPORT=$(find . -maxdepth 1 -type f -name 'beale-report-*.json' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | awk '{print $2}' || true)
 if [[ -z "$REPORT" ]]; then
-	echo "ERROR: no beale-report-*.json found"
-	exit 2
+  echo "ERROR: no beale-report-*.json found"
+  exit 2
 fi
 
 # Required keys
 REQUIRED=(timestamp duration_seconds consciousness guardian firewall_rules vlan_isolated ssh_hardened services_running status)
 
 if command -v jq &>/dev/null; then
-	for k in "${REQUIRED[@]}"; do
-		if ! jq -e "has(\"$k\")" "$REPORT" >/dev/null; then
-			echo "ERROR: report missing key: $k"
-			jq '.' "$REPORT" || true
-			exit 3
-		fi
-	done
+  for k in "${REQUIRED[@]}"; do
+    if ! jq -e "has(\"$k\")" "$REPORT" >/dev/null; then
+      echo "ERROR: report missing key: $k"
+      jq '.' "$REPORT" || true
+      exit 3
+    fi
+  done
 else
-	# Fallback to python parser
-	python3 - <<PY
+  # Fallback to python parser
+  python3 - <<PY
 import json,sys
 r=json.load(open('$REPORT'))
 for k in ${REQUIRED[@]}:
