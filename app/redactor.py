@@ -87,17 +87,10 @@ def _redact_presidio(text: str) -> str:
             language="en",
         )
 
-        redacted = cast("str", anonymizer.anonymize(text=text, analyzer_results=results).text)
+        anonymized = cast("str", anonymizer.anonymize(text=text, analyzer_results=results).text)
 
         # Apply additional regex for MAC addresses (Presidio doesn't catch these)
-        redacted = re.sub(
-            PATTERNS["mac"],
-            "[REDACTED]",
-            redacted,
-            flags=re.IGNORECASE,
-        )
-
-        return redacted
+        return re.sub(PATTERNS["mac"], "[REDACTED]", anonymized, flags=re.IGNORECASE)
 
     except Exception:
         logger.exception("Presidio redaction failed; falling back to regex")
@@ -153,10 +146,7 @@ def redact_file(filepath: str, output_filepath: str | None = None) -> str:
 def is_pii_present(text: str) -> bool:
     """Return True if ``text`` contains potential PII."""
 
-    for pattern in PATTERNS.values():
-        if re.search(pattern, text, flags=re.IGNORECASE):
-            return True
-    return False
+    return any(re.search(pattern, text, flags=re.IGNORECASE) for pattern in PATTERNS.values())
 
 
 if __name__ == "__main__":

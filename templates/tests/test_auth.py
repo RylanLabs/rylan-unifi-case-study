@@ -7,6 +7,7 @@ from typing import Any
 from unittest.mock import mock_open, patch
 
 import pytest
+import yaml
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
@@ -66,23 +67,27 @@ class TestLoadCredentials:
         assert creds["unifi_pass"] == "secret123"
         mock_file.assert_called_once_with("shared/inventory.yaml", "r", encoding="utf-8")
 
-    @patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found"))
-    def test_load_credentials_file_not_found(self, mock_file: Any) -> None:
+    def test_load_credentials_file_not_found(self) -> None:
         """Handle missing inventory.yaml gracefully."""
-        with pytest.raises(FileNotFoundError):
+        with (
+            patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found")),
+            pytest.raises(FileNotFoundError),
+        ):
             load_credentials()
 
-    @patch("builtins.open", new_callable=mock_open, read_data="invalid: yaml: content:")
-    @patch("yaml.safe_load", side_effect=Exception("Invalid YAML"))
-    def test_load_credentials_invalid_yaml(self, mock_yaml: Any, mock_file: Any) -> None:
+    def test_load_credentials_invalid_yaml(self) -> None:
         """Handle invalid YAML gracefully."""
-        with pytest.raises(Exception):
+        with (
+            patch("builtins.open", new_callable=mock_open, read_data="invalid: yaml: content:"),
+            patch("yaml.safe_load", side_effect=yaml.YAMLError("Invalid YAML")),
+            pytest.raises(yaml.YAMLError),
+        ):
             load_credentials()
 
-    @patch("builtins.open", new_callable=mock_open, read_data="{}")
     @patch("yaml.safe_load")
-    def test_load_credentials_empty(self, mock_yaml: Any, mock_file: Any) -> None:
+    def test_load_credentials_empty(self, mock_yaml: Any) -> None:
         """Handle empty credentials file."""
-        mock_yaml.return_value = {}
-        creds = load_credentials()
-        assert creds == {}
+        with patch("builtins.open", new_callable=mock_open, read_data="{}"):
+            mock_yaml.return_value = {}
+            creds = load_credentials()
+            assert creds == {}

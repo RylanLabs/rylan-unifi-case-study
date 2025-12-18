@@ -17,15 +17,15 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, Field, ValidationError
 
+# Import from parent directory for local `shared` package
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from shared.unifi_client import UniFiClient
+
 DeepDiff: Any | None = None
 try:
     DeepDiff = importlib.import_module("deepdiff").DeepDiff
 except Exception:
     DeepDiff = None
-
-# Import from parent directory
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared.unifi_client import UniFiClient
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 logger = logging.getLogger("fortress")

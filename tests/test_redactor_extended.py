@@ -29,17 +29,16 @@ class TestPresidioFallbackPath(unittest.TestCase):
     @patch("app.redactor.PRESIDIO_AVAILABLE", True)
     def test_presidio_method_with_unavailable_library(self) -> None:
         """Request presidio method when library unavailable."""
-        # Patch PRESIDIO_AVAILABLE to be True but imports will fail
-        with patch("app.redactor.PRESIDIO_AVAILABLE", True):
-            with patch("app.redactor._redact_presidio") as mock_presidio:
-                mock_presidio.side_effect = Exception("Presidio failed")
-                text = "Email: user@example.com"
-                # Should handle exception gracefully
-                try:
-                    result = redact_pii(text, method="regex")
-                    self.assertIn("[REDACTED]", result)
-                except Exception as e:
-                    self.fail(f"redact_pii should not raise: {e}")
+        # PRESIDIO_AVAILABLE already patched by decorator; only patch the _redact_presidio function
+        with patch("app.redactor._redact_presidio") as mock_presidio:
+            mock_presidio.side_effect = Exception("Presidio failed")
+            text = "Email: user@example.com"
+            # Should handle exception gracefully
+            try:
+                result = redact_pii(text, method="regex")
+                self.assertIn("[REDACTED]", result)
+            except Exception as e:
+                self.fail(f"redact_pii should not raise: {e}")
 
     def test_is_pii_present_with_ips(self) -> None:
         """Test PII detection for IP addresses."""

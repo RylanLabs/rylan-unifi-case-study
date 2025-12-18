@@ -20,11 +20,8 @@ def fix_fences(content: str) -> str:
         if m:
             leading = m.group(1)
             lang = m.group(2)
-            if lang == "":
-                # normalize language-less fences to text
-                line = f"{leading}```text"
-            else:
-                line = f"{leading}```{lang}"
+            # normalize language-less fences to text using a compact expression
+            line = f"{leading}```{lang or 'text'}"
             # Ensure exactly 1 blank before fence (if not at start)
             if result and result[-1].strip() != "":
                 result.append("")

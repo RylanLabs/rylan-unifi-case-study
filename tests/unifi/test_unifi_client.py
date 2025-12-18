@@ -41,7 +41,7 @@ def mock_unifi_session() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def client() -> None:
+def _client() -> None:
     """Legacy fixture removed — placeholder to preserve import ordering during edits.
 
     Tests import `UniFiClient` lazily now; this fixture is intentionally a no-op.
@@ -147,7 +147,7 @@ def test_malformed_json_handled(mock_unifi_session: MagicMock) -> None:
     mock_unifi_session.request.return_value = mock_response
 
     c = UniFiClient(TEST_CONTROLLER_URL)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid JSON"):
         c.get("rest/networkconf")
 
 

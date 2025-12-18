@@ -84,12 +84,17 @@ def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
     """
     try:
         # Use tcpdump to capture RTP packets and check DSCP
+        tcpdump_filter = f"src {peer_ip} and udp"
+        tcpdump_cmd = (
+            f"timeout 5 tcpdump -c 10 -nn -v '{tcpdump_filter}' " "2>/dev/null | grep -oP 'tos 0x[0-9a-f]+' | head -1"
+        )
+
         cmd = [
             "ssh",
             "-o",
             "StrictHostKeyChecking=no",
             f"{FREEPBX_SSH_USER}@{FREEPBX_HOST}",
-            f"timeout 5 tcpdump -c 10 -nn -v 'src {peer_ip} and udp' 2>/dev/null | grep -oP 'tos 0x[0-9a-f]+' | head -1",
+            tcpdump_cmd,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
