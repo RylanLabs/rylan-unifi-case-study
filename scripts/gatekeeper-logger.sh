@@ -42,8 +42,7 @@ log_validator() {
 	local validator_json="{\"status\":\"$status\",\"duration_ms\":$duration_ms"
 
 	if [[ -n "$error_message" ]]; then
-		error_message=$(echo "$error_message" | sed 's/"/\\"/g')
-		validator_json+=",\"error\":\"$error_message\""
+                error_message="${error_message//\"/\\\"}"
 	fi
 
 	validator_json+="}"
@@ -71,9 +70,7 @@ log_push_end() {
 	done
 	validators_json+="}"
 
-	local commit_msg=$(echo "${PUSH_METADATA[commit_message]}" | sed 's/"/\\"/g')
-
-	local final_json="{"
+        local commit_msg="${PUSH_METADATA[commit_message]//\"/\\\"}"
 	final_json+="\"timestamp\":\"${PUSH_METADATA[timestamp]}\","
 	final_json+="\"branch\":\"${PUSH_METADATA[branch]}\","
 	final_json+="\"commit_hash\":\"${PUSH_METADATA[commit_hash]}\","
@@ -82,8 +79,7 @@ log_push_end() {
 	final_json+="\"validators\":$validators_json"
 
 	if [[ -n "$recommendation" ]]; then
-		recommendation=$(echo "$recommendation" | sed 's/"/\\"/g')
-		final_json+=",\"recommendation\":\"$recommendation\""
+                recommendation="${recommendation//\"/\\\"}"
 	fi
 
 	final_json+="}"
@@ -113,11 +109,12 @@ rotate_logs() {
 	fi
 
 	if [[ $current_size -gt $max_size ]]; then
-		local timestamp=$(date +%Y%m%d_%H%M%S)
+		local timestamp
+                timestamp=$(date +%Y%m%d_%H%M%S)
 		mv "$GATEKEEPER_ROTATING" "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log"
 		gzip "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log" || true
 
-		ls -t "${GATEKEEPER_LOG_DIR}"/gatekeeper-*.log.gz 2>/dev/null | tail -n +11 | xargs rm -f 2>/dev/null || true
+		find "${GATEKEEPER_LOG_DIR}" -name "gatekeeper-*.log.gz" -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | tail -n +11 | awk '{print $2}' | xargs -r rm -f -- 2>/dev/null || true
 	fi
 }
 
