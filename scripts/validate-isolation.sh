@@ -48,7 +48,7 @@ else
   open_ports=$(printf '%s' "${open_ports}" | head -n1 | tr -dc '0-9')
   open_ports="${open_ports:-0}"
 
-  if (( open_ports > EXPECTED_MAX )); then
+  if ((open_ports > EXPECTED_MAX)); then
     proof=$(sudo nmap -sV --top-ports 100 "$TARGET_NETWORKS" | grep "open")
     fail "Unexpected open ports in trusted VLANs (${open_ports} > ${EXPECTED_MAX})" "$proof"
   fi
@@ -66,7 +66,7 @@ else
   quarantine_open=$(printf '%s' "${quarantine_open}" | head -n1 | tr -dc '0-9')
   quarantine_open="${quarantine_open:-0}"
 
-  if (( quarantine_open > 0 )); then
+  if ((quarantine_open > 0)); then
     proof=$(sudo nmap -sn 10.0.99.0/24 | grep "Nmap scan report")
     fail "Devices reachable in quarantine VLAN 99 (${quarantine_open} hosts)" "$proof"
   fi
@@ -75,7 +75,7 @@ else
   port_scan=$(printf '%s' "${port_scan}" | head -n1 | tr -dc '0-9')
   port_scan="${port_scan:-0}"
 
-  if (( port_scan != 0 )); then
+  if ((port_scan != 0)); then
     fail "Open ports detected in quarantine VLAN" "$(sudo nmap -p- 10.0.99.0/24 | grep open)"
   fi
 fi
