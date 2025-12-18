@@ -210,5 +210,4 @@ __pycache__/
 tmp/
 temp/
 05_network_migration/configs/*.json
-/.backups/
 .venv-stubs/
