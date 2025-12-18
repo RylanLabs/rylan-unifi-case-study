@@ -20,15 +20,15 @@ readonly BACKUP_ROOT
 
 # Carter: Identity — verify we are in the eternal fortress
 [[ "$(basename "$REPO_ROOT")" == "rylan-unifi-case-study" ]] || {
-	echo "ERROR: This script must be run from within the rylan-unifi-case-study repository"
-	echo "Current detected root: $REPO_ROOT"
-	exit 1
+  echo "ERROR: This script must be run from within the rylan-unifi-case-study repository"
+  echo "Current detected root: $REPO_ROOT"
+  exit 1
 }
 
 # Bauer: Trust nothing — verify repo accessibility
 [[ -r "$REPO_ROOT" && -w "$REPO_ROOT" ]] || {
-	echo "ERROR: Repository not readable/writable — Bauer verification failed"
-	exit 1
+  echo "ERROR: Repository not readable/writable — Bauer verification failed"
+  exit 1
 }
 
 # Create canonical hidden backup directory
@@ -36,23 +36,23 @@ mkdir -p "$BACKUP_ROOT"
 
 # Idempotently ensure .gitignore excludes .backups/
 if ! grep -q "^/.backups/" "$REPO_ROOT/.gitignore" 2>/dev/null; then
-	echo "/.backups/" >>"$REPO_ROOT/.gitignore"
-	echo "Added /.backups/ to .gitignore"
+  echo "/.backups/" >>"$REPO_ROOT/.gitignore"
+  echo "Added /.backups/ to .gitignore"
 fi
 
 # Detect and migrate scattered .bak heresy
 mapfile -t SCATTERED < <(find "$REPO_ROOT" -name '*.bak' -type f)
 if [[ ${#SCATTERED[@]} -gt 0 ]]; then
-	HERESY_DIR="${BACKUP_ROOT}/heresy-migration-$(date +%Y%m%d-%H%M%S)"
-	mkdir -p "$HERESY_DIR"
-	for bak in "${SCATTERED[@]}"; do
-		relative="${bak#"$REPO_ROOT"/}"
-		mkdir -p "$HERESY_DIR/$(dirname "$relative")"
-		mv "$bak" "$HERESY_DIR/$relative"
-	done
-	echo "Migrated ${#SCATTERED[@]} scattered .bak files to $HERESY_DIR"
+  HERESY_DIR="${BACKUP_ROOT}/heresy-migration-$(date +%Y%m%d-%H%M%S)"
+  mkdir -p "$HERESY_DIR"
+  for bak in "${SCATTERED[@]}"; do
+    relative="${bak#"$REPO_ROOT"/}"
+    mkdir -p "$HERESY_DIR/$(dirname "$relative")"
+    mv "$bak" "$HERESY_DIR/$relative"
+  done
+  echo "Migrated ${#SCATTERED[@]} scattered .bak files to $HERESY_DIR"
 else
-	echo "No scattered .bak heresy detected — fortress clean"
+  echo "No scattered .bak heresy detected — fortress clean"
 fi
 
 # Initialize persistent audit log
@@ -64,9 +64,9 @@ echo "[$(date -Iseconds)] Canonical .backups/ initialized — migrated heresy co
 echo ""
 echo "=== CANONICAL .backups/ STRUCTURE ACHIEVED ==="
 if command -v tree >/dev/null; then
-	tree "$BACKUP_ROOT"
+  tree "$BACKUP_ROOT"
 else
-	find "$BACKUP_ROOT" -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+  find "$BACKUP_ROOT" -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 fi
 
 echo ""

@@ -18,24 +18,24 @@ log_success() { [[ "$QUIET" != true ]] && echo "[SUCCESS] $*"; }
 
 # Audit trail
 audit() {
-	local ts="$1"
-	local level="$2"
-	local msg="$3"
-	echo "$ts | Beale | $level | $msg" >>"$AUDIT_LOG"
+  local ts="$1"
+  local level="$2"
+  local msg="$3"
+  echo "$ts | Beale | $level | $msg" >>"$AUDIT_LOG"
 }
 
 # Context-rich failure
 fail_with_context() {
-	local code
-	local msg
-	code="$1"
-	shift
-	msg="$*"
+  local code
+  local msg
+  code="$1"
+  shift
+  msg="$*"
 
-	log_error "$msg"
-	log_error "Last 20 lines:"
-	tail -20 "$LOG_FILE" | sed 's/^/  /'
+  log_error "$msg"
+  log_error "Last 20 lines:"
+  tail -20 "$LOG_FILE" | sed 's/^/  /'
 
-	audit "$(date -Iseconds)" "FAIL" "$msg"
-	exit "$code"
+  audit "$(date -Iseconds)" "FAIL" "$msg"
+  exit "$code"
 }
