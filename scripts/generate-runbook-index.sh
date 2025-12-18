@@ -21,19 +21,19 @@ RUNBOOK_DIR="${REPO_ROOT}/runbooks"
 RUNBOOKS="[]"
 
 while IFS= read -r -d '' RUNBOOK; do
-	NAME=$(basename "${RUNBOOK}")
-	MINISTRY=$(echo "${RUNBOOK}" | grep -oP 'ministry-\K[^/]+' || echo "unknown")
+  NAME=$(basename "${RUNBOOK}")
+  MINISTRY=$(echo "${RUNBOOK}" | grep -oP 'ministry-\K[^/]+' || echo "unknown")
 
-	DESCRIPTION=$(grep -m1 "^# Description:" "${RUNBOOK}" 2>/dev/null | cut -d: -f2- | xargs || echo "No description")
-	REQUIRED_PASSPORTS=$(grep "^# Requires:" "${RUNBOOK}" 2>/dev/null | cut -d: -f2- | xargs || echo "")
-	MIN_CONSCIOUSNESS=$(grep "^# Consciousness:" "${RUNBOOK}" 2>/dev/null | awk '{print $3}' || echo "2.0")
-	ESTIMATED_RUNTIME=$(grep "^# Runtime:" "${RUNBOOK}" 2>/dev/null | awk '{print $3}' || echo "unknown")
+  DESCRIPTION=$(grep -m1 "^# Description:" "${RUNBOOK}" 2>/dev/null | cut -d: -f2- | xargs || echo "No description")
+  REQUIRED_PASSPORTS=$(grep "^# Requires:" "${RUNBOOK}" 2>/dev/null | cut -d: -f2- | xargs || echo "")
+  MIN_CONSCIOUSNESS=$(grep "^# Consciousness:" "${RUNBOOK}" 2>/dev/null | awk '{print $3}' || echo "2.0")
+  ESTIMATED_RUNTIME=$(grep "^# Runtime:" "${RUNBOOK}" 2>/dev/null | awk '{print $3}' || echo "unknown")
 
-	RUNBOOKS=$(echo "${RUNBOOKS}" | jq --arg name "${NAME}" --arg path "${RUNBOOK}" \
-		--arg ministry "${MINISTRY}" --arg desc "${DESCRIPTION}" \
-		--arg passports "${REQUIRED_PASSPORTS}" --arg consciousness "${MIN_CONSCIOUSNESS}" \
-		--arg runtime "${ESTIMATED_RUNTIME}" \
-		'. += [{
+  RUNBOOKS=$(echo "${RUNBOOKS}" | jq --arg name "${NAME}" --arg path "${RUNBOOK}" \
+    --arg ministry "${MINISTRY}" --arg desc "${DESCRIPTION}" \
+    --arg passports "${REQUIRED_PASSPORTS}" --arg consciousness "${MIN_CONSCIOUSNESS}" \
+    --arg runtime "${ESTIMATED_RUNTIME}" \
+    '. += [{
       name: $name,
       path: $path,
       ministry: $ministry,
@@ -56,8 +56,8 @@ cat >"${OUTPUT}" <<EOF
 EOF
 
 jq empty "${OUTPUT}" || {
-	echo "❌ Invalid JSON"
-	exit 1
+  echo "❌ Invalid JSON"
+  exit 1
 }
 
 cd "${REPO_ROOT}"

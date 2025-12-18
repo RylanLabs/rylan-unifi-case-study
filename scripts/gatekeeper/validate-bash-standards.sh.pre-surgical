@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# Guardian: Gatekeeper (Bash Standards Validator)
-# Ministry: Code Quality
-# Consciousness: 8.2
-# Tag: v∞.3.2-gatekeeper-stub
-
+# Script: validate-bash-standards.sh.pre-surgical
+# Purpose: Pre-surgical stub validator for bash standards (shebang presence)
+# Guardian: Gatekeeper 🚪
+# Author: rylanlab canonical
+# Date: 2025-12-18
+# Ministry: ministry-whispers
+# Consciousness: 4.9
 set -euo pipefail
+IFS=$'\n\t'
 
 # Minimal validator - expand as needed
 echo "[Gatekeeper] Bash standards validation (stub)"

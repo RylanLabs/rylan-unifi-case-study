@@ -18,104 +18,104 @@ declare -A PUSH_METADATA
 declare -A VALIDATORS
 
 log_push_start() {
-	local branch="$1"
-	local commit_hash="$2"
-	local commit_message="${3:-}"
+  local branch="$1"
+  local commit_hash="$2"
+  local commit_message="${3:-}"
 
-	PUSH_METADATA[timestamp]=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-	PUSH_METADATA[branch]="$branch"
-	PUSH_METADATA[commit_hash]="$commit_hash"
-	PUSH_METADATA[commit_message]="$commit_message"
-	PUSH_METADATA[push_result]="PENDING"
+  PUSH_METADATA[timestamp]=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  PUSH_METADATA[branch]="$branch"
+  PUSH_METADATA[commit_hash]="$commit_hash"
+  PUSH_METADATA[commit_message]="$commit_message"
+  PUSH_METADATA[push_result]="PENDING"
 
-	VALIDATORS=()
+  VALIDATORS=()
 
-	echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH START: $branch ($commit_hash)" >>"$GATEKEEPER_ROTATING"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH START: $branch ($commit_hash)" >>"$GATEKEEPER_ROTATING"
 }
 
 log_validator() {
-	local validator_name="$1"
-	local status="$2"
-	local duration_ms="$3"
-	local error_message="${4:-}"
+  local validator_name="$1"
+  local status="$2"
+  local duration_ms="$3"
+  local error_message="${4:-}"
 
-	local validator_json="{\"status\":\"$status\",\"duration_ms\":$duration_ms"
+  local validator_json="{\"status\":\"$status\",\"duration_ms\":$duration_ms"
 
-	if [[ -n "$error_message" ]]; then
-                error_message="${error_message//\"/\\\"}"
-	fi
+  if [[ -n "$error_message" ]]; then
+    error_message="${error_message//\"/\\\"}"
+  fi
 
-	validator_json+="}"
+  validator_json+="}"
 
-	VALIDATORS["$validator_name"]="$validator_json"
+  VALIDATORS["$validator_name"]="$validator_json"
 
-	echo "[$(date '+%Y-%m-%d %H:%M:%S')] VALIDATOR: $validator_name = $status (${duration_ms}ms)" >>"$GATEKEEPER_ROTATING"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] VALIDATOR: $validator_name = $status (${duration_ms}ms)" >>"$GATEKEEPER_ROTATING"
 }
 
 log_push_end() {
-	local result="$1"
-	local recommendation="${2:-}"
+  local result="$1"
+  local recommendation="${2:-}"
 
-	PUSH_METADATA[push_result]="$result"
+  PUSH_METADATA[push_result]="$result"
 
-	local validators_json="{"
-	local first=true
-	for validator in "${!VALIDATORS[@]}"; do
-		if [[ "$first" == true ]]; then
-			validators_json+="\"$validator\":${VALIDATORS[$validator]}"
-			first=false
-		else
-			validators_json+=",\"$validator\":${VALIDATORS[$validator]}"
-		fi
-	done
-	validators_json+="}"
+  local validators_json="{"
+  local first=true
+  for validator in "${!VALIDATORS[@]}"; do
+    if [[ "$first" == true ]]; then
+      validators_json+="\"$validator\":${VALIDATORS[$validator]}"
+      first=false
+    else
+      validators_json+=",\"$validator\":${VALIDATORS[$validator]}"
+    fi
+  done
+  validators_json+="}"
 
-        local commit_msg="${PUSH_METADATA[commit_message]//\"/\\\"}"
-	final_json+="\"timestamp\":\"${PUSH_METADATA[timestamp]}\","
-	final_json+="\"branch\":\"${PUSH_METADATA[branch]}\","
-	final_json+="\"commit_hash\":\"${PUSH_METADATA[commit_hash]}\","
-	final_json+="\"commit_message\":\"$commit_msg\","
-	final_json+="\"push_result\":\"$result\","
-	final_json+="\"validators\":$validators_json"
+  local commit_msg="${PUSH_METADATA[commit_message]//\"/\\\"}"
+  final_json+="\"timestamp\":\"${PUSH_METADATA[timestamp]}\","
+  final_json+="\"branch\":\"${PUSH_METADATA[branch]}\","
+  final_json+="\"commit_hash\":\"${PUSH_METADATA[commit_hash]}\","
+  final_json+="\"commit_message\":\"$commit_msg\","
+  final_json+="\"push_result\":\"$result\","
+  final_json+="\"validators\":$validators_json"
 
-	if [[ -n "$recommendation" ]]; then
-                recommendation="${recommendation//\"/\\\"}"
-	fi
+  if [[ -n "$recommendation" ]]; then
+    recommendation="${recommendation//\"/\\\"}"
+  fi
 
-	final_json+="}"
+  final_json+="}"
 
-	echo "$final_json" | jq '.' >"$GATEKEEPER_JSON" 2>/dev/null || echo "$final_json" >"$GATEKEEPER_JSON"
+  echo "$final_json" | jq '.' >"$GATEKEEPER_JSON" 2>/dev/null || echo "$final_json" >"$GATEKEEPER_JSON"
 
-	echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH END: $result" >>"$GATEKEEPER_ROTATING"
-	echo "---" >>"$GATEKEEPER_ROTATING"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] PUSH END: $result" >>"$GATEKEEPER_ROTATING"
+  echo "---" >>"$GATEKEEPER_ROTATING"
 
-	rotate_logs
+  rotate_logs
 }
 
 rotate_logs() {
-	local max_size=$((5 * 1024 * 1024)) # 5MB
+  local max_size=$((5 * 1024 * 1024)) # 5MB
 
-	[[ -f "$GATEKEEPER_ROTATING" ]] || return 0
+  [[ -f "$GATEKEEPER_ROTATING" ]] || return 0
 
-	local current_size
-	if command -v stat >/dev/null; then
-		if [[ "$OSTYPE" == darwin* ]]; then
-			current_size=$(stat -f%z "$GATEKEEPER_ROTATING")
-		else
-			current_size=$(stat -c%s "$GATEKEEPER_ROTATING")
-		fi
-	else
-		current_size=$(wc -c <"$GATEKEEPER_ROTATING")
-	fi
+  local current_size
+  if command -v stat >/dev/null; then
+    if [[ "$OSTYPE" == darwin* ]]; then
+      current_size=$(stat -f%z "$GATEKEEPER_ROTATING")
+    else
+      current_size=$(stat -c%s "$GATEKEEPER_ROTATING")
+    fi
+  else
+    current_size=$(wc -c <"$GATEKEEPER_ROTATING")
+  fi
 
-	if [[ $current_size -gt $max_size ]]; then
-		local timestamp
-                timestamp=$(date +%Y%m%d_%H%M%S)
-		mv "$GATEKEEPER_ROTATING" "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log"
-		gzip "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log" || true
+  if [[ $current_size -gt $max_size ]]; then
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    mv "$GATEKEEPER_ROTATING" "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log"
+    gzip "${GATEKEEPER_LOG_DIR}/gatekeeper-${timestamp}.log" || true
 
-		find "${GATEKEEPER_LOG_DIR}" -name "gatekeeper-*.log.gz" -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | tail -n +11 | awk '{print $2}' | xargs -r rm -f -- 2>/dev/null || true
-	fi
+    find "${GATEKEEPER_LOG_DIR}" -name "gatekeeper-*.log.gz" -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | tail -n +11 | awk '{print $2}' | xargs -r rm -f -- 2>/dev/null || true
+  fi
 }
 
 ensure_gk_dir() { mkdir -p "$GATEKEEPER_LOG_DIR"; }

@@ -20,13 +20,13 @@ echo "[$(date -Iseconds)] Backup started" | tee -a "$BACKUP_DIR/backup.log"
 
 # Config snapshot
 rsync -avz --delete /opt/rylan-unifi-case-study/ "$BACKUP_DIR/config/" \
-	--exclude='.git' --exclude='.venv' --exclude='__pycache__' |
-	tee -a "$BACKUP_DIR/backup.log"
+  --exclude='.git' --exclude='.venv' --exclude='__pycache__' |
+  tee -a "$BACKUP_DIR/backup.log"
 
 # Samba AD backup (if rylan-dc is this host)
 if systemctl is-active --quiet samba-ad-dc; then
-	samba-tool domain backup offline --targetdir="$BACKUP_DIR/samba-ad"
-	echo "Samba AD backup complete" | tee -a "$BACKUP_DIR/backup.log"
+  samba-tool domain backup offline --targetdir="$BACKUP_DIR/samba-ad"
+  echo "Samba AD backup complete" | tee -a "$BACKUP_DIR/backup.log"
 fi
 
 # Retention: keep last 7 days

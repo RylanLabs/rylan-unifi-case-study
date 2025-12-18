@@ -12,16 +12,16 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 # Network isolation
 if scripts/validate-isolation.sh --quiet; then
-	echo "Network isolation: ✅ Intact"
+  echo "Network isolation: ✅ Intact"
 else
-	echo "Network isolation: ❌ Breached"
+  echo "Network isolation: ❌ Breached"
 fi
 
 # Secrets cleanliness
 if python app/redactor.py --dry-run . --quiet; then
-	echo "Secrets cleanliness: ✅ No PII"
+  echo "Secrets cleanliness: ✅ No PII"
 else
-	echo "Secrets cleanliness: ❌ Leak detected"
+  echo "Secrets cleanliness: ❌ Leak detected"
 fi
 
 # Firewall rule count (placeholder)

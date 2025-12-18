@@ -13,12 +13,12 @@ readonly NC='\033[0m'
 
 log() { printf '%b\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')] uck-g2-resurrect: $*"; }
 die() {
-	log "ERROR: $*" >&2
-	exit 1
+  log "ERROR: $*" >&2
+  exit 1
 }
 
 banner() {
-	cat <<'EOF'
+  cat <<'EOF'
 ╔═══════════════════════════════════════════════════════════╗
 ║        UCK-G2 WIZARD RESURRECTION — Beale Ministry       ║
 ║  Fix: Setup wizard corruption on Cloud Key Gen2/Gen2+    ║
@@ -29,34 +29,34 @@ EOF
 }
 
 backup_existing_flag() {
-	if [[ -f "${SETUP_FLAG_FILE}" ]]; then
-		local backup_file
-		backup_file="${SETUP_FLAG_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
-		log "Backing up existing flag: ${backup_file}"
-		cp "${SETUP_FLAG_FILE}" "${backup_file}"
-	else
-		log "No existing setup flag found (first-time fix)"
-	fi
+  if [[ -f "${SETUP_FLAG_FILE}" ]]; then
+    local backup_file
+    backup_file="${SETUP_FLAG_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
+    log "Backing up existing flag: ${backup_file}"
+    cp "${SETUP_FLAG_FILE}" "${backup_file}"
+  else
+    log "No existing setup flag found (first-time fix)"
+  fi
 }
 
 apply_resurrection_fix() {
-	log "Applying resurrection fix..."
-	echo '{"isReadyForSetup":false}' >"${SETUP_FLAG_FILE}"
+  log "Applying resurrection fix..."
+  echo '{"isReadyForSetup":false}' >"${SETUP_FLAG_FILE}"
 
-	if [[ -f "${SETUP_FLAG_FILE}" ]]; then
-		local content
-		content="$(cat "${SETUP_FLAG_FILE}")"
-		if [[ "${content}" == '{"isReadyForSetup":false}' ]]; then
-			log "${GREEN}✓${NC} Resurrection flag written successfully"
-		else
-			die "Flag file corrupted after write: ${content}"
-		fi
-	else
-		die "Failed to create flag file: ${SETUP_FLAG_FILE}"
-	fi
+  if [[ -f "${SETUP_FLAG_FILE}" ]]; then
+    local content
+    content="$(cat "${SETUP_FLAG_FILE}")"
+    if [[ "${content}" == '{"isReadyForSetup":false}' ]]; then
+      log "${GREEN}✓${NC} Resurrection flag written successfully"
+    else
+      die "Flag file corrupted after write: ${content}"
+    fi
+  else
+    die "Failed to create flag file: ${SETUP_FLAG_FILE}"
+  fi
 
-	chown unifi:unifi "${SETUP_FLAG_FILE}" 2>/dev/null || log "${YELLOW}WARN${NC}: Could not chown to unifi:unifi"
-	chmod 644 "${SETUP_FLAG_FILE}"
+  chown unifi:unifi "${SETUP_FLAG_FILE}" 2>/dev/null || log "${YELLOW}WARN${NC}: Could not chown to unifi:unifi"
+  chmod 644 "${SETUP_FLAG_FILE}"
 }
 
 export -f log die banner backup_existing_flag apply_resurrection_fix

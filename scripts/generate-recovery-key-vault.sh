@@ -20,8 +20,8 @@ mkdir -p "$(dirname "${OUTPUT}")"
 
 # Check for age encryption tool
 if ! command -v age >/dev/null 2>&1; then
-	echo "⚠️  age not installed, generating unencrypted vault (install with: apt install age)"
-	OUTPUT="${REPO_ROOT}/.secrets/recovery-key-vault.json"
+  echo "⚠️  age not installed, generating unencrypted vault (install with: apt install age)"
+  OUTPUT="${REPO_ROOT}/.secrets/recovery-key-vault.json"
 fi
 
 # Gather secrets from vault
@@ -48,18 +48,18 @@ EOF
 
 # Encrypt if age available
 if command -v age >/dev/null 2>&1 && [[ -n "${AGE_RECIPIENT:-}" ]]; then
-	age -r "${AGE_RECIPIENT}" -o "${OUTPUT}" "${TEMP_JSON}" || {
-		echo "❌ Encryption failed"
-		rm -f "${TEMP_JSON}"
-		exit 1
-	}
-	shred -u "${TEMP_JSON}" 2>/dev/null || rm -f "${TEMP_JSON}"
-	chmod 600 "${OUTPUT}"
-	echo "✓ ${OUTPUT} (encrypted, YubiKey required)"
+  age -r "${AGE_RECIPIENT}" -o "${OUTPUT}" "${TEMP_JSON}" || {
+    echo "❌ Encryption failed"
+    rm -f "${TEMP_JSON}"
+    exit 1
+  }
+  shred -u "${TEMP_JSON}" 2>/dev/null || rm -f "${TEMP_JSON}"
+  chmod 600 "${OUTPUT}"
+  echo "✓ ${OUTPUT} (encrypted, YubiKey required)"
 else
-	mv "${TEMP_JSON}" "${OUTPUT}"
-	chmod 600 "${OUTPUT}"
-	echo "✓ ${OUTPUT} (⚠️  UNENCRYPTED - install age + set AGE_RECIPIENT)"
+  mv "${TEMP_JSON}" "${OUTPUT}"
+  chmod 600 "${OUTPUT}"
+  echo "✓ ${OUTPUT} (⚠️  UNENCRYPTED - install age + set AGE_RECIPIENT)"
 fi
 
 cd "${REPO_ROOT}"

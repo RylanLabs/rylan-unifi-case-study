@@ -12,9 +12,9 @@ set -euo pipefail
 log() { [[ "$QUIET" == false ]] && echo "[Inventory] $*"; }
 audit() { echo "$(date -Iseconds) | Inventory | $1 | $2" >>/var/log/carter-audit.log; }
 fail() {
-	echo "❌ Inventory FAILURE: $1"
-	audit "FAIL" "$1"
-	exit 1
+  echo "❌ Inventory FAILURE: $1"
+  audit "FAIL" "$1"
+  exit 1
 }
 
 QUIET=false
@@ -24,9 +24,9 @@ log "Device inventory bootstrap — Carter identity"
 
 # Source true Carter ministry (correct path)
 if [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]]; then
-	source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+  source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
 else
-	fail "Carter ministry missing" "Run ministry-secrets first"
+  fail "Carter ministry missing" "Run ministry-secrets first"
 fi
 
 # ─────────────────────────────────────────────────────

@@ -9,8 +9,8 @@ set -euo pipefail
 # Install project pre-commit hooks for developers
 
 if ! command -v pre-commit &>/dev/null; then
-	echo "pre-commit not installed. Install via pip: pip install pre-commit"
-	exit 1
+  echo "pre-commit not installed. Install via pip: pip install pre-commit"
+  exit 1
 fi
 
 # Install hooks for current repo
