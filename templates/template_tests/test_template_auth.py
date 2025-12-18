@@ -65,7 +65,11 @@ class TestLoadCredentials:
         creds = load_credentials()
         assert creds["unifi_user"] == "admin"
         assert creds["unifi_pass"] == "secret123"
-        mock_file.assert_called_once_with("shared/inventory.yaml", "r", encoding="utf-8")
+        # open() may be called without explicit mode (defaults to 'r')
+        mock_file.assert_called_once()
+        called_args, called_kwargs = mock_file.call_args
+        assert called_args[0] == "shared/inventory.yaml"
+        assert called_kwargs.get("encoding") == "utf-8"
 
     def test_load_credentials_file_not_found(self) -> None:
         """Handle missing inventory.yaml gracefully."""
