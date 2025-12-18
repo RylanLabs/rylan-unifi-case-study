@@ -80,8 +80,8 @@ EXCLUDE_BANDIT_LIST=$(
   echo "${EXCLUDE_PATHS[*]}"
 )
 run_and_log bandit true bandit -r . --exclude "$EXCLUDE_BANDIT_LIST" -q -lll
-# Run tests (critical)
-run_and_log pytest true pytest --cov=. --cov-fail-under=70
+# Run tests (critical) — Scope coverage to project packages to avoid vendored/template noise
+run_and_log pytest true pytest --cov=app --cov=shared --cov-fail-under=70
 
 # 2. Bash purity
 log "Running Bash purity validation..."
