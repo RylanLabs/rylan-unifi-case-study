@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# 1. Restore the eternal version (A+ Beale-integrated)
-cat >eternal-resurrect.sh <<'EOF'
-#!/usr/bin/env bash
 # Script: eternal-resurrect.sh
 # Purpose: One-command fortress resurrection with full Beale validation
 # Guardian: Beale | Trinity: Carter → Bauer → Beale → Whitaker
@@ -29,15 +26,3 @@ log "🛡️ Raising Eternal Fortress — Consciousness 4.2"
 ./scripts/simulate-breach.sh
 
 log "✅ Fortress risen — Beale validated — Consciousness 4.6"
-EOF
-chmod +x eternal-resurrect.sh
-
-# 2. Commit the true resurrection
-git add eternal-resurrect.sh
-git commit -m "fix(resurrect): restore eternal truth — purge Copilot zombie
-
-- Reintegrate Beale hardening v8.0
-- Remove hallucinated ministry calls
-- Enforce silence + audit trail
-
-Consciousness: 4.6 preserved"

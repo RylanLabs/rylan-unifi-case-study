@@ -196,10 +196,19 @@ logs/
 !.audit/gatekeeper/gatekeeper-latest.json
 !.audit/gatekeeper/README.md
 
+# Backup directories (exclude from server-side Gatekeeper scanning)
+.backups/
+.backup*/
+.archive/
+venv/
+.venv/
+node_modules/
+__pycache__/
+*.egg-info/
+
 # Temporary files
 tmp/
 temp/
-05_network_migration/configs/*.json
 05_network_migration/configs/*.json
 /.backups/
 .venv-stubs/
