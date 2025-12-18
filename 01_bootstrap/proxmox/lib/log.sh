@@ -16,34 +16,34 @@ set -euo pipefail
 
 # log_info: Print informational message
 log_info() {
-  echo -e "${BLUE}[INFO]${NC} $*" | tee -a "${LOG_FILE}" >&2
+	echo -e "${BLUE}[INFO]${NC} $*" | tee -a "${LOG_FILE}" >&2
 }
 
 # log_success: Print success message (green)
 log_success() {
-  echo -e "${GREEN}[SUCCESS]${NC} $*" | tee -a "${LOG_FILE}" >&2
+	echo -e "${GREEN}[SUCCESS]${NC} $*" | tee -a "${LOG_FILE}" >&2
 }
 
 # log_warn: Print warning message (yellow)
 log_warn() {
-  echo -e "${YELLOW}[WARN]${NC} $*" | tee -a "${LOG_FILE}" >&2
+	echo -e "${YELLOW}[WARN]${NC} $*" | tee -a "${LOG_FILE}" >&2
 }
 
 # log_error: Print error message (red)
 log_error() {
-  echo -e "${RED}[ERROR]${NC} $*" | tee -a "${LOG_FILE}" >&2
+	echo -e "${RED}[ERROR]${NC} $*" | tee -a "${LOG_FILE}" >&2
 }
 
 # phase_start: Print prominent phase header
 phase_start() {
-  local phase_num="$1"
-  local phase_name="$2"
-  echo ""
-  echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
-  echo -e "${GREEN}║${NC} Phase ${phase_num}: ${phase_name}"
-  echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}"
-  echo ""
-  log_info "Phase ${phase_num}: ${phase_name}"
+	local phase_num="$1"
+	local phase_name="$2"
+	echo ""
+	echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
+	echo -e "${GREEN}║${NC} Phase ${phase_num}: ${phase_name}"
+	echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}"
+	echo ""
+	log_info "Phase ${phase_num}: ${phase_name}"
 }
 
 export -f log_info log_success log_warn log_error phase_start

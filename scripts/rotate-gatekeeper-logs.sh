@@ -17,12 +17,12 @@ KEEP=10
 mkdir -p "$GK_DIR"
 
 if [ -f "$LOG" ]; then
-  size=$(stat -c%s "$LOG")
-  if [ "$size" -gt "$MAX_BYTES" ]; then
-    ts=$(date +"%Y%m%d_%H%M%S")
-    mv "$LOG" "$GK_DIR/gatekeeper-$ts.log"
-    gzip "$GK_DIR/gatekeeper-$ts.log"
-    # keep only $KEEP most recent
-    ls -1t "$GK_DIR"/gatekeeper-*.log.gz 2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f -- || true
-  fi
+	size=$(stat -c%s "$LOG")
+	if [ "$size" -gt "$MAX_BYTES" ]; then
+		ts=$(date +"%Y%m%d_%H%M%S")
+		mv "$LOG" "$GK_DIR/gatekeeper-$ts.log"
+		gzip "$GK_DIR/gatekeeper-$ts.log"
+		# keep only $KEEP most recent
+		ls -1t "$GK_DIR"/gatekeeper-*.log.gz 2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f -- || true
+	fi
 fi

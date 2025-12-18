@@ -47,8 +47,8 @@ log_info() { printf '%b %s\n' "${BLUE}[RESURRECT]${NC}" "$*"; }
 log_success() { printf '%b %s\n' "${GREEN}[RESURRECT]${NC} ✅" "$*"; }
 # shellcheck disable=SC2317
 log_error() {
-  printf '%b %s\n' "${RED}[RESURRECT]${NC} ❌" "$*"
-  exit 1
+	printf '%b %s\n' "${RED}[RESURRECT]${NC} ❌" "$*"
+	exit 1
 }
 # shellcheck disable=SC2317
 log_warn() { printf '%b %s\n' "${YELLOW}[RESURRECT]${NC} ⚠️" "$*"; }

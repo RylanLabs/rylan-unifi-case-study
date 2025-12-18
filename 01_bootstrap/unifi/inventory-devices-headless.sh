@@ -12,9 +12,9 @@ set -euo pipefail
 log() { [[ "$QUIET" == false ]] && echo "[Headless Inventory] $*"; }
 audit() { echo "$(date -Iseconds) | HeadlessInventory | $1 | $2" >>/var/log/carter-audit.log; }
 fail() {
-  echo "❌ Headless inventory FAILURE: $1" >&2
-  audit "FAIL" "$1"
-  exit 1
+	echo "❌ Headless inventory FAILURE: $1" >&2
+	audit "FAIL" "$1"
+	exit 1
 }
 
 QUIET=true # Headless = silent by default
@@ -31,7 +31,7 @@ source "$REPO_ROOT/lib/unifi/client.sh" || fail "Carter API client missing"
 mkdir -p /var/log
 
 {
-  cat <<'EOF'
+	cat <<'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                           RYLAN LABS • ETERNAL FORTRESS                      ║
 ║  Headless Device Inventory — $(date)                                         ║
@@ -40,22 +40,22 @@ mkdir -p /var/log
 
 EOF
 
-  unifi_login >/dev/null
+	unifi_login >/dev/null
 
-  DEVICES_FILE=$(unifi_get_devices)
+	DEVICES_FILE=$(unifi_get_devices)
 
-  device_count=$(jq '.data | length' "$DEVICES_FILE")
+	device_count=$(jq '.data | length' "$DEVICES_FILE")
 
-  [[ $device_count -gt 0 ]] || fail "No devices returned from controller" "Check UniFi connectivity, credentials, or controller status"
+	[[ $device_count -gt 0 ]] || fail "No devices returned from controller" "Check UniFi connectivity, credentials, or controller status"
 
-  echo "Devices discovered: $device_count"
-  echo ""
-  echo "MAC               Model         Name                  IP             State"
-  echo "──────────────────────────────────────────────────────────────────────────────"
-  jq -r '.data[] | [.mac, .model, .name // "unnamed", .ip // "no-ip", (.state // 0 | if . == 1 then "connected" else "disconnected" end)] | @tsv' "$DEVICES_FILE" | column -t -s $'\t'
+	echo "Devices discovered: $device_count"
+	echo ""
+	echo "MAC               Model         Name                  IP             State"
+	echo "──────────────────────────────────────────────────────────────────────────────"
+	jq -r '.data[] | [.mac, .model, .name // "unnamed", .ip // "no-ip", (.state // 0 | if . == 1 then "connected" else "disconnected" end)] | @tsv' "$DEVICES_FILE" | column -t -s $'\t'
 
-  echo ""
-  cat <<'EOF'
+	echo ""
+	cat <<'EOF'
 ═══════════════════════════════════════════════════════════════════════════════
 Summary:
   Total devices: $device_count
@@ -67,7 +67,7 @@ Next: Feed into migration or Beale validation
 
 EOF
 
-  rm -f "$DEVICES_FILE"
+	rm -f "$DEVICES_FILE"
 
 } >"$OUTPUT_FILE"
 

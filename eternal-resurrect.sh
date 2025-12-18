@@ -7,7 +7,10 @@
 set -euo pipefail
 
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
-die() { echo "ERROR: $*"; exit 1; }
+die() {
+	echo "ERROR: $*"
+	exit 1
+}
 
 log "🛡️ Raising Eternal Fortress — Consciousness 4.2"
 

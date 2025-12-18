@@ -35,10 +35,10 @@ TOTAL=$(jq '.data | length' "$DEVICES_FILE")
 CONNECTED=$(jq '[.data[] | select(.state == 1)] | length' "$DEVICES_FILE")
 
 if [ "$CONNECTED" -eq "$TOTAL" ]; then
-  echo "  ✅ All $TOTAL devices connected"
+	echo "  ✅ All $TOTAL devices connected"
 else
-  echo "  ⚠️  Only $CONNECTED/$TOTAL connected"
-  jq -r '.data[] | select(.state != 1) | "    - \(.name // .mac): state \(.state)"' "$DEVICES_FILE"
+	echo "  ⚠️  Only $CONNECTED/$TOTAL connected"
+	jq -r '.data[] | select(.state != 1) | "    - \(.name // .mac): state \(.state)"' "$DEVICES_FILE"
 fi
 
 rm -f "$DEVICES_FILE"
@@ -47,10 +47,10 @@ rm -f "$DEVICES_FILE"
 echo ""
 echo "[2/4] Testing controller reachability..."
 if ping -c 3 -W 2 192.168.1.13 >/dev/null 2>&1; then
-  echo "  ✅ Controller reachable"
+	echo "  ✅ Controller reachable"
 else
-  echo "  ❌ Controller unreachable"
-  exit 1
+	echo "  ❌ Controller unreachable"
+	exit 1
 fi
 
 # 3. Backup current config
@@ -78,25 +78,25 @@ echo ""
 echo "[4/4] Validating configuration files..."
 
 if jq empty "$SCRIPT_DIR/../configs/vlans.json" 2>/dev/null; then
-  VLAN_COUNT=$(jq '.networks | length' "$SCRIPT_DIR/../configs/vlans.json")
-  echo "  ✅ vlans.json valid ($VLAN_COUNT VLANs defined)"
+	VLAN_COUNT=$(jq '.networks | length' "$SCRIPT_DIR/../configs/vlans.json")
+	echo "  ✅ vlans.json valid ($VLAN_COUNT VLANs defined)"
 else
-  echo "  ❌ vlans.json invalid"
-  exit 1
+	echo "  ❌ vlans.json invalid"
+	exit 1
 fi
 
 if jq empty "$SCRIPT_DIR/../configs/firewall-rules.json" 2>/dev/null; then
-  RULE_COUNT=$(jq '.rules | length' "$SCRIPT_DIR/../configs/firewall-rules.json")
-  echo "  ✅ firewall-rules.json valid ($RULE_COUNT rules defined)"
+	RULE_COUNT=$(jq '.rules | length' "$SCRIPT_DIR/../configs/firewall-rules.json")
+	echo "  ✅ firewall-rules.json valid ($RULE_COUNT rules defined)"
 
-  if [ "$RULE_COUNT" -le 10 ]; then
-    echo "  ✅ Rule count ≤10 (Hellodeolu compliant)"
-  else
-    echo "  ⚠️  Rule count >10 (may impact performance)"
-  fi
+	if [ "$RULE_COUNT" -le 10 ]; then
+		echo "  ✅ Rule count ≤10 (Hellodeolu compliant)"
+	else
+		echo "  ⚠️  Rule count >10 (may impact performance)"
+	fi
 else
-  echo "  ❌ firewall-rules.json invalid"
-  exit 1
+	echo "  ❌ firewall-rules.json invalid"
+	exit 1
 fi
 
 echo ""

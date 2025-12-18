@@ -21,9 +21,9 @@ START_TIME="${START_TIME:-$(date +%s)}"
 
 # init_metrics: Initialize JSON metrics file with ignition start info
 init_metrics() {
-  mkdir -p "$(dirname "$METRICS_FILE")"
+	mkdir -p "$(dirname "$METRICS_FILE")"
 
-  cat >"$METRICS_FILE" <<EOF
+	cat >"$METRICS_FILE" <<EOF
 {
   "ignition_start": "$(date -Iseconds)",
   "hostname": "${HOSTNAME:-unknown}",
@@ -32,7 +32,7 @@ init_metrics() {
 }
 EOF
 
-  log_info "Metrics initialized: $METRICS_FILE"
+	log_info "Metrics initialized: $METRICS_FILE"
 }
 
 ################################################################################
@@ -41,28 +41,28 @@ EOF
 
 # collect_system_metrics: Gather CPU, RAM, disk, and kernel information
 collect_system_metrics() {
-  local cpu_cores
-  local ram_gb
-  local disk_free_gb
+	local cpu_cores
+	local ram_gb
+	local disk_free_gb
 
-  cpu_cores=$(nproc)
-  ram_gb=$(free -g | awk '/^Mem:/{print $2}')
-  disk_free_gb=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
+	cpu_cores=$(nproc)
+	ram_gb=$(free -g | awk '/^Mem:/{print $2}')
+	disk_free_gb=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
 
-  jq --arg cpu "$cpu_cores" \
-    --arg ram "$ram_gb" \
-    --arg disk "$disk_free_gb" \
-    --arg kernel "$(uname -r)" \
-    '.system = {
+	jq --arg cpu "$cpu_cores" \
+		--arg ram "$ram_gb" \
+		--arg disk "$disk_free_gb" \
+		--arg kernel "$(uname -r)" \
+		'.system = {
       "cpu_cores": ($cpu | tonumber),
       "ram_gb": ($ram | tonumber),
       "disk_free_gb": ($disk | tonumber),
       "kernel": $kernel
     }' \
-    "$METRICS_FILE" >"${METRICS_FILE}.tmp" &&
-    mv "${METRICS_FILE}.tmp" "$METRICS_FILE"
+		"$METRICS_FILE" >"${METRICS_FILE}.tmp" &&
+		mv "${METRICS_FILE}.tmp" "$METRICS_FILE"
 
-  log_info "System metrics collected"
+	log_info "System metrics collected"
 }
 
 export -f init_metrics collect_system_metrics

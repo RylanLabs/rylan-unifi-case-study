@@ -12,10 +12,10 @@ echo "[Gatekeeper] Bash standards validation (stub)"
 # Check for shebang in .sh files
 fail=0
 while IFS= read -r -d '' file; do
-  if ! head -1 "$file" | grep -q "^#!/"; then
-    echo "ERROR: Missing shebang: $file" >&2
-    fail=1
-  fi
+	if ! head -1 "$file" | grep -q "^#!/"; then
+		echo "ERROR: Missing shebang: $file" >&2
+		fail=1
+	fi
 done < <(find . -name "*.sh" ! -path "./.venv/*" ! -path "./venv/*" -print0)
 
 exit "$fail"

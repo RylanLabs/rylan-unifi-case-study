@@ -16,50 +16,50 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/uck-utils.sh"
 
 preflight_checks() {
-  log "Running preflight checks..."
-  [[ $EUID -eq 0 ]] || die "Must run as root (use sudo)"
-  [[ -d "/usr/lib/unifi/data" ]] || die "UniFi data directory not found"
-  if systemctl is-active --quiet unifi; then
-    log "UniFi service is running"
-  else
-    log "WARN: UniFi service not running (will start after fix)"
-  fi
-  log "✓ Preflight checks passed"
+	log "Running preflight checks..."
+	[[ $EUID -eq 0 ]] || die "Must run as root (use sudo)"
+	[[ -d "/usr/lib/unifi/data" ]] || die "UniFi data directory not found"
+	if systemctl is-active --quiet unifi; then
+		log "UniFi service is running"
+	else
+		log "WARN: UniFi service not running (will start after fix)"
+	fi
+	log "✓ Preflight checks passed"
 }
 
 restart_unifi_service() {
-  log "Restarting UniFi service..."
-  systemctl restart unifi || die "Failed to restart UniFi service"
+	log "Restarting UniFi service..."
+	systemctl restart unifi || die "Failed to restart UniFi service"
 }
 
 verify_resurrection() {
-  log "Waiting for UniFi to become ready..."
-  local max_wait=60
-  local elapsed=0
-  while [[ $elapsed -lt $max_wait ]]; do
-    if curl -k -s -o /dev/null -w "%{http_code}" https://localhost:8443 | grep -qE "^(200|302)"; then
-      log "✓ UniFi controller responding (${elapsed}s)"
-      break
-    fi
-    sleep 2
-    elapsed=$((elapsed + 2))
-  done
+	log "Waiting for UniFi to become ready..."
+	local max_wait=60
+	local elapsed=0
+	while [[ $elapsed -lt $max_wait ]]; do
+		if curl -k -s -o /dev/null -w "%{http_code}" https://localhost:8443 | grep -qE "^(200|302)"; then
+			log "✓ UniFi controller responding (${elapsed}s)"
+			break
+		fi
+		sleep 2
+		elapsed=$((elapsed + 2))
+	done
 
-  log "Validating resurrection..."
-  local response
-  response="$(curl -k -s -L https://localhost:8443 2>/dev/null || true)"
-  if echo "${response}" | grep -qi "Welcome to your new controller"; then
-    die "Setup wizard still active — resurrection failed"
-  fi
-  if echo "${response}" | grep -qi "login\|manage"; then
-    log "✓ Setup wizard bypassed — normal login screen active"
-  else
-    log "WARN: Unexpected response from controller (manual verification needed)"
-  fi
+	log "Validating resurrection..."
+	local response
+	response="$(curl -k -s -L https://localhost:8443 2>/dev/null || true)"
+	if echo "${response}" | grep -qi "Welcome to your new controller"; then
+		die "Setup wizard still active — resurrection failed"
+	fi
+	if echo "${response}" | grep -qi "login\|manage"; then
+		log "✓ Setup wizard bypassed — normal login screen active"
+	else
+		log "WARN: Unexpected response from controller (manual verification needed)"
+	fi
 }
 
 victory_banner() {
-  cat <<'EOF'
+	cat <<'EOF'
 
 ╔═══════════════════════════════════════════════════════════╗
 ║                THE FORTRESS HAS RISEN AGAIN               ║
@@ -78,14 +78,14 @@ EOF
 }
 
 main() {
-  banner
-  preflight_checks
-  backup_existing_flag
-  apply_resurrection_fix
-  restart_unifi_service
-  verify_resurrection
-  victory_banner
-  log "SUCCESS: UCK-G2 wizard resurrection complete"
+	banner
+	preflight_checks
+	backup_existing_flag
+	apply_resurrection_fix
+	restart_unifi_service
+	verify_resurrection
+	victory_banner
+	log "SUCCESS: UCK-G2 wizard resurrection complete"
 }
 
 main "$@"

@@ -20,8 +20,8 @@ readonly SCRIPT_NAME
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() {
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
-  exit 1
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+	exit 1
 }
 
 # Carter: Identity — fixed repo root
@@ -51,10 +51,10 @@ log "Canonical backup started: $BACKUP_DIR"
 mapfile -t SH_FILES < <(find "$REPO_ROOT/scripts" "$REPO_ROOT/lib" -type f -name '*.sh' ! -name '*.bak' 2>/dev/null)
 
 for file in "${SH_FILES[@]}"; do
-  relative="${file#"$REPO_ROOT"/}"
-  dest="${BACKUP_DIR}/${relative}"
-  mkdir -p "$(dirname "$dest")"
-  cp -p "$file" "$dest"
+	relative="${file#"$REPO_ROOT"/}"
+	dest="${BACKUP_DIR}/${relative}"
+	mkdir -p "$(dirname "$dest")"
+	cp -p "$file" "$dest"
 done
 
 log "Backed up ${#SH_FILES[@]} scripts with metadata preservation"

@@ -24,41 +24,41 @@ source "${_SCRIPT_DIR}/../lib/ignite_lib.sh"
 # ─────────────────────────────────────────────────────
 
 main() {
-  acquire_lock
-  trap cleanup EXIT
+	acquire_lock
+	trap cleanup EXIT
 
-  create_backup
-  check_proxmox_version
-  check_already_ignited
+	create_backup
+	check_proxmox_version
+	check_already_ignited
 
-  parse_arguments "$@"
-  validate_required
+	parse_arguments "$@"
+	validate_required
 
-  if [[ "${VALIDATE_ONLY:-false}" == true ]]; then
-    run_phase "VALIDATION ONLY" "${_SCRIPT_DIR}/phases/phase0-validate.sh"
-    log_success "VALIDATION COMPLETE"
-    exit "${EXIT_SUCCESS}"
-  fi
+	if [[ "${VALIDATE_ONLY:-false}" == true ]]; then
+		run_phase "VALIDATION ONLY" "${_SCRIPT_DIR}/phases/phase0-validate.sh"
+		log_success "VALIDATION COMPLETE"
+		exit "${EXIT_SUCCESS}"
+	fi
 
-  run_phase "0: Pre-flight validation" "${_SCRIPT_DIR}/phases/phase0-validate.sh"
-  run_phase "1: Network configuration" "${_SCRIPT_DIR}/phases/phase1-network.sh"
-  run_phase "2: Security hardening" "${_SCRIPT_DIR}/phases/phase2-harden.sh"
-  run_phase "3: Tooling bootstrap" "${_SCRIPT_DIR}/phases/phase3-bootstrap.sh"
+	run_phase "0: Pre-flight validation" "${_SCRIPT_DIR}/phases/phase0-validate.sh"
+	run_phase "1: Network configuration" "${_SCRIPT_DIR}/phases/phase1-network.sh"
+	run_phase "2: Security hardening" "${_SCRIPT_DIR}/phases/phase2-harden.sh"
+	run_phase "3: Tooling bootstrap" "${_SCRIPT_DIR}/phases/phase3-bootstrap.sh"
 
-  if [[ "${_SKIP_ETERNAL_RESURRECT:-false}" == false ]]; then
-    run_phase "4: Fortress resurrection" "${_SCRIPT_DIR}/phases/phase4-resurrect.sh" ||
-      log_warn "Phase 4 non-fatal issues (continuing)"
-  fi
+	if [[ "${_SKIP_ETERNAL_RESURRECT:-false}" == false ]]; then
+		run_phase "4: Fortress resurrection" "${_SCRIPT_DIR}/phases/phase4-resurrect.sh" ||
+			log_warn "Phase 4 non-fatal issues (continuing)"
+	fi
 
-  if run_whitaker_offensive_suite; then
-    clear_checkpoint
-    log_success "=== PROXMOX IGNITION COMPLETE — ETERNAL GREEN ==="
-    log_success "Fortress operational | RTO <15 min"
-    exit "${EXIT_SUCCESS}"
-  else
-    log_error "=== OFFENSIVE VALIDATION FAILED ==="
-    exit "${EXIT_OFFENSIVE}"
-  fi
+	if run_whitaker_offensive_suite; then
+		clear_checkpoint
+		log_success "=== PROXMOX IGNITION COMPLETE — ETERNAL GREEN ==="
+		log_success "Fortress operational | RTO <15 min"
+		exit "${EXIT_SUCCESS}"
+	else
+		log_error "=== OFFENSIVE VALIDATION FAILED ==="
+		exit "${EXIT_OFFENSIVE}"
+	fi
 }
 
 main "$@"

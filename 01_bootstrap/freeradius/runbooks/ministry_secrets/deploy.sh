@@ -39,6 +39,6 @@ source "${REPO_ROOT}/lib/freeradius/deploy_lib.sh"
 
 # Main execution
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  deploy
-  start_service
+	deploy
+	start_service
 fi

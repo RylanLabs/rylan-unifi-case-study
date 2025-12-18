@@ -40,7 +40,7 @@ sha_url=https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/SHA25
 filename=debian-live-12.8.0-amd64-standard.iso"
 
 print_rylanlabs_banner() {
-  cat <<'EOF'
+	cat <<'EOF'
 
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
@@ -69,149 +69,149 @@ log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] $*"; }
 log_success() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [SUCCESS] $*"; }
 
 acquire_lock() {
-  if [[ -f "$LOCK_FILE" ]]; then
-    local pid
-    pid=$(cat "$LOCK_FILE")
-    if kill -0 "$pid" 2>/dev/null; then
-      log_error "Already running (PID $pid)"
-      exit 1
-    fi
-  fi
-  echo $$ >"$LOCK_FILE"
+	if [[ -f "$LOCK_FILE" ]]; then
+		local pid
+		pid=$(cat "$LOCK_FILE")
+		if kill -0 "$pid" 2>/dev/null; then
+			log_error "Already running (PID $pid)"
+			exit 1
+		fi
+	fi
+	echo $$ >"$LOCK_FILE"
 }
 
 cleanup() {
-  rm -f "$LOCK_FILE"
-  log_info "Lock released"
+	rm -f "$LOCK_FILE"
+	log_info "Lock released"
 }
 trap cleanup EXIT
 
 create_backup() {
-  [[ -f "$ISO_PATH" ]] || return 0
-  mkdir -p "$BACKUP_DIR"
-  cp -a "$ISO_PATH" "$BACKUP_DIR/" || log_warn "Backup failed (continuing)"
-  log_success "Existing ISO backed up: $BACKUP_DIR"
+	[[ -f "$ISO_PATH" ]] || return 0
+	mkdir -p "$BACKUP_DIR"
+	cp -a "$ISO_PATH" "$BACKUP_DIR/" || log_warn "Backup failed (continuing)"
+	log_success "Existing ISO backed up: $BACKUP_DIR"
 }
 
 fail_with_context() {
-  local exit_code=$1
-  shift
-  log_error "$*"
-  log_error "Last 20 lines of log:"
-  tail -20 "$LOG_FILE" | sed 's/^/  /'
-  log_error "Rollback: cp -a $BACKUP_DIR/* $(dirname "$ISO_PATH")/ 2>/dev/null || true"
-  exit "$exit_code"
+	local exit_code=$1
+	shift
+	log_error "$*"
+	log_error "Last 20 lines of log:"
+	tail -20 "$LOG_FILE" | sed 's/^/  /'
+	log_error "Rollback: cp -a $BACKUP_DIR/* $(dirname "$ISO_PATH")/ 2>/dev/null || true"
+	exit "$exit_code"
 }
 
 validate_tools() {
-  command -v wget >/dev/null || fail_with_context 1 "wget required"
-  command -v sha256sum >/dev/null || log_warn "sha256sum missing — checksum skipped"
+	command -v wget >/dev/null || fail_with_context 1 "wget required"
+	command -v sha256sum >/dev/null || log_warn "sha256sum missing — checksum skipped"
 }
 
 fetch_expected_sha256() {
-  local sha_url="$1"
-  local filename="$2"
-  local sha_file
-  sha_file=$(mktemp)
-  trap 'rm -f "$sha_file"' RETURN
+	local sha_url="$1"
+	local filename="$2"
+	local sha_file
+	sha_file=$(mktemp)
+	trap 'rm -f "$sha_file"' RETURN
 
-  log_info "Fetching SHA256SUMS from $sha_url"
-  if wget -q -O "$sha_file" "$sha_url"; then
-    grep "$filename" "$sha_file" | awk '{print $1}' || {
-      log_warn "Filename '$filename' not found in SHA256SUMS — checksum skipped"
-      echo ""
-    }
-  else
-    log_warn "Failed to fetch SHA256SUMS — continuing without checksum"
-    echo ""
-  fi
+	log_info "Fetching SHA256SUMS from $sha_url"
+	if wget -q -O "$sha_file" "$sha_url"; then
+		grep "$filename" "$sha_file" | awk '{print $1}' || {
+			log_warn "Filename '$filename' not found in SHA256SUMS — checksum skipped"
+			echo ""
+		}
+	else
+		log_warn "Failed to fetch SHA256SUMS — continuing without checksum"
+		echo ""
+	fi
 }
 
 download_iso() {
-  local iso_url="$1"
-  local iso_path="$2"
-  local expected_sha256="$3"
-  local tmp_file="${iso_path}.part"
+	local iso_url="$1"
+	local iso_path="$2"
+	local expected_sha256="$3"
+	local tmp_file="${iso_path}.part"
 
-  if [[ "$DRY_RUN" == true ]]; then
-    log_info "[DRY-RUN] Would download $iso_url → $iso_path"
-    return 0
-  fi
+	if [[ "$DRY_RUN" == true ]]; then
+		log_info "[DRY-RUN] Would download $iso_url → $iso_path"
+		return 0
+	fi
 
-  log_info "Downloading $iso_url"
-  wget --progress=bar --tries=5 --timeout=30 -O "$tmp_file" "$iso_url" || fail_with_context 2 "Download failed"
+	log_info "Downloading $iso_url"
+	wget --progress=bar --tries=5 --timeout=30 -O "$tmp_file" "$iso_url" || fail_with_context 2 "Download failed"
 
-  if [[ -n "$expected_sha256" ]] && command -v sha256sum >/dev/null; then
-    echo "$expected_sha256 $tmp_file" | sha256sum -c --status || fail_with_context 3 "Checksum mismatch"
-    log_success "Checksum verified"
-  else
-    log_warn "Checksum skipped"
-  fi
+	if [[ -n "$expected_sha256" ]] && command -v sha256sum >/dev/null; then
+		echo "$expected_sha256 $tmp_file" | sha256sum -c --status || fail_with_context 3 "Checksum mismatch"
+		log_success "Checksum verified"
+	else
+		log_warn "Checksum skipped"
+	fi
 
-  mv "$tmp_file" "$iso_path" || fail_with_context 4 "Failed to stage ISO"
-  log_success "ISO staged: $iso_path"
+	mv "$tmp_file" "$iso_path" || fail_with_context 4 "Failed to stage ISO"
+	log_success "ISO staged: $iso_path"
 }
 
 process_distro() {
-  local distro="$1"
-  local config="${DISTROS[$distro]}"
+	local distro="$1"
+	local config="${DISTROS[$distro]}"
 
-  # Parse the newline-separated key=value configuration without eval so ShellCheck
-  # can follow variable assignments (safer than eval).
-  ISO_PATH=""
-  ISO_URL=""
-  sha_url=""
-  filename=""
-  while IFS=$'\n' read -r kv; do
-    case "$kv" in
-      path=*) ISO_PATH="${kv#path=}" ;;
-      url=*) ISO_URL="${kv#url=}" ;;
-      sha_url=*) sha_url="${kv#sha_url=}" ;;
-      filename=*) filename="${kv#filename=}" ;;
-    esac
-  done <<<"$config"
+	# Parse the newline-separated key=value configuration without eval so ShellCheck
+	# can follow variable assignments (safer than eval).
+	ISO_PATH=""
+	ISO_URL=""
+	sha_url=""
+	filename=""
+	while IFS=$'\n' read -r kv; do
+		case "$kv" in
+		path=*) ISO_PATH="${kv#path=}" ;;
+		url=*) ISO_URL="${kv#url=}" ;;
+		sha_url=*) sha_url="${kv#sha_url=}" ;;
+		filename=*) filename="${kv#filename=}" ;;
+		esac
+	done <<<"$config"
 
-  # The distro config is expanded dynamically via eval above; shellcheck cannot
-  # see the assignment statically. Suppress SC2154 for these runtime-set vars.
+	# The distro config is expanded dynamically via eval above; shellcheck cannot
+	# see the assignment statically. Suppress SC2154 for these runtime-set vars.
 
-  create_backup
-  mkdir -p "$(dirname "$ISO_PATH")"
+	create_backup
+	mkdir -p "$(dirname "$ISO_PATH")"
 
-  if [[ -f "$ISO_PATH" ]]; then
-    local expected_sha256
-    expected_sha256=$(fetch_expected_sha256 "$sha_url" "$filename")
-    if [[ -n "$expected_sha256" ]] && command -v sha256sum >/dev/null; then
-      if echo "$expected_sha256 $ISO_PATH" | sha256sum -c --status; then
-        log_success "$distro ISO present and verified — skipping"
-        return 0
-      fi
-      log_warn "$distro checksum mismatch — re-downloading"
-    else
-      log_info "$distro ISO present — checksum skipped"
-      return 0
-    fi
-  fi
+	if [[ -f "$ISO_PATH" ]]; then
+		local expected_sha256
+		expected_sha256=$(fetch_expected_sha256 "$sha_url" "$filename")
+		if [[ -n "$expected_sha256" ]] && command -v sha256sum >/dev/null; then
+			if echo "$expected_sha256 $ISO_PATH" | sha256sum -c --status; then
+				log_success "$distro ISO present and verified — skipping"
+				return 0
+			fi
+			log_warn "$distro checksum mismatch — re-downloading"
+		else
+			log_info "$distro ISO present — checksum skipped"
+			return 0
+		fi
+	fi
 
-  local expected_sha256
-  expected_sha256=$(fetch_expected_sha256 "$sha_url" "$filename")
-  download_iso "$ISO_URL" "$ISO_PATH" "$expected_sha256"
+	local expected_sha256
+	expected_sha256=$(fetch_expected_sha256 "$sha_url" "$filename")
+	download_iso "$ISO_URL" "$ISO_PATH" "$expected_sha256"
 }
 
 main() {
-  print_rylanlabs_banner
+	print_rylanlabs_banner
 
-  log_info "=== MULTI-DISTRO CLOUD-INIT ISO FETCH v9 — A++ CANON HOMOGENIZED ==="
-  log_info "Log: $LOG_FILE"
+	log_info "=== MULTI-DISTRO CLOUD-INIT ISO FETCH v9 — A++ CANON HOMOGENIZED ==="
+	log_info "Log: $LOG_FILE"
 
-  acquire_lock
-  validate_tools
+	acquire_lock
+	validate_tools
 
-  for distro in "${!DISTROS[@]}"; do
-    log_info "Processing $distro..."
-    process_distro "$distro"
-  done
+	for distro in "${!DISTROS[@]}"; do
+		log_info "Processing $distro..."
+		process_distro "$distro"
+	done
 
-  log_success "=== ALL SUPPORTED ISOs FETCHED — FORTRESS READY ==="
+	log_success "=== ALL SUPPORTED ISOs FETCHED — FORTRESS READY ==="
 }
 
 main

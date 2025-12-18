@@ -15,8 +15,8 @@ echo "════════════════════════�
 echo ""
 
 if [[ ! -d ".githooks" ]]; then
-  echo "❌ No .githooks directory found. Nothing to install." >&2
-  exit 1
+	echo "❌ No .githooks directory found. Nothing to install." >&2
+	exit 1
 fi
 
 # Set hooks path
@@ -29,29 +29,29 @@ echo "✅ Hooks installed: core.hooksPath set to .githooks"
 echo ""
 echo "   Installed hooks:"
 for hook in .githooks/*; do
-  if [[ -f "$hook" && -x "$hook" ]]; then
-    HOOK_NAME=$(basename "$hook")
-    case "$HOOK_NAME" in
-      pre-commit)
-        echo "   - pre-commit      (BOM/CRLF normalization)"
-        ;;
-      commit-msg)
-        echo "   - commit-msg      (Namer: Conventional Commits validation)"
-        ;;
-      prepare-commit-msg)
-        echo "   - prepare-commit-msg (Namer: Template injection)"
-        ;;
-      post-commit)
-        echo "   - post-commit     (Eye: Threshold detection)"
-        ;;
-      pre-push)
-        echo "   - pre-push        (Gatekeeper: Full validation)"
-        ;;
-      *)
-        echo "   - $HOOK_NAME"
-        ;;
-    esac
-  fi
+	if [[ -f "$hook" && -x "$hook" ]]; then
+		HOOK_NAME=$(basename "$hook")
+		case "$HOOK_NAME" in
+		pre-commit)
+			echo "   - pre-commit      (BOM/CRLF normalization)"
+			;;
+		commit-msg)
+			echo "   - commit-msg      (Namer: Conventional Commits validation)"
+			;;
+		prepare-commit-msg)
+			echo "   - prepare-commit-msg (Namer: Template injection)"
+			;;
+		post-commit)
+			echo "   - post-commit     (Eye: Threshold detection)"
+			;;
+		pre-push)
+			echo "   - pre-push        (Gatekeeper: Full validation)"
+			;;
+		*)
+			echo "   - $HOOK_NAME"
+			;;
+		esac
+	fi
 done
 
 echo ""

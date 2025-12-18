@@ -15,19 +15,19 @@ set -euo pipefail
 
 # update_config_line: Safely update or append configuration line
 update_config_line() {
-  local file="$1"
-  local key="$2"
-  local value="$3"
+	local file="$1"
+	local key="$2"
+	local value="$3"
 
-  # Backup before modifying
-  backup_config "$file"
+	# Backup before modifying
+	backup_config "$file"
 
-  # Update existing line or append
-  if grep -q "^${key}" "$file" 2>/dev/null; then
-    sed -i "s|^${key}.*|${key}${value}|g" "$file"
-  else
-    echo "${key}${value}" >>"$file"
-  fi
+	# Update existing line or append
+	if grep -q "^${key}" "$file" 2>/dev/null; then
+		sed -i "s|^${key}.*|${key}${value}|g" "$file"
+	else
+		echo "${key}${value}" >>"$file"
+	fi
 }
 
 export -f update_config_line

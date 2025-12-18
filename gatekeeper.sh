@@ -8,34 +8,34 @@ IFS=$'\n\t'
 
 # Canonical exclusion patterns to avoid scanning backups/venvs (Hellodeolu v6)
 readonly EXCLUDE_PATHS=(
-  ".archive/"
-  ".backups/"
-  ".backup*/"
-  "venv/"
-  ".venv/"
-  "node_modules/"
-  ".git/"
-  "__pycache__/"
-  "*.egg-info/"
+	".archive/"
+	".backups/"
+	".backup*/"
+	"venv/"
+	".venv/"
+	"node_modules/"
+	".git/"
+	"__pycache__/"
+	"*.egg-info/"
 )
 EXCLUDE_FIND_EXPR=()
 for p in "${EXCLUDE_PATHS[@]}"; do
-  EXCLUDE_FIND_EXPR+=('!' -path "*/${p}*")
+	EXCLUDE_FIND_EXPR+=('!' -path "*/${p}*")
 done
 
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] GATEKEEPER: $*" >&2; }
 die() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ GATEKEEPER: $*" >&2
-  exit 1
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ GATEKEEPER: $*" >&2
+	exit 1
 }
 
 log "The Gatekeeper awakens. No commit shall pass unclean."
 # Structured Gatekeeper logging
 if [ -f scripts/gatekeeper-logger.sh ]; then
-  # shellcheck source=/dev/null
-  source scripts/gatekeeper-logger.sh
+	# shellcheck source=/dev/null
+	source scripts/gatekeeper-logger.sh
 else
-  ensure_gk_dir() { mkdir -p ".audit/gatekeeper"; }
+	ensure_gk_dir() { mkdir -p ".audit/gatekeeper"; }
 fi
 # Capture branch/commit context
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
@@ -45,25 +45,25 @@ log_push_start "$BRANCH" "$COMMIT_HASH" "$COMMIT_MSG" || true
 
 # Helper: run a command, measure, log validator, and optionally die on failure
 run_and_log() {
-  local name="$1" critical=${2:-false}
-  shift 2 || true
-  local start end dur rc err
-  start=$(date +%s%3N)
-  if ! "$@" 2>.audit/gatekeeper/${name}.stderr.log; then
-    rc=$?
-    err=$(sed -n '1,200p' .audit/gatekeeper/${name}.stderr.log | sed 's/"/\\"/g' | tr '\n' ' ')
-  else
-    rc=0
-    err=""
-  fi
-  end=$(date +%s%3N)
-  dur=$((end - start))
-  log_validator "$name" "$([ "$rc" -eq 0 ] && echo PASS || echo FAIL)" "$dur" "$err" || true
-  if [ "$rc" -ne 0 ] && [ "$critical" = true ]; then
-    log_push_end "BLOCKED" || true
-    die "$name failed (rc=$rc)"
-  fi
-  return $rc
+	local name="$1" critical=${2:-false}
+	shift 2 || true
+	local start end dur rc err
+	start=$(date +%s%3N)
+	if ! "$@" 2>.audit/gatekeeper/${name}.stderr.log; then
+		rc=$?
+		err=$(sed -n '1,200p' .audit/gatekeeper/${name}.stderr.log | sed 's/"/\\"/g' | tr '\n' ' ')
+	else
+		rc=0
+		err=""
+	fi
+	end=$(date +%s%3N)
+	dur=$((end - start))
+	log_validator "$name" "$([ "$rc" -eq 0 ] && echo PASS || echo FAIL)" "$dur" "$err" || true
+	if [ "$rc" -ne 0 ] && [ "$critical" = true ]; then
+		log_push_end "BLOCKED" || true
+		die "$name failed (rc=$rc)"
+	fi
+	return $rc
 }
 
 # 1. Python heresy gates
@@ -83,7 +83,7 @@ run_and_log pytest true pytest --cov=. --cov-fail-under=70
 log "Running Bash purity validation..."
 # Allow warnings; fail only on actual errors
 if find . -name "*.sh" -type f "${EXCLUDE_FIND_EXPR[@]}" -print0 | xargs -0 shellcheck -x -f gcc 2>&1 | grep -E "error:"; then
-  die "shellcheck errors found"
+	die "shellcheck errors found"
 fi
 find . -name "*.sh" -type f "${EXCLUDE_FIND_EXPR[@]}" -print0 | xargs -0 shfmt -i 2 -ci -d || die "shfmt formatting failed"
 log "✅ Bash purity OK"
@@ -91,19 +91,22 @@ log "✅ Bash purity OK"
 # 3. Markdown lore
 log "Validating sacred texts..."
 if command -v markdownlint >/dev/null 2>&1; then
-  find . -name "*.md" -type f -print0 | xargs -0 markdownlint --config .markdownlint.json || die "markdownlint failed"
+	find . -name "*.md" -type f -print0 | xargs -0 markdownlint --config .markdownlint.json || die "markdownlint failed"
 else
-  log "markdownlint not installed; skipping"
+	log "markdownlint not installed; skipping"
 fi
 
 # 4. Bandit parse sanity (the one that was killing CI)
 log "Testing Bandit config parsing..."
 if [ -f .bandit ]; then
-  # Provide bandit with explicit exclude list to avoid scanning virtualenvs/backups
-EXCLUDE_BANDIT=$(IFS=, ; echo "${EXCLUDE_PATHS[*]}")
-run_and_log bandit_parse true bandit -c .bandit -r . --exclude "$EXCLUDE_BANDIT" -f json >/dev/null 2>&1
+	# Provide bandit with explicit exclude list to avoid scanning virtualenvs/backups
+	EXCLUDE_BANDIT=$(
+		IFS=,
+		echo "${EXCLUDE_PATHS[*]}"
+	)
+	run_and_log bandit_parse true bandit -c .bandit -r . --exclude "$EXCLUDE_BANDIT" -f json >/dev/null 2>&1
 else
-  log ".bandit not found — using defaults"
+	log ".bandit not found — using defaults"
 fi
 
 # 5. Smoke test resurrection (DRY RUN)

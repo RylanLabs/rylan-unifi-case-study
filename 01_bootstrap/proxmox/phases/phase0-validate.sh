@@ -18,36 +18,36 @@ CLOUDKEY_IP=""
 SKIP_UNIFI=false
 
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    --recon-only)
-      MODE="recon-only"
-      shift
-      ;;
-    --skip-unifi)
-      SKIP_UNIFI=true
-      shift
-      ;;
-    --validate-cloudkey)
-      MODE="validate-cloudkey"
-      shift
-      ;;
-    --cloudkey-ip)
-      CLOUDKEY_IP="$2"
-      shift 2
-      ;;
-    --validate-lxc)
-      MODE="validate-lxc"
-      shift
-      ;;
-    --red-team-mode)
-      MODE="red-team"
-      shift
-      ;;
-    *)
-      log_warn "Unknown flag: $1"
-      shift
-      ;;
-  esac
+	case $1 in
+	--recon-only)
+		MODE="recon-only"
+		shift
+		;;
+	--skip-unifi)
+		SKIP_UNIFI=true
+		shift
+		;;
+	--validate-cloudkey)
+		MODE="validate-cloudkey"
+		shift
+		;;
+	--cloudkey-ip)
+		CLOUDKEY_IP="$2"
+		shift 2
+		;;
+	--validate-lxc)
+		MODE="validate-lxc"
+		shift
+		;;
+	--red-team-mode)
+		MODE="red-team"
+		shift
+		;;
+	*)
+		log_warn "Unknown flag: $1"
+		shift
+		;;
+	esac
 done
 
 # ============================================================================
@@ -70,30 +70,30 @@ source "${SCRIPT_DIR}/lib/phase0-red-team.sh"
 # ============================================================================
 
 main() {
-  case "$MODE" in
-    recon-only)
-      run_flatnet_recon
-      ;;
-    validate-cloudkey)
-      run_cloudkey_validation "$CLOUDKEY_IP"
-      ;;
-    validate-lxc)
-      run_lxc_validation
-      ;;
-    red-team)
-      run_red_team_audit "$SKIP_UNIFI" "$CLOUDKEY_IP"
-      ;;
-    full)
-      run_prerequisites_validation
-      if [ "$SKIP_UNIFI" = false ]; then
-        log_info "Skipping controller validation (use --validate-cloudkey or --validate-lxc post-setup)"
-      fi
-      ;;
-    *)
-      log_error "Unknown mode: $MODE"
-      exit 1
-      ;;
-  esac
+	case "$MODE" in
+	recon-only)
+		run_flatnet_recon
+		;;
+	validate-cloudkey)
+		run_cloudkey_validation "$CLOUDKEY_IP"
+		;;
+	validate-lxc)
+		run_lxc_validation
+		;;
+	red-team)
+		run_red_team_audit "$SKIP_UNIFI" "$CLOUDKEY_IP"
+		;;
+	full)
+		run_prerequisites_validation
+		if [ "$SKIP_UNIFI" = false ]; then
+			log_info "Skipping controller validation (use --validate-cloudkey or --validate-lxc post-setup)"
+		fi
+		;;
+	*)
+		log_error "Unknown mode: $MODE"
+		exit 1
+		;;
+	esac
 }
 
 main

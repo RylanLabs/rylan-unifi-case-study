@@ -12,10 +12,10 @@ set -euo pipefail
 log() { [[ "$QUIET" == false ]] && echo "[Whitaker] $*"; }
 audit() { echo "$(date -Iseconds) | Whitaker | $1 | $2" >>/var/log/whitaker-audit.log; }
 fail() {
-  echo "🚨 SIMULATED BREACH SUCCESS: $1"
-  echo "📋 Defense failed — immediate remediation required"
-  audit "BREACH" "$1"
-  exit 1
+	echo "🚨 SIMULATED BREACH SUCCESS: $1"
+	echo "📋 Defense failed — immediate remediation required"
+	audit "BREACH" "$1"
+	exit 1
 }
 
 QUIET=false
@@ -29,8 +29,8 @@ mkdir -p /var/log
 
 # Source Carter for potential API targets (if needed)
 if [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]]; then
-  # shellcheck source=./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
-  source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+	# shellcheck source=./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+	source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
 fi
 
 # ─────────────────────────────────────────────────────
@@ -40,13 +40,13 @@ log "Phase 1: Controller reconnaissance"
 CONTROLLER_IP="192.168.1.13" # Canonical controller
 
 if [[ "$DRY_RUN" == false ]]; then
-  controller_ports=$(sudo timeout 30 nmap -sV -p 80,443,8080,8443,3478 "$CONTROLLER_IP" 2>/dev/null | grep -c "open" || echo 0)
-  if [[ $controller_ports -gt 4 ]]; then # Expect HTTPS, inform, STUN
-    proof=$(sudo nmap -sV -p 80,443,8080,8443,3478 "$CONTROLLER_IP" | grep open)
-    fail "Unexpected ports open on controller ($controller_ports)" "$proof"
-  fi
+	controller_ports=$(sudo timeout 30 nmap -sV -p 80,443,8080,8443,3478 "$CONTROLLER_IP" 2>/dev/null | grep -c "open" || echo 0)
+	if [[ $controller_ports -gt 4 ]]; then # Expect HTTPS, inform, STUN
+		proof=$(sudo nmap -sV -p 80,443,8080,8443,3478 "$CONTROLLER_IP" | grep open)
+		fail "Unexpected ports open on controller ($controller_ports)" "$proof"
+	fi
 else
-  log "⚠️ DRY-RUN: Skipping controller scan"
+	log "⚠️ DRY-RUN: Skipping controller scan"
 fi
 log "✅ Controller exposure minimal"
 
@@ -55,13 +55,13 @@ log "✅ Controller exposure minimal"
 # ─────────────────────────────────────────────────────
 log "Phase 2: Lateral movement probe across VLANs"
 if [[ "$DRY_RUN" == false ]] && command -v nmap &>/dev/null; then
-  cross_vlan=$(sudo timeout 60 nmap -sn 10.0.{10,30,40,90}.0/24 2>/dev/null | grep -c "Host is up" || echo 0)
-  if [[ $cross_vlan -gt 20 ]]; then # Adjust based on known device count
-    proof=$(sudo nmap -sn 10.0.{10,30,40,90}.0/24 | grep "Nmap scan report" | head -10)
-    fail "Excessive cross-VLAN visibility ($cross_vlan hosts)" "$proof"
-  fi
+	cross_vlan=$(sudo timeout 60 nmap -sn 10.0.{10,30,40,90}.0/24 2>/dev/null | grep -c "Host is up" || echo 0)
+	if [[ $cross_vlan -gt 20 ]]; then # Adjust based on known device count
+		proof=$(sudo nmap -sn 10.0.{10,30,40,90}.0/24 | grep "Nmap scan report" | head -10)
+		fail "Excessive cross-VLAN visibility ($cross_vlan hosts)" "$proof"
+	fi
 else
-  log "⚠️ nmap missing or dry-run → skipping lateral probe"
+	log "⚠️ nmap missing or dry-run → skipping lateral probe"
 fi
 log "✅ Lateral movement restricted"
 
@@ -70,10 +70,10 @@ log "✅ Lateral movement restricted"
 # ─────────────────────────────────────────────────────
 log "Phase 3: Web vulnerability simulation"
 if [[ "$DRY_RUN" == false ]] && nc -z "$CONTROLLER_IP" 443 2>/dev/null; then
-  # Placeholder — real sqlmap would go here in air-gapped sim
-  log "✅ No exploitable web endpoints detected (simulation)"
+	# Placeholder — real sqlmap would go here in air-gapped sim
+	log "✅ No exploitable web endpoints detected (simulation)"
 else
-  log "⚠️ Controller web interface unreachable — skipped"
+	log "⚠️ Controller web interface unreachable — skipped"
 fi
 
 # ─────────────────────────────────────────────────────

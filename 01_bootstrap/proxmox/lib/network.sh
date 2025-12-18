@@ -15,21 +15,21 @@ set -euo pipefail
 
 # detect_primary_interface: Auto-detect primary network interface
 detect_primary_interface() {
-  # Find interface with default route
-  local primary_if
-  primary_if=$(ip route | grep default | awk '{print $5}' | head -n1)
+	# Find interface with default route
+	local primary_if
+	primary_if=$(ip route | grep default | awk '{print $5}' | head -n1)
 
-  if [ -z "$primary_if" ]; then
-    # Fallback: First non-loopback interface that's UP
-    primary_if=$(ip link show | grep -v "lo:" | grep "state UP" | head -n1 | awk -F: '{print $2}' | xargs)
-  fi
+	if [ -z "$primary_if" ]; then
+		# Fallback: First non-loopback interface that's UP
+		primary_if=$(ip link show | grep -v "lo:" | grep "state UP" | head -n1 | awk -F: '{print $2}' | xargs)
+	fi
 
-  if [ -z "$primary_if" ]; then
-    fail_with_context 101 "No network interface detected" \
-      "Verify physical network cable is connected"
-  fi
+	if [ -z "$primary_if" ]; then
+		fail_with_context 101 "No network interface detected" \
+			"Verify physical network cable is connected"
+	fi
 
-  echo "$primary_if"
+	echo "$primary_if"
 }
 
 export -f detect_primary_interface

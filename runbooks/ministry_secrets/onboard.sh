@@ -14,12 +14,12 @@ readonly STATE_FILE="${SCRIPT_DIR}/state/users.yaml"
 
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $*" >&2; }
 die() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
-  exit 1
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+	exit 1
 }
 
 usage() {
-  cat >&2 <<EOF
+	cat >&2 <<EOF
 Usage: $SCRIPT_NAME <email> [role] [expiry_days]
 
 Roles: engineer (default), vip, exec, contractor
@@ -30,7 +30,7 @@ Examples:
   $SCRIPT_NAME bob@rylan.internal vip
   $SCRIPT_NAME contractor@vendor.com contractor 30
 EOF
-  exit 1
+	exit 1
 }
 
 # Validate arguments
@@ -44,30 +44,30 @@ EXPIRY_DAYS="${3:-0}"
 
 # Validate role
 case "$ROLE" in
-  engineer | vip | exec | contractor) ;;
-  *) die "Unknown role: $ROLE. Valid: engineer, vip, exec, contractor" ;;
+engineer | vip | exec | contractor) ;;
+*) die "Unknown role: $ROLE. Valid: engineer, vip, exec, contractor" ;;
 esac
 
 # Role → VLAN + Groups mapping
 VLAN=""
 USER_GROUPS=""
 case "$ROLE" in
-  engineer)
-    VLAN=30
-    USER_GROUPS="ssh-admins,users"
-    ;;
-  vip)
-    VLAN=25
-    USER_GROUPS="vip-access,audit-log"
-    ;;
-  exec)
-    VLAN=20
-    USER_GROUPS="exec-access,2fa-required"
-    ;;
-  contractor)
-    VLAN=40
-    USER_GROUPS="contractors,time-limited"
-    ;;
+engineer)
+	VLAN=30
+	USER_GROUPS="ssh-admins,users"
+	;;
+vip)
+	VLAN=25
+	USER_GROUPS="vip-access,audit-log"
+	;;
+exec)
+	VLAN=20
+	USER_GROUPS="exec-access,2fa-required"
+	;;
+contractor)
+	VLAN=40
+	USER_GROUPS="contractors,time-limited"
+	;;
 esac
 
 # Extract username from email
@@ -77,11 +77,11 @@ log "Onboarding $EMAIL ($ROLE) to VLAN $VLAN"
 
 # DRY_RUN mode for testing
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
-  log "DRY_RUN: Would create LDAP entry for uid=$USERNAME"
-  log "DRY_RUN: Would generate SSH key"
-  log "DRY_RUN: Would assign VLAN $VLAN via RADIUS"
-  log "DRY_RUN: Would update state file"
-  exit 0
+	log "DRY_RUN: Would create LDAP entry for uid=$USERNAME"
+	log "DRY_RUN: Would generate SSH key"
+	log "DRY_RUN: Would assign VLAN $VLAN via RADIUS"
+	log "DRY_RUN: Would update state file"
+	exit 0
 fi
 
 # Create state directory if needed
@@ -94,10 +94,10 @@ chmod 700 "$SSH_KEY_DIR"
 
 SSH_KEY_FILE="${SSH_KEY_DIR}/${USERNAME}"
 if [[ ! -f "$SSH_KEY_FILE" ]]; then
-  log "Generating SSH key for $USERNAME"
-  ssh-keygen -t ed25519 -C "$EMAIL" -f "$SSH_KEY_FILE" -N "" -q
-  chmod 600 "$SSH_KEY_FILE"
-  chmod 644 "${SSH_KEY_FILE}.pub"
+	log "Generating SSH key for $USERNAME"
+	ssh-keygen -t ed25519 -C "$EMAIL" -f "$SSH_KEY_FILE" -N "" -q
+	chmod 600 "$SSH_KEY_FILE"
+	chmod 644 "${SSH_KEY_FILE}.pub"
 fi
 
 SSH_PUBKEY=$(cat "${SSH_KEY_FILE}.pub")
@@ -127,18 +127,18 @@ log "LDIF created: $LDIF_FILE"
 
 # Apply LDIF (if ldapadd available)
 if command -v ldapadd &>/dev/null; then
-  log "Adding LDAP entry..."
-  # ldapadd -x -D "cn=admin,dc=rylan,dc=internal" -W -f "$LDIF_FILE"
-  log "LDAP: Skipping actual ldapadd (uncomment in production)"
+	log "Adding LDAP entry..."
+	# ldapadd -x -D "cn=admin,dc=rylan,dc=internal" -W -f "$LDIF_FILE"
+	log "LDAP: Skipping actual ldapadd (uncomment in production)"
 else
-  log "LDAP: ldapadd not available, LDIF saved to $LDIF_FILE"
+	log "LDAP: ldapadd not available, LDIF saved to $LDIF_FILE"
 fi
 
 # Update state file (YAML)
 TIMESTAMP=$(date -Iseconds)
 EXPIRY_DATE=""
 if [[ "$EXPIRY_DAYS" -gt 0 ]]; then
-  EXPIRY_DATE=$(date -d "+${EXPIRY_DAYS} days" -Iseconds)
+	EXPIRY_DATE=$(date -d "+${EXPIRY_DAYS} days" -Iseconds)
 fi
 
 cat >>"$STATE_FILE" <<STATE_EOF

@@ -4,8 +4,8 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 CONFIG_PATH="${REPO_ROOT}/02_declarative_config/policy-table-rylan-v5.json"
 if [[ ! -f "${CONFIG_PATH}" ]]; then
-  echo "Policy file not found: ${CONFIG_PATH}" >&2
-  exit 0
+	echo "Policy file not found: ${CONFIG_PATH}" >&2
+	exit 0
 fi
 python3 - <<'PY'
 import json,sys
