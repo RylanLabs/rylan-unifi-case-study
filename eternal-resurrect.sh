@@ -15,7 +15,7 @@ die() {
 log "🛡️ Raising Eternal Fortress — Consciousness 4.2"
 
 # Run ministries (Carter → Bauer → Beale)
-./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+./runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
 ./runbooks/ministry-whispers/rylan-bauer-eternal-one-shot.sh
 # Beale ministry not yet one-shot — call direct hardening
 ./scripts/beale-harden.sh --quiet || die "Beale hardening failed"

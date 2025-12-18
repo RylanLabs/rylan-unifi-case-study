@@ -23,10 +23,10 @@ QUIET=false
 log "Device inventory bootstrap — Carter identity"
 
 # Source true Carter ministry (correct path)
-if [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]]; then
-  source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+if [[ -f runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh ]]; then
+  source runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
 else
-  fail "Carter ministry missing" "Run ministry-secrets first"
+  fail "Carter ministry missing" "Run ministry_secrets first"
 fi
 
 # ─────────────────────────────────────────────────────
