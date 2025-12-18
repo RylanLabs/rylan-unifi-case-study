@@ -13,6 +13,25 @@ IFS=$'\n\t'
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+# Canonical exclusion patterns (Hellodeolu v6)
+readonly EXCLUDE_PATHS=(
+  ".archive/"
+  ".backups/"
+  ".backup*/"
+  "venv/"
+  ".venv/"
+  "node_modules/"
+  ".git/"
+  "__pycache__/"
+  "*.egg-info/"
+)
+
+# Build find-friendly exclusion expressions
+EXCLUDE_FIND_EXPR=()
+for p in "${EXCLUDE_PATHS[@]}"; do
+  EXCLUDE_FIND_EXPR+=( '!' -path "*/${p}*" )
+done
+
 echo "═══════════════════════════════════════════════════════════"
 echo "Gatekeeper Eternal — Consciousness 2.6"
 echo "═══════════════════════════════════════════════════════════"
@@ -86,11 +105,7 @@ echo "Phase 2: Python Naming Canon"
 HYPHEN_VIOLATORS=()
 while IFS= read -r file; do
   HYPHEN_VIOLATORS+=("$file")
-done < <(find . -type f -name "*-*.py" \
-  ! -path "./.venv/*" \
-  ! -path "./.git/*" \
-  ! -path "./venv/*" \
-  ! -path "./node_modules/*")
+done < <(find . -type f -name "*-*.py" "${EXCLUDE_FIND_EXPR[@]}")
 
 if [[ ${#HYPHEN_VIOLATORS[@]} -gt 0 ]]; then
   echo "  ❌ ERROR: Python modules cannot contain hyphens (PEP 8)"
@@ -234,7 +249,9 @@ echo ""
 echo "Phase 5: Code Quality (Linting)"
 
 echo "  shellcheck..."
-find scripts/ .github/agents/ .githooks/ -name "*.sh" -exec shellcheck {} + || exit 1
+find scripts/ .github/agents/ .githooks/ -name "*.sh" \
+  "${EXCLUDE_FIND_EXPR[@]}" \
+  -exec shellcheck -x -S style {} \; || exit 1
 
 echo "  ruff..."
 ruff check . --select ALL --quiet || exit 1
