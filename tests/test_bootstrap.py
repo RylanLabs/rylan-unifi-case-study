@@ -10,7 +10,8 @@ BASE = Path(__file__).resolve().parent.parent
 
 def test_bootstrap_scripts_exist() -> None:
     assert (BASE / "01_bootstrap" / "install-unifi-controller.sh").exists()
-    assert (BASE / "01_bootstrap" / "adopt_devices.py").exists()
+    # adoption script lives under the unifi subdirectory
+    assert (BASE / "01_bootstrap" / "unifi" / "adopt_devices.py").exists()
 
 
 def test_vlan_stubs_present() -> None:
