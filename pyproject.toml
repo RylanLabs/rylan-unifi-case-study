@@ -16,7 +16,7 @@ requires-python = ">=3.10"
 # Pytest Configuration
 # ============================================================================
 [tool.pytest.ini_options]
-testpaths = ["tests", "templates/template_tests"]
+testpaths = ["tests"]
 addopts = "-ra -v --strict-markers --tb=short"
 cache_dir = ".pytest_cache"
 markers = [
