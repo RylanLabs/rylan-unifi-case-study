@@ -23,6 +23,6 @@ if [ -f "$LOG" ]; then
     mv "$LOG" "$GK_DIR/gatekeeper-$ts.log"
     gzip "$GK_DIR/gatekeeper-$ts.log"
     # keep only $KEEP most recent
-    ls -1t "$GK_DIR"/gatekeeper-*.log.gz 2>/dev/null | tail -n +$((KEEP+1)) | xargs -r rm -f -- || true
+    ls -1t "$GK_DIR"/gatekeeper-*.log.gz 2>/dev/null | tail -n +$((KEEP + 1)) | xargs -r rm -f -- || true
   fi
 fi
