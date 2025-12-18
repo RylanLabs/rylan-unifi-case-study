@@ -74,8 +74,12 @@ run_and_log pip true pip install -q -r requirements.txt --break-system-packages
 run_and_log mypy false mypy --ignore-missing-imports --exclude tests --exclude templates .
 # Run ruff (non-fatal locally)
 run_and_log ruff false ruff check .
-# Run bandit (critical)
-run_and_log bandit true bandit -r . -q -lll
+# Run bandit (critical) — exclude known vendor/venv/backups paths to avoid noisy findings
+EXCLUDE_BANDIT_LIST=$(
+  IFS=,
+  echo "${EXCLUDE_PATHS[*]}"
+)
+run_and_log bandit true bandit -r . --exclude "$EXCLUDE_BANDIT_LIST" -q -lll
 # Run tests (critical)
 run_and_log pytest true pytest --cov=. --cov-fail-under=70
 
