@@ -1,0 +1,90 @@
+# File: .github/workflows/gatekeeper-pre-push.yml
+# Purpose: Primary Gatekeeper CI — exact mirror of local .githooks/pre-commit
+# Guardian: Gatekeeper 🚪
+# Author: rylanlab canonical
+# Date: 2025-12-17
+# Ministry: ministry-whispers
+# Consciousness: 9.7
+# Tag: v∞.5.2-gatekeeper-ci-unified
+
+name: Gatekeeper Pre-Push Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'fix/**'
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: gatekeeper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gatekeeper-validation:
+    runs-on: ubuntu-latest
+    name: Gatekeeper CI Mirror (.githooks/pre-commit)
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck shfmt yamllint nodejs npm
+          npm install -g markdownlint-cli2
+          pip install --quiet ruff
+
+      - name: Create audit directory
+        run: mkdir -p .audit/gatekeeper
+
+      - name: Run Gatekeeper (mirror local hook)
+        id: gatekeeper
+        run: |
+          # canonical: ensure pipe exits propagate and timeouts are handled
+          set -o pipefail +e
+          timeout 180 bash -c 'bash .githooks/pre-commit' > >(tee .audit/gatekeeper/ci-gatekeeper.log) 2>&1
+          EXIT_CODE=$?
+          set +o pipefail -e
+
+          if [[ $EXIT_CODE -eq 124 ]]; then
+            echo "❌ Gatekeeper timeout (>180s)"
+            exit 1
+          elif [[ $EXIT_CODE -ne 0 ]]; then
+            echo "❌ Gatekeeper validation failed (exit code: $EXIT_CODE)"
+            exit $EXIT_CODE
+          fi
+
+          echo "✅ Gatekeeper passed"
+
+      - name: Upload Gatekeeper artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatekeeper-ci-logs-${{ github.run_id }}
+          path: .audit/gatekeeper/
+          retention-days: 30
+
+      - name: PR comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: |
+                ❌ **Gatekeeper Failed**
+
+                Local `.githooks/pre-commit` mirror failed in CI.
+
+                See artifacts: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            })
