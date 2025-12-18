@@ -28,6 +28,17 @@ cmd="$1"; shift || true
 jq_exists() { command -v jq >/dev/null 2>&1; }
 
 case "$cmd" in
+  latest)
+    if [ -f "$GK_DIR/gatekeeper-latest.json" ]; then
+      if jq_exists; then
+        jq '.' "$GK_DIR/gatekeeper-latest.json" || true
+      else
+        cat "$GK_DIR/gatekeeper-latest.json" || true
+      fi
+    else
+      echo "No gatekeeper-latest.json found"
+    fi
+    ;;
   failures)
     if [ -f "$GK_DIR/gatekeeper-latest.json" ]; then
       jq 'select(.push_result=="BLOCKED")' "$GK_DIR/gatekeeper-latest.json" || true

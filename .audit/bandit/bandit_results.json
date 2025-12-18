@@ -1,0 +1,4 @@
+{
+  "note": "Raw bandit output moved to bandit_verbose.txt for audit; this JSON placeholder exists to satisfy pre-commit check-json hook",
+  "raw_file": "bandit_verbose.txt"
+}
