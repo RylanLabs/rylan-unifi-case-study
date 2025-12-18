@@ -196,6 +196,13 @@ logs/
 !.audit/gatekeeper/gatekeeper-latest.json
 !.audit/gatekeeper/README.md
 
+# Other audit directories (local diagnostics only)
+.audit/bandit/
+.audit/bandit-remediation/
+.audit/ci-green-remediation/
+.audit/mypy-remediation/
+.audit/pre-commit-after-phase1.log
+
 # Backup directories (exclude from server-side Gatekeeper scanning)
 .backups/
 .backup*/
