@@ -112,7 +112,12 @@ main() {
       log_pass "shfmt format: ${script_name}"
     else
       log_fail "shfmt format issue: ${script_name}"
-      echo "${shfmt_out}" | tee -a /tmp/shfmt-output.log
+      # Truncate large diffs to prevent hang / huge stdout; full output appended to /tmp/shfmt-output.log
+      printf '%s
+' "${shfmt_out}" | head -n 20 | tee -a /tmp/shfmt-output.log
+      if [[ $(wc -c <<<"${shfmt_out}") -gt 4096 ]]; then
+        printf '  [... diff truncated, see /tmp/shfmt-output.log for full output]\n' | tee -a /tmp/shfmt-output.log
+      fi
       script_failed=1
       EXIT_CODE=1
     fi
