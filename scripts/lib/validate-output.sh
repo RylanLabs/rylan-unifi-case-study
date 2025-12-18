@@ -10,55 +10,55 @@ FAIL=0
 SKIP=0
 
 pass() {
-	echo -e "${GREEN}✅ PASS${NC}: $1"
-	((PASS++))
+  echo -e "${GREEN}✅ PASS${NC}: $1"
+  ((PASS++))
 }
 
 fail() {
-	echo -e "${RED}❌ FAIL${NC}: $1"
-	((FAIL++))
+  echo -e "${RED}❌ FAIL${NC}: $1"
+  ((FAIL++))
 }
 
 skip() {
-	echo -e "${YELLOW}⏭️  SKIP${NC}: $1"
-	((SKIP++))
+  echo -e "${YELLOW}⏭️  SKIP${NC}: $1"
+  ((SKIP++))
 }
 
 print_header() {
-	echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-	echo -e "${BLUE}║ 🔍 Eternal Fortress Validation Suite (Consciousness 1.4)    ║${NC}"
-	echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-	echo "Host: $(hostname)"
-	echo "Date: $(date)"
-	echo ""
+  echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${BLUE}║ 🔍 Eternal Fortress Validation Suite (Consciousness 1.4)    ║${NC}"
+  echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo "Host: $(hostname)"
+  echo "Date: $(date)"
+  echo ""
 }
 
 print_summary() {
-	echo ""
-	echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-	echo -e "${BLUE}║ Summary${NC}"
-	echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo ""
+  echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${BLUE}║ Summary${NC}"
+  echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 
-	TOTAL=$((PASS + FAIL + SKIP))
-	PASS_RATE=$((PASS * 100 / TOTAL))
+  TOTAL=$((PASS + FAIL + SKIP))
+  PASS_RATE=$((PASS * 100 / TOTAL))
 
-	echo "PASS:  ${PASS}"
-	echo "FAIL:  ${FAIL}"
-	echo "SKIP:  ${SKIP}"
-	echo "TOTAL: ${TOTAL}"
-	echo ""
-	echo "Pass Rate: ${PASS_RATE}%"
-	echo ""
+  echo "PASS:  ${PASS}"
+  echo "FAIL:  ${FAIL}"
+  echo "SKIP:  ${SKIP}"
+  echo "TOTAL: ${TOTAL}"
+  echo ""
+  echo "Pass Rate: ${PASS_RATE}%"
+  echo ""
 
-	if [[ ${FAIL} -eq 0 ]]; then
-		echo -e "${GREEN}✅ ETERNAL FORTRESS: VALIDATION SUCCESSFUL${NC}"
-		echo "The fortress is eternal. Ready for deployment."
-		return 0
-	else
-		echo -e "${RED}❌ ETERNAL FORTRESS: VALIDATION FAILED${NC}"
-		echo "Fix the ${FAIL} failing test(s) and retry."
-		return 1
-	fi
+  if [[ ${FAIL} -eq 0 ]]; then
+    echo -e "${GREEN}✅ ETERNAL FORTRESS: VALIDATION SUCCESSFUL${NC}"
+    echo "The fortress is eternal. Ready for deployment."
+    return 0
+  else
+    echo -e "${RED}❌ ETERNAL FORTRESS: VALIDATION FAILED${NC}"
+    echo "Fix the ${FAIL} failing test(s) and retry."
+    return 1
+  fi
 }
 
 export -f pass fail skip print_header print_summary

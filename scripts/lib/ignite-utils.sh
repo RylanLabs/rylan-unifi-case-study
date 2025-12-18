@@ -12,41 +12,41 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log() {
-	local level=$1
-	shift
-	case "$level" in
-	phase)
-		echo -e "${BLUE}==============================================================================${NC}\n${GREEN}[TRINITY]${NC} $*\n${BLUE}==============================================================================${NC}"
-		;;
-	step)
-		echo -e "${GREEN}[TRINITY]${NC} $*"
-		;;
-	error)
-		echo -e "${RED}[TRINITY-ERROR]${NC} $*"
-		;;
-	warn)
-		echo -e "${YELLOW}[TRINITY-WARN]${NC} $*"
-		;;
-	success)
-		echo -e "${GREEN}[TRINITY-SUCCESS]${NC} $*"
-		;;
-	esac
+  local level=$1
+  shift
+  case "$level" in
+    phase)
+      echo -e "${BLUE}==============================================================================${NC}\n${GREEN}[TRINITY]${NC} $*\n${BLUE}==============================================================================${NC}"
+      ;;
+    step)
+      echo -e "${GREEN}[TRINITY]${NC} $*"
+      ;;
+    error)
+      echo -e "${RED}[TRINITY-ERROR]${NC} $*"
+      ;;
+    warn)
+      echo -e "${YELLOW}[TRINITY-WARN]${NC} $*"
+      ;;
+    success)
+      echo -e "${GREEN}[TRINITY-SUCCESS]${NC} $*"
+      ;;
+  esac
 }
 
 exit_handler() {
-	local exit_code=$?
-	local end_time
-	end_time=$(date +%s)
-	local duration
-	duration=$((end_time - START_TIME))
+  local exit_code=$?
+  local end_time
+  end_time=$(date +%s)
+  local duration
+  duration=$((end_time - START_TIME))
 
-	if [[ $exit_code -eq 0 ]]; then
-		log success "Trinity orchestration COMPLETE (${duration}s)"
-	else
-		log error "Trinity orchestration FAILED with exit code $exit_code"
-	fi
+  if [[ $exit_code -eq 0 ]]; then
+    log success "Trinity orchestration COMPLETE (${duration}s)"
+  else
+    log error "Trinity orchestration FAILED with exit code $exit_code"
+  fi
 
-	exit "$exit_code"
+  exit "$exit_code"
 }
 
 trap exit_handler EXIT
