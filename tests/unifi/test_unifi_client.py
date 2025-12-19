@@ -20,13 +20,9 @@ import requests
 # Ensure repository root is on sys.path so tests can import packages directly when
 # executed from developer environments. This mirrors the autouse fixture but
 # keeps imports top-level to satisfy PLC0415.
-try:
-    repo_root = str(Path(__file__).resolve().parents[2])
-    if repo_root not in sys.path:
-        sys.path.insert(0, repo_root)
-except Exception:
-    # Best-effort only; function-level imports remain a fallback during test runtime
-    pass
+repo_root = str(Path(__file__).resolve().parents[2])
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
 
 from shared.unifi_client import UniFiClient
 
