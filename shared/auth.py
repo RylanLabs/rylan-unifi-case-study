@@ -60,9 +60,10 @@ def load_credentials() -> dict[str, str]:
                 return data or {}
             except yaml.YAMLError:
                 raise
-            except Exception as e:
-                # Convert unexpected exceptions into YAML errors for callers
-                raise yaml.YAMLError(str(e)) from e
+            except (TypeError, AttributeError) as e:
+                # Convert type/attribute errors to YAML errors for consistent handling
+                # (e.g., if yaml.safe_load receives invalid input type such as None or an int)
+                raise yaml.YAMLError(f"Invalid input for YAML parsing: {e}") from e
     except FileNotFoundError:
         # Preserve FileNotFoundError semantics for callers/tests
         raise
