@@ -1,1 +1,1 @@
-"""UniFi tests package (explicit namespace)"""
+"""UniFi tests package (explicit namespace)."""

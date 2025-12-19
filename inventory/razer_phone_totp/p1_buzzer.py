@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module: inventory/razer_phone_totp/p1_buzzer.py
+"""Module: inventory/razer_phone_totp/p1_buzzer.py.
 
 Purpose: Header hygiene inserted. Consciousness: 8.0.
 """
@@ -57,8 +57,8 @@ def main() -> None:
                         logger.exception("termux-notification failed")
                 else:
                     logger.debug("termux-notification not found; skipping notification")
-        except (requests.RequestException, subprocess.CalledProcessError) as e:
-            logger.exception("p1_buzzer main loop error: %s", e)
+        except (requests.RequestException, subprocess.CalledProcessError):
+            logger.exception("p1_buzzer main loop error")
         time.sleep(300)
 
 
