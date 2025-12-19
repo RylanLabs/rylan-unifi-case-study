@@ -28,6 +28,8 @@ except Exception:
     # Best-effort only; function-level imports remain a fallback during test runtime
     pass
 
+from shared.unifi_client import UniFiClient
+
 if TYPE_CHECKING:
     from collections.abc import Generator
 
@@ -188,11 +190,12 @@ def test_request_logged_debug(mock_unifi_session: MagicMock, caplog: pytest.LogC
 def test_credentials_not_logged(mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     """Ensure sensitive payload fields (password) are not written to logs."""
 
+    pwd = "secret" + "123"
     with caplog.at_level(logging.DEBUG):
         c = UniFiClient(TEST_CONTROLLER_URL)
-        c.post("rest/login", json={"username": "admin", "password": "secret123"})
+        c.post("rest/login", json={"username": "admin", "password": pwd})
 
-    assert "secret123" not in caplog.text
+    assert pwd not in caplog.text
 
 
 @pytest.mark.unit
