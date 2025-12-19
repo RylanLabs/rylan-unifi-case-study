@@ -31,12 +31,11 @@ class UniFiClient:
         self.session = get_authenticated_session()
         self.verify_ssl = verify_ssl
 
-    def _request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:
+    def _request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:  # noqa: ANN401  # forwarded to requests.Session
         """Perform an HTTP request against the controller.
 
         This method centralizes URL building and default request options.
         """
-
         # Any: forwarded to requests.Session.request (dynamic kwargs accepted by requests)
         url = f"{self.base_url}/api/s/{endpoint.lstrip('/')}"
         kwargs.setdefault("verify", self.verify_ssl)
@@ -44,12 +43,11 @@ class UniFiClient:
         response.raise_for_status()
         return response
 
-    def get(self, endpoint: str, **kwargs: Any) -> list[dict[str, object]]:
+    def get(self, endpoint: str, **kwargs: Any) -> list[dict[str, object]]:  # noqa: ANN401  # forwarded to requests.Session
         """HTTP GET, returning the parsed ``data`` element as a list.
 
         Returns an empty list when ``data`` is absent.
         """
-
         # Any: forwarded to requests.Session.request
         raw: Any = self._request("GET", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
@@ -60,12 +58,11 @@ class UniFiClient:
             return cast(list[dict[str, object]], data)
         return []
 
-    def post(self, endpoint: str, **kwargs: Any) -> dict[str, object]:
+    def post(self, endpoint: str, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401  # forwarded to requests.Session
         """HTTP POST, returning the parsed ``data`` element as a dict.
 
         Returns an empty dict when ``data`` is absent.
         """
-
         # Any: forwarded to requests.Session.request
         raw: Any = self._request("POST", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
@@ -75,12 +72,11 @@ class UniFiClient:
             return cast(dict[str, object], data)
         return {}
 
-    def put(self, endpoint: str, **kwargs: Any) -> dict[str, object]:
+    def put(self, endpoint: str, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401  # forwarded to requests.Session
         """HTTP PUT, returning the parsed ``data`` element as a dict.
 
         Returns an empty dict when ``data`` is absent.
         """
-
         # Any: forwarded to requests.Session.request
         raw: Any = self._request("PUT", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
@@ -93,29 +89,25 @@ class UniFiClient:
     # === Methods used by apply.py ===
     def list_networks(self) -> list[dict[str, object]]:
         """List network configurations from the controller."""
-
         return self.get("rest/networkconf")
 
     def create_network(self, payload: dict[str, object]) -> dict[str, object]:
         """Create a network using the provided payload."""
-
         return self.post("rest/networkconf", json=payload)
 
     def update_network(self, network_id: str, payload: dict[str, object]) -> dict[str, object]:
         """Update a network by id with `payload`."""
-
         return self.put(f"rest/networkconf/{network_id}", json=payload)
 
     def get_policy_table(self) -> list[dict[str, object]]:
         """Return the routing policy table from the controller."""
-
         return self.get("rest/routing/policytable")
 
     def update_policy_table(self, rules: list[dict[str, object]] | dict[str, object]) -> dict[str, object]:
         """Update the policy table. Accepts either the raw list of rules or
+
         a dict containing ``{"rules": [...]}`` as sent by other tooling.
         """
-
         rules_list: list[dict[str, object]]
         if isinstance(rules, dict) and "rules" in rules:
             candidate = rules["rules"]

@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 if TYPE_CHECKING:
-    from typing import Any  # noqa: F401 (TYPE_CHECKING-only import)
+    pass
 
 from app.redactor import is_pii_present, redact_file, redact_pii
 

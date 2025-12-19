@@ -69,7 +69,6 @@ def _redact_presidio(text: str) -> str:
 
     Falls back to regex on failure.
     """
-
     try:
         analyzer = AnalyzerEngine()
         anonymizer = AnonymizerEngine()
