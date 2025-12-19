@@ -219,7 +219,7 @@ def reconcile(
 # --------------------------------------------------------------------------- #
 
 
-def apply_policy_table(client: UniFiClient | None, *, dry_run: bool) -> int:
+def apply_policy_table(client: UniFiClient | None, *, _dry_run: bool) -> int:
     """Apply firewall policy table."""
     path = BASE_DIR / "02_declarative_config" / "policy-table.yaml"
     if not path.exists():
@@ -269,7 +269,7 @@ def main() -> None:
             sys.exit(1)
 
     vlan_rc = reconcile(load_state(Path("vlans.yaml")), client, dry_run=args.dry_run)
-    policy_rc = apply_policy_table(client, dry_run=args.dry_run)
+    policy_rc = apply_policy_table(client, _dry_run=args.dry_run)
 
     if vlan_rc or policy_rc:
         sys.exit(vlan_rc or policy_rc)
