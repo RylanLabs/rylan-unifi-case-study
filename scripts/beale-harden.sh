@@ -114,6 +114,7 @@ audit() {
   printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null || true
 }
 
+# shellcheck disable=SC2317  # Function called indirectly via audit failure paths
 fail() {
   local phase=$1 code=$2 message=$3 remediation=$4
   echo "❌ ${phase} FAILURE: ${message}"

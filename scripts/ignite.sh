@@ -11,6 +11,11 @@ set -euo pipefail
 # Carter (Secrets) -> Bauer (Whispers) -> Beale (Detection) -> Validate
 # Zero concurrency. Exit-on-fail. Junior-at-3-AM deployable (<45 min).
 
+# Ministry phases (Trinity sequencing)
+# Phase 1: ministry-secrets (identity provisioning - Carter)
+# Phase 2: ministry-whispers (configuration hardening - Bauer)
+# Phase 3: ministry-detection (validation enforcement - Beale)
+
 cat <<'BANNER'
 ================================================================================
                         TRINITY ORCHESTRATOR v4.0

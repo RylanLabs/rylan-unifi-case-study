@@ -1,0 +1,95 @@
+metadata:
+  author: Trinity Ministries (Suehring)
+  version: v5.1
+  rule_budget: 10
+  hardware: USG-3P
+  notes: 'Immutable perimeter: guest isolation, VLAN QoS, DHCP detection'
+rules:
+- id: 1
+  name: guest-to-internet
+  description: Guest/IoT (VLAN 90) to WAN only
+  source:
+    vlan: 90
+  destination:
+    type: wan
+  action: accept
+- id: 2
+  name: guest-to-local-drop
+  description: Block guest/IoT to internal VLANs 10/30/40
+  source:
+    vlan: 90
+  destination:
+    vlans:
+    - 10
+    - 30
+    - 40
+  action: drop
+- name: consolidated-servers-nfs-voip-rtp
+  action: accept
+  destination:
+    ports:
+    - 2049
+    vlan: 10
+  source:
+    vlans:
+    - 1
+    - 10
+    - 30
+    - 40
+  protocols:
+  - tcp
+  - udp
+- name: consolidated-dns-dhcp-mgmt-rogue-dhcp-detect
+  action: accept
+  destination:
+    ports:
+    - 53
+    - 67
+    - 68
+    vlan: 1
+  source:
+    vlans:
+    - 10
+    - 30
+    - 40
+    - 90
+  protocol: udp
+- id: 7
+  name: trusted-services
+  description: Trusted (30) to Services (10/40)
+  source:
+    vlan: 30
+  destination:
+    vlans:
+    - 10
+    - 40
+    ports:
+    - 443
+    - 3000
+    - 5000
+  protocol: tcp
+  action: accept
+- id: 10
+  name: default-drop
+  description: Default drop (implicit deny, hardware offload)
+  source:
+    any: true
+  destination:
+    any: true
+  action: drop
+- rule: '1'
+  action: drop
+  src: 10.0.30.0/24
+  dst: 10.0.40.0/24
+- rule: '2'
+  action: drop
+  src: 10.0.90.0/24
+  dst: any
+- rule: '3'
+  action: allow
+  src: 10.0.10.0/24
+  dst: any
+- rule: '4'
+  action: drop
+  src: any
+  dst: 10.0.10.13:80

@@ -148,7 +148,7 @@ trigger_remote_backup() {
 
   local output
   output=$(mktemp)
-  trap "rm -f $output" RETURN
+  trap 'rm -f "$output"' RETURN
 
   if ! ssh "$BACKUP_USER@$CLOUDKEY_IP" "unifi-os backup" >"$output" 2>&1; then
     log_error "Remote backup command failed"
