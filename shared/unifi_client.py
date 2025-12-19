@@ -31,7 +31,7 @@ class UniFiClient:
         self.session = get_authenticated_session()
         self.verify_ssl = verify_ssl
 
-    def _request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:  # noqa: ANN401  # forwarded to requests.Session
+    def _request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:
         """Perform an HTTP request against the controller.
 
         This method centralizes URL building and default request options.
@@ -43,7 +43,7 @@ class UniFiClient:
         response.raise_for_status()
         return response
 
-    def get(self, endpoint: str, **kwargs: Any) -> list[dict[str, object]]:  # noqa: ANN401  # forwarded to requests.Session
+    def get(self, endpoint: str, **kwargs: Any) -> list[dict[str, object]]:
         """HTTP GET, returning the parsed ``data`` element as a list.
 
         Returns an empty list when ``data`` is absent.
@@ -58,7 +58,7 @@ class UniFiClient:
             return cast(list[dict[str, object]], data)
         return []
 
-    def post(self, endpoint: str, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401  # forwarded to requests.Session
+    def post(self, endpoint: str, **kwargs: Any) -> dict[str, object]:
         """HTTP POST, returning the parsed ``data`` element as a dict.
 
         Returns an empty dict when ``data`` is absent.
@@ -72,7 +72,7 @@ class UniFiClient:
             return cast(dict[str, object], data)
         return {}
 
-    def put(self, endpoint: str, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401  # forwarded to requests.Session
+    def put(self, endpoint: str, **kwargs: Any) -> dict[str, object]:
         """HTTP PUT, returning the parsed ``data`` element as a dict.
 
         Returns an empty dict when ``data`` is absent.
