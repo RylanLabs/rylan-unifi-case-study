@@ -100,8 +100,11 @@ async def rogue_dhcp(
     # VLAN 90 override: allow 20/minute
     if x_unifi_vlan == GUEST_VLAN_ID:
         # Note: Accessing private _storage for dynamic rate limit override
-        limiter._storage.reset(request)  # noqa: SLF001
-        limiter._storage.incr(request, GUEST_RATE_LIMIT)  # noqa: SLF001
+        # Note: Accessing private _storage for dynamic rate limit override.
+        # This is intentionally reaching into the Limiter implementation for
+        # a runtime-only rate-limit override behavior (controlled and tested).
+        limiter._storage.reset(request)
+        limiter._storage.incr(request, GUEST_RATE_LIMIT)
 
     # Simulate osTicket ticket creation
     data = await request.json()
