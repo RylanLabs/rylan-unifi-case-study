@@ -18,7 +18,6 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 # shellcheck disable=SC2034
 readonly SCRIPT_NAME
 
-# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
 source "$REPO_ROOT/lib/unifi/client.sh"
 
 CONFIG_FILE="$SCRIPT_DIR/../configs/vlans.json"

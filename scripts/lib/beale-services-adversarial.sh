@@ -16,11 +16,14 @@ run_services_phase() {
   if [[ "$DRY_RUN" == false ]] && command -v systemctl &>/dev/null; then
     running=$(systemctl list-units --type=service --state=running --no-legend --no-pager | wc -l)
     if [[ -f /etc/pve/nodes ]]; then
-      threshold=50; context="proxmox"
+      threshold=50
+      context="proxmox"
     elif [[ -f /.dockerenv ]] || [[ -f /run/.containerenv ]]; then
-      threshold=10; context="container"
+      threshold=10
+      context="container"
     else
-      threshold=30; context="server"
+      threshold=30
+      context="server"
     fi
     if [[ $running -gt $threshold ]]; then
       log "⚠️ Elevated services: $running > $threshold ($context)"
@@ -48,7 +51,7 @@ run_adversarial_phase() {
   # SQLi test
   if [[ "$DRY_RUN" == false ]] && nc -z localhost 8000 2>/dev/null; then
     code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8000/api?id=1' OR '1'='1" || echo 000)
-    [[ "$code" == "200" ]] && \
+    [[ "$code" == "200" ]] &&
       fail "Phase 5" 5 "SQL injection bypassed (HTTP 200)" "Harden WAF • Validate input sanitization"
     log "✅ SQL injection blocked (HTTP $code)"
   else

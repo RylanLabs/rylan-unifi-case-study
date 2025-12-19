@@ -17,7 +17,7 @@ SHA1="${3:-}"
 
 # Only inject template for new commits (not amends, merges, squashes, etc.)
 case "$COMMIT_SOURCE" in
-  message|template|merge|squash|commit)
+  message | template | merge | squash | commit)
     # User provided message or using template — don't override
     exit 0
     ;;
@@ -40,7 +40,7 @@ if [[ -f "$REPO_ROOT/CONSCIOUSNESS.md" ]]; then
 fi
 
 # Inject Namer template
-cat > "$MSG_FILE" << EOF
+cat >"$MSG_FILE" <<EOF
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # THE NAMER'S TEMPLATE — Conventional Commits Canon

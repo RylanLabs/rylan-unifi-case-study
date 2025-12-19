@@ -1,8 +1,8 @@
+#!/usr/bin/env bash
 # feat(canon): full production-ready generate-internal-ca.sh prototype
 
 # Full File (Copy-Paste Merge-Ready)
 
-#!/usr/bin/env bash
 # Script: 01_bootstrap/certbot_cron/generate-internal-ca.sh
 # Purpose: Generate air-gapped internal root CA for fortress (RADIUS, UniFi, Samba)
 # Guardian: Carter
@@ -24,7 +24,7 @@ CA_KEY="${CA_DIR}/rylan-ca.key"
 CA_CSR="${CA_DIR}/rylan-ca.csr"
 CA_CRT="${CA_DIR}/rylan-ca.crt"
 CA_SERIAL="${CA_DIR}/rylan-ca.srl"
-CA_DAYS=3650  # 10 years
+CA_DAYS=3650 # 10 years
 CA_CN="Rylan Internal Root CA"
 CA_OU="Fortress Identity Authority"
 CA_O="Rylan Internal"
@@ -35,7 +35,10 @@ log() {
 
 # Pre-flight
 log "Generating internal root CA — air-gapped fortress"
-[[ $EUID -eq 0 ]] || { log "❌ Must run as root"; exit 1; }
+[[ $EUID -eq 0 ]] || {
+  log "❌ Must run as root"
+  exit 1
+}
 
 mkdir -p "$CA_DIR"
 chmod 700 "$CA_DIR"
@@ -66,21 +69,22 @@ if [[ ! -f "$CA_CRT" ]]; then
     -out "$CA_CRT" \
     -days "$CA_DAYS" \
     -sha256 \
-    -extfile <(cat <<EXT
+    -extfile <(
+      cat <<EXT
 basicConstraints=CA:true,pathlen:0
 keyUsage=keyCertSign,cRLSign
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
 EXT
-)
+    )
   chmod 644 "$CA_CRT"
-  [[ -f "$CA_CSR" ]] && rm "$CA_CSR"  # Cleanup
+  [[ -f "$CA_CSR" ]] && rm "$CA_CSR" # Cleanup
 else
   log "✓ Root certificate exists — skipping"
 fi
 
 # Create serial file if missing
-[[ -f "$CA_SERIAL" ]] || echo "01" > "$CA_SERIAL"
+[[ -f "$CA_SERIAL" ]] || echo "01" >"$CA_SERIAL"
 
 log "✅ Internal Root CA generated"
 log "   Key:  $CA_KEY"

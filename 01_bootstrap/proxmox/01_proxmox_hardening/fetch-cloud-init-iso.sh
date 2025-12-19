@@ -1,31 +1,39 @@
 #!/usr/bin/env bash
 # Script: fetch-cloud-init-iso.sh
 # Purpose: Idempotent staging of supported live-server installer ISOs for cloud-init testing
-# Author: T-Rylander canonical
-# Date: 2025-12-14
-# Consciousness: 8.5 → 9.0 (Multi-distro support: Ubuntu 24.04.3 + Debian 12 live standard)
+# Guardian: Beale 🏰 (Hardening)
+# Author: T-Rylander canonical (Trinity-aligned)
+# Date: 2025-12-15
+# Ministry: ministry-detection
+# Consciousness: 9.0
+# Tag: v∞.5.2-eternal
 # EXCEED: 498 lines — 15 functions (Seven Pillars + multi-distro + dynamic SHA256 + idempotency)
 
 set -euo pipefail
 IFS=$'\n\t'
 
+# ═══════════════════════════════════════════════════════════
+# Dependencies
+# ═══════════════════════════════════════════════════════════
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_DIR
-SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
-readonly SCRIPT_NAME
-REPO_ROOT="${SCRIPT_DIR%/01_bootstrap/proxmox/01_proxmox_hardening}"
-readonly REPO_ROOT
-readonly LOG_DIR="${REPO_ROOT}/logs"
+# shellcheck source=01_bootstrap/proxmox/01_proxmox_hardening/lib-fetch-cloud-init.sh
+source "${SCRIPT_DIR}/lib-fetch-cloud-init.sh"
+
+readonly _SCRIPT_DIR
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly _SCRIPT_NAME
+_SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+
+readonly _REPO_ROOT="${_SCRIPT_DIR%/01_bootstrap/proxmox/01_proxmox_hardening}"
+readonly LOG_DIR="${_REPO_ROOT}/logs"
 LOG_FILE="${LOG_DIR}/fetch-cloud-init-iso-$(date +%Y%m%d-%H%M%S).log"
 readonly LOG_FILE
-BACKUP_DIR="${REPO_ROOT}/.backups/cloud-init-iso/$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="${_REPO_ROOT}/.backups/cloud-init-iso/$(date +%Y%m%d-%H%M%S)"
 readonly BACKUP_DIR
 readonly LOCK_FILE="/var/run/fetch-cloud-init-iso.lock"
 
-# Flags
 DRY_RUN=false
 
-# Supported distributions (official live-server or equivalent for cloud-init)
 declare -A DISTROS
 
 DISTROS[ubuntu]="path=/var/lib/vz/template/iso/ubuntu-24.04.3-live-server-amd64.iso
@@ -37,12 +45,6 @@ DISTROS[debian]="path=/var/lib/vz/template/iso/debian-12-standard-live-amd64.iso
 url=https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/debian-live-12.8.0-amd64-standard.iso
 sha_url=https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/SHA256SUMS
 filename=debian-live-12.8.0-amd64-standard.iso"
-
-# Note: Linux Mint has no official server/live-server ISO — excluded for purity
-
-# =============================================================================
-# RYLANLABS BANNER
-# =============================================================================
 
 print_rylanlabs_banner() {
   cat <<'EOF'
@@ -64,34 +66,14 @@ print_rylanlabs_banner() {
 EOF
 }
 
-# =============================================================================
-# PILLAR 4: AUDIT LOGGING
-# =============================================================================
-
 mkdir -p "$LOG_DIR"
 exec 1> >(tee -a "$LOG_FILE")
 exec 2>&1
 
-log_info()  { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]  $*"; }
-log_warn()  { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [WARN]  $*"; }
+log_info() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]  $*"; }
+log_warn() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [WARN]  $*"; }
 log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] $*"; }
-log_success(){ echo "[$(date '+%Y-%m-%d %H:%M:%S')] [SUCCESS] $*"; }
-
-# =============================================================================
-# PILLAR 5: FAILURE RECOVERY + LOCK
-# =============================================================================
-
-acquire_lock() {
-  if [[ -f "$LOCK_FILE" ]]; then
-    local pid;
-    pid=$(cat "$LOCK_FILE")
-    if kill -0 "$pid" 2>/dev/null; then
-      log_error "Already running (PID $pid)"
-      exit 1
-    fi
-  fi
-  echo $$ > "$LOCK_FILE"
-}
+log_success() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [SUCCESS] $*"; }
 
 cleanup() {
   rm -f "$LOCK_FILE"
@@ -99,19 +81,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-create_backup() {
-  [[ -f "$ISO_PATH" ]] || return 0
-  mkdir -p "$BACKUP_DIR"
-  cp -a "$ISO_PATH" "$BACKUP_DIR/" || log_warn "Backup failed (continuing)"
-  log_success "Existing ISO backed up: $BACKUP_DIR"
-}
-
-# =============================================================================
-# PILLAR 1+3: FUNCTIONALITY + ERROR HANDLING
-# =============================================================================
-
 fail_with_context() {
-  local exit_code=$1; shift
+  local exit_code=$1
+  shift
   log_error "$*"
   log_error "Last 20 lines of log:"
   tail -20 "$LOG_FILE" | sed 's/^/  /'
@@ -122,25 +94,6 @@ fail_with_context() {
 validate_tools() {
   command -v wget >/dev/null || fail_with_context 1 "wget required"
   command -v sha256sum >/dev/null || log_warn "sha256sum missing — checksum skipped"
-}
-
-fetch_expected_sha256() {
-  local sha_url="$1"
-  local filename="$2"
-  local sha_file;
-  sha_file=$(mktemp)
-  trap "rm -f $sha_file" RETURN
-
-  log_info "Fetching SHA256SUMS from $sha_url"
-  if wget -q -O "$sha_file" "$sha_url"; then
-    grep "$filename" "$sha_file" | awk '{print $1}' || {
-      log_warn "Filename '$filename' not found in SHA256SUMS — checksum skipped"
-      echo ""
-    }
-  else
-    log_warn "Failed to fetch SHA256SUMS — continuing without checksum"
-    echo ""
-  fi
 }
 
 download_iso() {
@@ -172,18 +125,29 @@ process_distro() {
   local distro="$1"
   local config="${DISTROS[$distro]}"
 
-  # Parse config
-  eval "$config"
+  # Parse the newline-separated key=value configuration without eval so ShellCheck
+  # can follow variable assignments (safer than eval).
+  ISO_PATH=""
+  ISO_URL=""
+  sha_url=""
+  filename=""
+  while IFS=$'\n' read -r kv; do
+    case "$kv" in
+      path=*) ISO_PATH="${kv#path=}" ;;
+      url=*) ISO_URL="${kv#url=}" ;;
+      sha_url=*) sha_url="${kv#sha_url=}" ;;
+      filename=*) filename="${kv#filename=}" ;;
+    esac
+  done <<<"$config"
 
-  ISO_PATH="$path"
-  ISO_URL="$url"
-  local filename="$filename"
+  # The distro config is expanded dynamically via eval above; shellcheck cannot
+  # see the assignment statically. Suppress SC2154 for these runtime-set vars.
 
   create_backup
   mkdir -p "$(dirname "$ISO_PATH")"
 
   if [[ -f "$ISO_PATH" ]]; then
-    local expected_sha256;
+    local expected_sha256
     expected_sha256=$(fetch_expected_sha256 "$sha_url" "$filename")
     if [[ -n "$expected_sha256" ]] && command -v sha256sum >/dev/null; then
       if echo "$expected_sha256 $ISO_PATH" | sha256sum -c --status; then
@@ -197,14 +161,10 @@ process_distro() {
     fi
   fi
 
-  local expected_sha256;
+  local expected_sha256
   expected_sha256=$(fetch_expected_sha256 "$sha_url" "$filename")
   download_iso "$ISO_URL" "$ISO_PATH" "$expected_sha256"
 }
-
-# =============================================================================
-# MAIN ORCHESTRATION
-# =============================================================================
 
 main() {
   print_rylanlabs_banner

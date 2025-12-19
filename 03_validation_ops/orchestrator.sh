@@ -43,7 +43,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # Load .env
-# shellcheck disable=SC1091
+
 if [[ -f .env ]]; then
   source .env
 else
@@ -74,7 +74,7 @@ component_end() {
   local end
   end=$(date +%s%N)
   local start=${COMPONENT_START[$c]:-0}
-  local elapsed_ms;
+  local elapsed_ms
   elapsed_ms=$(((end - start) / 1000000))
   # shellcheck disable=SC2034
   COMPONENT_TIMES[$c]=$elapsed_ms

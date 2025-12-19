@@ -47,7 +47,7 @@ run_firewall_phase() {
 
       if [[ $rule_count -gt $MAX_FIREWALL_RULES ]]; then
         fail "Phase 1" 1 "Firewall rules exceed limit after auto-fix ($rule_count > $MAX_FIREWALL_RULES)" \
-             "Manual consolidation required • See audit log: $AUDIT_LOG"
+          "Manual consolidation required • See audit log: $AUDIT_LOG"
       else
         log "✅ AUTO-FIX successful: firewall rules now $rule_count"
         audit "Phase 1" "FIXED" "rules=$rule_count type=$fw_type"
@@ -61,7 +61,7 @@ run_firewall_phase() {
         fi
       }
       fail "Phase 1" 1 "Firewall rules exceed limit ($rule_count > $MAX_FIREWALL_RULES)" \
-           "Consolidate rules • Use ipsets • Remove duplicates • Re-run validation"
+        "Consolidate rules • Use ipsets • Remove duplicates • Re-run validation"
     fi
   fi
   log "✅ Firewall rules: $rule_count ≤ $MAX_FIREWALL_RULES ($fw_type)"
@@ -79,7 +79,7 @@ run_vlan_phase() {
   if [[ "$DRY_RUN" == false ]] && timeout 3 ping -c 1 -W 1 "$VLAN_GATEWAY" &>/dev/null; then
     ip route get "$VLAN_GATEWAY" 2>/dev/null || true
     fail "Phase 2" 2 "VLAN gateway reachable from management" \
-         "Check routing tables • Verify firewall blocks • ip route del $VLAN_QUARANTINE"
+      "Check routing tables • Verify firewall blocks • ip route del $VLAN_QUARANTINE"
   fi
 
   if [[ "$DRY_RUN" == false ]] && command -v nmap &>/dev/null; then
@@ -87,7 +87,7 @@ run_vlan_phase() {
     if [[ $hosts_up -gt 0 ]]; then
       sudo nmap -sn "$VLAN_QUARANTINE" --exclude "$VLAN_GATEWAY" | grep "Nmap scan report" || true
       fail "Phase 2" 2 "Lateral movement: $hosts_up host(s) in quarantine" \
-           "Power off rogue devices • Verify switch port security • Re-isolate VLAN"
+        "Power off rogue devices • Verify switch port security • Re-isolate VLAN"
     fi
   else
     log "⚠️ nmap missing or dry-run → skipping lateral check"
@@ -106,11 +106,11 @@ run_ssh_phase() {
   log "Phase 3: SSH Hardening"
   if [[ "$DRY_RUN" == false ]] && command -v sshd &>/dev/null; then
     sshd_config=$(sudo sshd -T 2>/dev/null)
-    echo "$sshd_config" | grep -qE "^permitrootlogin (yes|prohibit-password)" && \
+    echo "$sshd_config" | grep -qE "^permitrootlogin (yes|prohibit-password)" &&
       fail "Phase 3" 3 "Root login permitted" "Set PermitRootLogin no in sshd_config"
-    echo "$sshd_config" | grep -qE "^passwordauthentication yes" && \
+    echo "$sshd_config" | grep -qE "^passwordauthentication yes" &&
       fail "Phase 3" 3 "Password auth enabled" "Set PasswordAuthentication no"
-    echo "$sshd_config" | grep -qi "^pubkeyauthentication yes" || \
+    echo "$sshd_config" | grep -qi "^pubkeyauthentication yes" ||
       fail "Phase 3" 3 "Pubkey auth disabled" "Set PubkeyAuthentication yes"
     log "✅ SSH hardened (key-only, root prohibited)"
     audit "Phase 3" "PASS" "root=no password=no pubkey=yes"

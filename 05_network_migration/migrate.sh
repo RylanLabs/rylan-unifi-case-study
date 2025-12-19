@@ -9,20 +9,43 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Beale Doctrine: Fail loud, silence on success
 # ─────────────────────────────────────────────────────
-log()   { [[ "$QUIET" == false ]] && echo "[Migration] $*"; }
-audit() { echo "$(date -Iseconds) | Migration | $1 | $2" >> /var/log/migration-audit.log; }
-fail()  { echo "❌ MIGRATION FAILURE: $1"; echo "📋 Remediation: $2"; audit "FAIL" "$1"; exit 1; }
+# Flags & Logging (preserve environment vars when set)
+QUIET="${QUIET:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+AUTO_APPROVE="${AUTO_APPROVE:-false}"
 
-QUIET=false
-DRY_RUN=false
-AUTO_APPROVE=false
+log() { if [[ "$QUIET" == false ]]; then echo "[Migration] $*"; fi; }
+AUDIT_LOG="/var/log/migration-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/migration-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Migration | $1 | $2" >>"$AUDIT_LOG"; }
+
+fail() {
+  echo "❌ MIGRATION FAILURE: $1"
+  echo "📋 Remediation: $2"
+  audit "FAIL" "$1"
+  exit 1
+}
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --quiet)      QUIET=true; shift ;;
-    --dry-run)    DRY_RUN=true; shift ;;
-    --auto)       AUTO_APPROVE=true; shift ;;
-    --help)       cat <<EOF
+    --quiet)
+      QUIET=true
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --auto)
+      AUTO_APPROVE=true
+      shift
+      ;;
+    --help)
+      cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 Eternal Network Migration Orchestrator
 
@@ -34,8 +57,12 @@ OPTIONS:
 
 Consciousness: 4.6 | Guardian: Beale
 EOF
-                  exit 0 ;;
-    *)            echo "Unknown option: $1"; exit 1 ;;
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
   esac
 done
 
@@ -72,7 +99,10 @@ fi
 if [[ "$AUTO_APPROVE" == false ]] && [[ "$DRY_RUN" == false ]]; then
   echo ""
   read -r -p "⚠️  Proceed with production network migration? Type 'yes' to continue: " CONFIRM
-  [[ "$CONFIRM" == "yes" ]] || { echo "Migration aborted by user"; exit 0; }
+  [[ "$CONFIRM" == "yes" ]] || {
+    echo "Migration aborted by user"
+    exit 0
+  }
 fi
 
 # ─────────────────────────────────────────────────────
@@ -118,7 +148,7 @@ audit "PASS" "post_beale_checked"
 # ─────────────────────────────────────────────────────
 # Eternal Banner Drop
 # ─────────────────────────────────────────────────────
-[[ "$QUIET" == false ]] && cat << 'EOF'
+[[ "$QUIET" == false ]] && cat <<'EOF'
 
 
 ╔══════════════════════════════════════════════════════════════════════════════╗

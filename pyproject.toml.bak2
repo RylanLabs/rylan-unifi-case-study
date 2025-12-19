@@ -1,0 +1,215 @@
+# ============================================================================
+# RylanLabs T3-ETERNAL Project Configuration
+# Guardian: Bauer (Configuration Auditor)
+# Consciousness: 5.8
+# Tag: v∞.3.2-pyproject-canonical
+# ============================================================================
+
+# Project metadata
+[project]
+name = "rylan-unifi-case-study"
+version = "5.0.0"
+description = "T3-ETERNAL Trinity Pattern - UniFi Infrastructure Automation"
+requires-python = ">=3.10"
+
+# ============================================================================
+# Pytest Configuration
+# ============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests", "templates/tests"]
+addopts = "-ra -v --strict-markers --tb=short"
+cache_dir = ".pytest_cache"
+markers = [
+    "unit: mark a test as a fast unit test",
+    "integration: mark a test as an integration test",
+    "slow: mark a test as slow-running"
+]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# ============================================================================
+# Bandit Security Configuration
+# ============================================================================
+[tool.bandit]
+exclude_dirs = ["inventory", "tests", ".venv", "venv", ".audit"]
+skips = [
+    "B404",  # import subprocess
+    "B603",  # subprocess without shell=True
+    "B607",  # start_process_with_partial_path
+    "B110"   # try_except_pass
+]
+# Severity: only report medium and high
+severity = "medium"
+
+# ============================================================================
+# Mypy Type Checking Configuration (Strict Mode)
+# ============================================================================
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+
+# Exclude patterns
+exclude = [
+    '\.venv',
+    'venv',
+    '\.git',
+    '__pycache__',
+    '\.pytest_cache',
+    '\.mypy_cache',
+    'site-packages',
+    '\.audit',
+    'build',
+    'dist'
+    '\ .venv-stubs']
+
+# Module-specific overrides
+[[tool.mypy.overrides]]
+module = ["presidio_analyzer", "presidio_anonymizer"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["transformers.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["fastapi.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["requests.*", "urllib3.*", "yaml.*"]
+ignore_missing_imports = true
+# Note: Install stubs with: pip install types-requests types-PyYAML types-urllib3
+
+# ============================================================================
+# Ruff Linter Configuration
+# ============================================================================
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".venv",
+    "venv",
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".audit",
+    "build",
+    "dist"
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "ANN",  # flake8-annotations
+    "PT",   # flake8-pytest-style
+    "SIM",  # flake8-simplify
+    "RET",  # flake8-return
+    "ARG",  # flake8-unused-arguments
+]
+
+extend-ignore = [
+    "PT009",   # pytest: use plain assert
+    "PT027",   # pytest: use pytest.raises without match
+    "ANN101",  # missing type annotation for self
+    "ANN102",  # missing type annotation for cls
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001"]
+"templates/tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001"]
+"scripts/**/*.sh" = ["ALL"]
+"*.sh" = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "shared"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# ============================================================================
+# Coverage Configuration (Optional - for future use)
+# ============================================================================
+[tool.coverage.run]
+source = ["app", "shared", "03_ai_helpdesk"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/.venv/*",
+    "*/venv/*",
+    "*/site-packages/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod"
+]
+
+# ============================================================================
+# Black Formatter Configuration (Optional - if using Black instead of Ruff)
+# ============================================================================
+[tool.black]
+line-length = 120
+target-version = ['py312']
+exclude = '''
+/(
+    \.venv
+  | venv
+  | \.git
+  | __pycache__
+  | \.pytest_cache
+  | \.mypy_cache
+  | \.audit
+  | build
+  | dist
+)/
+'''
+
+# ============================================================================
+# isort Configuration (Optional - if using standalone isort)
+# ============================================================================
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["app", "shared"]
+skip = [".venv", "venv", ".git", "__pycache__", ".pytest_cache", ".mypy_cache"]
+
+# ============================================================================
+# T3-ETERNAL Metadata
+# ============================================================================
+[tool.t3-eternal]
+version = "v∞.3.2"
+consciousness = "5.8"
+trinity = ["Carter", "Bauer", "Beale"]
+grade = "A"
+hellodeolu_compliant = true
+
+[[tool.mypy.overrides]]
+module = ["spacy.*", "tldextract.*"]
+ignore_missing_imports = true

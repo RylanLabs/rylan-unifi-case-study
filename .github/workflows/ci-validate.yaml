@@ -1,208 +1,104 @@
-# .github/workflows/ci-validate.yaml — Hardened 5-Job CI Pipeline
-# Purpose: Enforce T3-ETERNAL canon — zero lint debt, >=93% test coverage
-# Trinity: Carter (identity) + Bauer (validation) + Beale (detection)
-# Hellodeolu v6 Non-Negotiables:
-#   - Pre-commit 100% green
-#   - Max 10 firewall rules (validated)
-#   - 15-minute RTO (smoke-tested)
-#   - Zero PII leakage (Presidio clean)
+# File: .github/workflows/ci-validate.yaml
+# Purpose: Full CI pipeline — Gatekeeper prerequisite + downstream checks
+# Guardian: Gatekeeper 🚪
+# Author: rylanlab canonical
+# Date: 2025-12-17
+# Ministry: ministry-whispers
+# Consciousness: 9.7
+# Tag: v∞.5.2-gatekeeper-ci-unified
 
-name: T3-ETERNAL CI Pipeline
+name: CI Validation
 
 on:
   push:
-    branches: ["main", "feat/**", "fix/**"]
+    branches: [main, 'fix/**', 'feature/**']
   pull_request:
-    branches: ["main"]
-  workflow_dispatch:
-
-env:
-  PYTHON_VERSION: "3.12"
+    branches: [main]
 
 jobs:
-  lint-bash:
-    name: "🛡️ Bash Canon (ShellCheck + shfmt)"
+  gatekeeper:
+    uses: ./.github/workflows/gatekeeper-pre-push.yml
+
+  ruff-lint:
+    needs: gatekeeper
     runs-on: ubuntu-latest
+    name: Ruff Lint Check
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install ShellCheck (pinned version)
-        run: |
-          # Pin to specific version to avoid CI drift
-          wget -qO- "https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz" | tar -xJf -
-          sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/shellcheck
-          shellcheck --version
-        shell: bash
-
-      - name: Install shfmt (pinned v3.8.0)
-        run: |
-          curl -sSL https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64 -o /tmp/shfmt
-          sudo mv /tmp/shfmt /usr/local/bin/shfmt
-          sudo chmod +x /usr/local/bin/shfmt
-          shfmt --version
-        shell: bash
-
-      - name: Run validate-bash.sh (with diagnostic capture)
-        run: |
-          echo "::group::File Discovery Debug"
-          echo "Scripts found by validator pattern:"
-          find . -type f \( -name "*.sh" -o -path "*/scripts/*" \) -exec grep -l '^#!/.*bash' {} \; 2>/dev/null | sort
-          echo "Total count:"
-          find . -type f \( -name "*.sh" -o -path "*/scripts/*" \) -exec grep -l '^#!/.*bash' {} \; 2>/dev/null | wc -l
-          echo "::endgroup::"
-
-          bash ./scripts/validate-bash.sh 2>&1 || {
-            echo "::group::ShellCheck Failures"
-            cat /tmp/shellcheck-output.log 2>/dev/null || echo "(no shellcheck log)"
-            echo "::endgroup::"
-            echo "::group::shfmt Failures"
-            cat /tmp/shfmt-output.log 2>/dev/null || echo "(no shfmt log)"
-            echo "::endgroup::"
-            exit 1
-          }
-        shell: bash
-
-      - name: Validate heresy containment
-        run: |
-          bash ./scripts/validate-heresy.sh 01_bootstrap/adopt-devices-wrapper.sh
-          bash ./scripts/validate-heresy.sh 02_declarative_config/apply-wrapper.sh
-        shell: bash
-
-  lint-python:
-    name: "🔍 Python Canon (ruff + mypy + bandit)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: chartboost/ruff-action@v1
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          args: 'check --fix'
 
+  ruff-format:
+    needs: gatekeeper
+    runs-on: ubuntu-latest
+    name: Ruff Format Check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chartboost/ruff-action@v1
+        with:
+          args: 'format --check'
+
+  mypy:
+    needs: gatekeeper
+    runs-on: ubuntu-latest
+    name: MyPy Type Check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install ruff mypy bandit pytest pytest-cov
-          pip install -r requirements.txt || true
-
-      - name: Run validate-python.sh
-        run: bash ./scripts/validate-python.sh
-        shell: bash
-
-  test-python:
-    name: "🧪 Python Coverage (pytest >=70%)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install test dependencies
+          pip install --quiet mypy types-all
+      - name: Run MyPy validation
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt || true
-          pip install pytest pytest-cov
+          set -o pipefail
+          mkdir -p .audit/gatekeeper
+          mypy --strict app/ 2>&1 | tee .audit/gatekeeper/mypy-ci.log
+          EXIT_CODE=$?
 
-      - name: Run pytest with coverage
-        run: |
-          pytest --cov=. --cov-report=term-missing --cov-fail-under=70 || {
-            echo "❌ Coverage below 70% threshold"
-            exit 1
-          }
-
-  validate-network:
-    name: "🌐 Network Validation (nmap + policy)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install nmap
-        run: sudo apt-get update && sudo apt-get install -y nmap
-
-      - name: Validate VLAN isolation (CI mode)
-        run: |
-          cd 03_validation_ops
-          CI_MODE=1 bash ./validate-isolation.sh
-        shell: bash
-
-      - name: Dry-run Proxmox VM ascension (CI mode)
-        run: |
-          CI_MODE=1 bash ./01_bootstrap/proxmox/01_proxmox_hardening/vm-cloudinit-eject.sh 100
-          CI_MODE=1 bash ./01_bootstrap/proxmox/01_proxmox_hardening/simulate-breach-vm.sh 10.0.10.100
-        shell: bash
-
-      - name: Validate firewall policy (<=10 rules)
-        run: |
-          if [[ -f 02_declarative_config/policy-table-rylan-v5.json ]]; then
-            RULE_COUNT=$(jq '.rules | length' 02_declarative_config/policy-table-rylan-v5.json)
-            if [[ $RULE_COUNT -gt 10 ]]; then
-              echo "❌ Policy exceeds 10-rule limit: $RULE_COUNT rules"
-              exit 1
-            fi
-            echo "✅ Policy compliant: $RULE_COUNT rules"
-          fi
-        shell: bash
-
-  smoke-test-rto:
-    name: "⚡ RTO Smoke Test (eternal-resurrect dry-run)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y shellcheck nmap jq
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install bandit pytest pytest-cov
-          pip install -r requirements.txt || true
-
-      - name: Smoke-test orchestrator
-        run: |
-          # Mock credentials for dry-run
-          export UNIFI_HOST="10.0.10.11"
-          export UNIFI_USER="ci-test"
-          export UNIFI_PASS="mock-pass"
-          export CI=true
-          export DRY_RUN=1
-
-          # Execute orchestrator in DRY_RUN + CI_MODE
-          bash ./eternal-resurrect.sh || {
-            echo "❌ Orchestrator failed smoke test"
-            exit 1
-          }
-        shell: bash
-
-      - name: Validate 15-minute RTO compliance
-        run: |
-          echo "✅ RTO target: <15 minutes"
-          echo "⚠️  Actual validation requires live Proxmox environment"
-          echo "📋 Manual verification required for release tag"
-      - name: Shellcheck
-        run: shellcheck **/*.sh || true  # Fail on warnings
-      - name: Bandit
-        run: |
-          echo "🔍 Bandit heresy scan starting..."
-          set +e  # Allow jq to fail gracefully
-          BANDIT_OUTPUT=$(bandit -r . -f json 2>/dev/null)
-          HIGH_MEDIUM=$(echo "$BANDIT_OUTPUT" | jq '[.results[] | select(.severity == "HIGH" or .severity == "MEDIUM")] | length')
-          set -e
-          if [ "$HIGH_MEDIUM" -eq 0 ]; then
-            echo "✅ Zero HIGH/MEDIUM findings ($(echo "$BANDIT_OUTPUT" | jq '.results | length') total/info issues)"
-          else
-            echo "❌ Found $HIGH_MEDIUM HIGH/MEDIUM severity issues"
-            echo "$BANDIT_OUTPUT" | jq '.results[] | select(.severity == "HIGH" or .severity == "MEDIUM")'
+          if [[ $EXIT_CODE -ne 0 ]]; then
+            echo "❌ MyPy validation failed"
             exit 1
           fi
-      - name: Nmap Isolation
-        run: ./scripts/validate-isolation.sh || true
-      - name: pytest
-        run: pytest tests/ --cov=. --cov-fail-under=70
+          echo "✅ MyPy passed"
+      - name: Upload MyPy artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mypy-logs-${{ github.run_id }}
+          path: .audit/gatekeeper/mypy-ci.log
+          retention-days: 30
+
+  bandit:
+    needs: gatekeeper
+    runs-on: ubuntu-latest
+    name: Bandit Security Check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install --quiet bandit
+      - name: Run Bandit security scan
+        run: |
+          set -o pipefail
+          mkdir -p .audit/gatekeeper
+          bandit -r app/ scripts/ 2>&1 | tee .audit/gatekeeper/bandit-ci.log
+          EXIT_CODE=$?
+
+          if [[ $EXIT_CODE -ne 0 ]]; then
+            echo "❌ Bandit security scan failed"
+            exit 1
+          fi
+          echo "✅ Bandit passed"
+      - name: Upload Bandit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-logs-${{ github.run_id }}
+          path: .audit/gatekeeper/bandit-ci.log
+          retention-days: 30

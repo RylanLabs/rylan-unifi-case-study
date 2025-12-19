@@ -13,7 +13,6 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
-# shellcheck disable=SC1091
 source "${REPO_ROOT}/lib/ignite-utils.sh"
 
 # Configuration
@@ -53,7 +52,7 @@ harden_ssh() {
 
   # Add Protocol 2 if absent
   if ! grep -q "^Protocol 2" "$SSH_CONFIG"; then
-    echo "Protocol 2" >> "$SSH_CONFIG"
+    echo "Protocol 2" >>"$SSH_CONFIG"
   fi
 
   # Validate syntax
@@ -85,7 +84,7 @@ configure_firewall() {
   local now
   now=$(date -Iseconds)
 
-  cat > "$tmp_conf" <<NFTABLES_CONF
+  cat >"$tmp_conf" <<NFTABLES_CONF
 #!/usr/sbin/nft -f
 # FreeRADIUS Fortress Firewall (generated: $now)
 # Management subnet: 10.0.1.0/27
@@ -178,7 +177,7 @@ install_fail2ban() {
 
   apt-get install -y fail2ban
 
-  cat > /etc/fail2ban/jail.d/freeradius.conf <<'FAIL2BAN_CONF'
+  cat >/etc/fail2ban/jail.d/freeradius.conf <<'FAIL2BAN_CONF'
 [freeradius]
 enabled = true
 port = 1812,1813
@@ -192,7 +191,7 @@ FAIL2BAN_CONF
 
   # Create filter if missing
   if [[ ! -f /etc/fail2ban/filter.d/freeradius.conf ]]; then
-    cat > /etc/fail2ban/filter.d/freeradius.conf <<'FILTER_CONF'
+    cat >/etc/fail2ban/filter.d/freeradius.conf <<'FILTER_CONF'
 [Definition]
 failregex = ^\w+\s+\d+ \d+:\d+:\d+ \S+ \S+\[\d+\]: Login incorrect: \[<HOST>
 ignoreregex =
@@ -207,7 +206,7 @@ configure_audit() {
 
   apt-get install -y auditd
 
-  cat > /etc/audit/rules.d/freeradius.rules <<'AUDIT_RULES'
+  cat >/etc/audit/rules.d/freeradius.rules <<'AUDIT_RULES'
 -w /etc/freeradius/ -p wa -k freeradius_config
 -w /etc/freeradius/3.0/certs/ -p wa -k freeradius_certs
 -w /var/log/freeradius/ -p wa -k freeradius_logs
@@ -230,7 +229,7 @@ configure_logging() {
   sed -i 's/auth_goodpass = no/auth_goodpass = yes/' /etc/freeradius/3.0/radiusd.conf || true
 
   # Configure logrotate
-  cat > /etc/logrotate.d/freeradius <<'LOGROTATE_CONF'
+  cat >/etc/logrotate.d/freeradius <<'LOGROTATE_CONF'
 /var/log/freeradius/*.log {
   daily
   rotate 14

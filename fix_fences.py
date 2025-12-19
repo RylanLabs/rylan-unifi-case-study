@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
-"""Fix MD031 violations by ensuring exactly one blank line before/after fences."""
+"""Fix MD031 violations by ensuring exactly one blank line before/after fences.
 
+This tool is quiet on success (no prints) to follow the "silence is golden" doctrine.
+"""
+
+import logging
 import re
 import sys
 from pathlib import Path
+
+# Constants to avoid magic numbers
+MIN_ARG_COUNT = 2
+MIN_BLANKS = 2
+logger = logging.getLogger(__name__)
 
 
 def fix_fences(content: str) -> str:
@@ -20,15 +29,12 @@ def fix_fences(content: str) -> str:
         if m:
             leading = m.group(1)
             lang = m.group(2)
-            if lang == "":
-                # normalize language-less fences to text
-                line = f"{leading}```text"
-            else:
-                line = f"{leading}```{lang}"
+            # normalize language-less fences to text using a compact expression
+            line = f"{leading}```{lang or 'text'}"
             # Ensure exactly 1 blank before fence (if not at start)
             if result and result[-1].strip() != "":
                 result.append("")
-            elif result and len(result) >= 2 and result[-1] == "" and result[-2] == "":
+            elif result and len(result) >= MIN_BLANKS and result[-1] == "" and result[-2] == "":
                 # Remove extra blank
                 result.pop()
 
@@ -59,15 +65,18 @@ def fix_fences(content: str) -> str:
     return "\n".join(result)
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: fix_fences.py <file1.md> [file2.md ...]")
+def main() -> None:
+    """CLI entrypoint: run fence fixer on files passed on the command line."""
+    logging.basicConfig(level=logging.WARNING)
+
+    if len(sys.argv) < MIN_ARG_COUNT:
+        logger.error("Usage: fix_fences.py <file1.md> [file2.md ...]")
         sys.exit(1)
 
     for filepath in sys.argv[1:]:
         path = Path(filepath)
         if not path.exists():
-            print(f"Skip {filepath}: not found")
+            logger.warning("Skip %s: not found", filepath)
             continue
 
         content = path.read_text()
@@ -75,9 +84,6 @@ def main():
 
         if fixed != content:
             path.write_text(fixed)
-            print(f"Fixed {filepath}")
-        else:
-            print(f"No changes for {filepath}")
 
 
 if __name__ == "__main__":

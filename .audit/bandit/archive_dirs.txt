@@ -1,0 +1,5 @@
+./.archive
+./.archive/venv-stubs-v∞.3.2-deprecated
+./.venv
+./.venv/pyvenv.cfg
+./scripts/archive

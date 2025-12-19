@@ -52,10 +52,10 @@ if [[ -n "$hyphenated_dirs" ]] && [[ "$DRY_RUN" == false ]]; then
 
     # Search for references in code/config files
     if grep -rn --include="*.py" --include="*.sh" --include="*.yml" --include="*.yaml" --include="*.md" --include="*.json" \
-        -e "$dir_name" . 2>/dev/null | grep -v ".git" | grep -v "auto-fix-naming.sh" | head -5; then
+      -e "$dir_name" . 2>/dev/null | grep -v ".git" | grep -v "auto-fix-naming.sh" | head -5; then
       REFERENCES_FOUND=true
     fi
-  done <<< "$hyphenated_dirs"
+  done <<<"$hyphenated_dirs"
 
   if [[ "$REFERENCES_FOUND" == true ]]; then
     echo ""
@@ -105,7 +105,7 @@ if [[ -n "$hyphenated_dirs" ]]; then
         fi
       fi
     fi
-  done <<< "$hyphenated_dirs"
+  done <<<"$hyphenated_dirs"
   echo ""
 fi
 
@@ -133,7 +133,7 @@ if [[ -n "$hyphenated_files" ]]; then
         fi
       fi
     fi
-  done <<< "$hyphenated_files"
+  done <<<"$hyphenated_files"
   echo ""
 fi
 

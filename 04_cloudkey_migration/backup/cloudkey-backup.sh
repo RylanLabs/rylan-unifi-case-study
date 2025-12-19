@@ -9,9 +9,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-readonly SCRIPT_DIR;
+readonly SCRIPT_DIR
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_NAME;
+readonly SCRIPT_NAME
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly REPO_ROOT="${SCRIPT_DIR%/04_cloudkey_migration/backup}"
 readonly LOG_DIR="${REPO_ROOT}/logs"
@@ -28,7 +28,7 @@ CLOUDKEY_IP="${CLOUDKEY_IP:-10.0.1.30}"
 BACKUP_USER="${BACKUP_USER:-ubnt}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 DRY_RUN="${DRY_RUN:-false}"
-NOTIFY_ON_FAILURE="${NOTIFY_ON_FAILURE:-false}"  # Set webhook URL via env if true
+NOTIFY_ON_FAILURE="${NOTIFY_ON_FAILURE:-false}" # Set webhook URL via env if true
 
 # =============================================================================
 # RYLANLABS BANNER
@@ -63,9 +63,9 @@ find "$LOG_DIR" -name "cloudkey-backup-*.log" -type f | sort | head -n -50 | xar
 exec 1> >(tee -a "$LOG_FILE")
 exec 2>&1
 
-log_info()    { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]    $*"; }
-log_warn()    { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [WARN]    $*"; }
-log_error()   { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR]   $*"; }
+log_info() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]    $*"; }
+log_warn() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [WARN]    $*"; }
+log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR]   $*"; }
 log_success() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [SUCCESS] $*"; }
 
 # =============================================================================
@@ -74,14 +74,14 @@ log_success() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [SUCCESS] $*"; }
 
 acquire_lock() {
   if [[ -f "$LOCK_FILE" ]]; then
-    local pid;
+    local pid
     pid=$(cat "$LOCK_FILE")
     if kill -0 "$pid" 2>/dev/null; then
       log_error "Backup already running (PID $pid)"
       exit 1
     fi
   fi
-  echo $$ > "$LOCK_FILE"
+  echo $$ >"$LOCK_FILE"
 }
 
 cleanup() {
@@ -105,7 +105,8 @@ notify_failure() {
 # =============================================================================
 
 fail_with_context() {
-  local code=$1; shift
+  local code=$1
+  shift
   log_error "$*"
   log_error "Last 20 lines of log:"
   tail -20 "$LOG_FILE" | sed 's/^/  /'
@@ -123,7 +124,7 @@ validate_ssh_access() {
   fi
 
   local attempts=3
-  for ((i=1; i<=attempts; i++)); do
+  for ((i = 1; i <= attempts; i++)); do
     if timeout 15 ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new \
       "$BACKUP_USER@$CLOUDKEY_IP" "echo 'OK'" >/dev/null 2>&1; then
       log_success "SSH access confirmed"
@@ -145,7 +146,7 @@ trigger_remote_backup() {
     return 0
   fi
 
-  local output;
+  local output
   output=$(mktemp)
   trap "rm -f $output" RETURN
 
@@ -180,7 +181,7 @@ download_and_verify_backup() {
   [[ -s "$local_file" ]] || fail_with_context 5 "Downloaded backup is empty"
 
   # Verify file integrity (basic size check + sha256)
-  local local_sha;
+  local local_sha
   local_sha=$(sha256sum "$local_file" | awk '{print $1}')
   log_info "Local SHA256: $local_sha"
 
@@ -202,7 +203,7 @@ encrypt_backup() {
     fail_with_context 6 "GPG encryption failed"
   fi
 
-  rm -f "$plain_file"  # Remove plaintext
+  rm -f "$plain_file" # Remove plaintext
   log_success "Backup encrypted: $encrypted_file"
 }
 

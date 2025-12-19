@@ -9,9 +9,21 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Carter Doctrine: Use resurrected ministry for auth
 # ─────────────────────────────────────────────────────
-log()   { [[ "$QUIET" == false ]] && echo "[Inventory] $*"; }
-audit() { echo "$(date -Iseconds) | Inventory | $1 | $2" >> /var/log/carter-audit.log; }
-fail()  { echo "❌ Inventory FAILURE: $1"; audit "FAIL" "$1"; exit 1; }
+# Logging & Audit (with /var/log fallback)
+log() { if [[ "$QUIET" == false ]]; then echo "[Inventory] $*"; fi; }
+AUDIT_LOG="/var/log/carter-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/carter-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Inventory | $1 | $2" >>"$AUDIT_LOG"; }
+
+fail() {
+  echo "❌ Inventory FAILURE: $1"
+  audit "FAIL" "$1"
+  exit 1
+}
 
 QUIET=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
@@ -19,10 +31,10 @@ QUIET=false
 log "Device inventory bootstrap — Carter identity"
 
 # Source true Carter ministry (correct path)
-if [[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]]; then
-  source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+if [[ -f runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh ]]; then
+  source runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
 else
-  fail "Carter ministry missing" "Run ministry-secrets first"
+  fail "Carter ministry missing" "Run ministry_secrets first"
 fi
 
 # ─────────────────────────────────────────────────────
@@ -42,7 +54,7 @@ log "✅ Inventory complete — $device_count device(s) discovered"
 # ─────────────────────────────────────────────────────
 # Eternal Banner Drop
 # ─────────────────────────────────────────────────────
-[[ "$QUIET" == false ]] && cat << 'EOF'
+[[ "$QUIET" == false ]] && cat <<'EOF'
 
 
 ╔══════════════════════════════════════════════════════════════════════════════╗

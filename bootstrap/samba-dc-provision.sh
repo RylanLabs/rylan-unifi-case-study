@@ -34,7 +34,7 @@ DRY_RUN="${1:-}"
 echo "=== Samba AD/DC Provisioning (Canonical Bash) ==="
 echo "Domain: $DOMAIN ($REALM) | IP: $DC_IP"
 
-if [[ "$DRY_RUN" == "--dry-run" ]]; then
+if [[ $DRY_RUN == "--dry-run" ]]; then
   echo "[DRY-RUN MODE] Configuration would be:"
   echo "  DOMAIN: $DOMAIN"
   echo "  REALM: $REALM"
@@ -189,7 +189,7 @@ echo "=== Samba AD/DC Provisioning Summary ==="
 echo "Domain: $DOMAIN ($REALM)"
 echo "DC IP: $DC_IP"
 echo "Admin User: administrator@$REALM"
-echo "Admin Password: (see \$SAMBA_ADMIN_PASS or script config)"
+echo 'Admin Password: (see $SAMBA_ADMIN_PASS or script config)'
 echo ""
 echo "Next Steps:"
 echo "1. Test LDAP: ldapsearch -x -H ldap://$DC_IP -D 'cn=administrator,cn=users,dc=rylan,dc=internal' -w '$ADMIN_PASS' -b 'dc=rylan,dc=internal'"

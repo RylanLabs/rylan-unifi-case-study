@@ -21,9 +21,11 @@ validate_ssh() {
   if [[ "$test_name" == "all" ]] || [[ "$test_name" == "port" ]]; then
     log_info "Test 1: Verifying SSH port (${ssh_port}) is open..."
     if nmap -p "$ssh_port" localhost 2>/dev/null | grep -q "open"; then
-      log_success "SSH port open"; ((passed++))
+      log_success "SSH port open"
+      ((passed++))
     else
-      log_error "SSH port not open"; ((failed++))
+      log_error "SSH port not open"
+      ((failed++))
     fi
   fi
 
@@ -31,9 +33,11 @@ validate_ssh() {
   if [[ "$test_name" == "all" ]] || [[ "$test_name" == "password" ]]; then
     log_info "Test 2: Verifying password authentication is disabled..."
     if grep -q "^PasswordAuthentication no" /etc/ssh/sshd_config; then
-      log_success "Password authentication disabled"; ((passed++))
+      log_success "Password authentication disabled"
+      ((passed++))
     else
-      log_error "Password authentication not disabled"; ((failed++))
+      log_error "Password authentication not disabled"
+      ((failed++))
     fi
   fi
 
@@ -41,9 +45,11 @@ validate_ssh() {
   if [[ "$test_name" == "all" ]] || [[ "$test_name" == "root" ]]; then
     log_info "Test 3: Verifying root login restrictions..."
     if grep -q "^PermitRootLogin prohibit-password" /etc/ssh/sshd_config; then
-      log_success "Root login restricted to key-only"; ((passed++))
+      log_success "Root login restricted to key-only"
+      ((passed++))
     else
-      log_error "Root login not properly restricted"; ((failed++))
+      log_error "Root login not properly restricted"
+      ((failed++))
     fi
   fi
 
@@ -51,11 +57,13 @@ validate_ssh() {
   if [[ "$test_name" == "all" ]] || [[ "$test_name" == "key" ]]; then
     log_info "Test 4: Verifying SSH public key is installed..."
     if [[ -f /root/.ssh/authorized_keys ]] && [[ -s /root/.ssh/authorized_keys ]]; then
-      local key_fingerprint;
+      local key_fingerprint
       key_fingerprint=$(ssh-keygen -lf /root/.ssh/authorized_keys 2>/dev/null | head -1 || echo "N/A")
-      log_success "SSH public key installed: $key_fingerprint"; ((passed++))
+      log_success "SSH public key installed: $key_fingerprint"
+      ((passed++))
     else
-      log_error "SSH public key not installed"; ((failed++))
+      log_error "SSH public key not installed"
+      ((failed++))
     fi
   fi
 
@@ -64,11 +72,14 @@ validate_ssh() {
     log_info "Test 5: SSH algorithm strength..."
     local ssh_config="/etc/ssh/sshd_config"
     if grep -q "^Ciphers.*rc4\|DES\|MD5" "$ssh_config"; then
-      log_error "Weak SSH ciphers detected"; ((failed++))
+      log_error "Weak SSH ciphers detected"
+      ((failed++))
     elif grep -q "chacha20-poly1305\|aes.*gcm" "$ssh_config"; then
-      log_success "Strong SSH ciphers configured"; ((passed++))
+      log_success "Strong SSH ciphers configured"
+      ((passed++))
     else
-      log_warn "No forward-secrecy ciphers found (prefer ChaCha20 or AES-GCM)"; ((passed++))
+      log_warn "No forward-secrecy ciphers found (prefer ChaCha20 or AES-GCM)"
+      ((passed++))
     fi
   fi
 
@@ -79,10 +90,12 @@ validate_ssh() {
       timeout 2 ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no nonexistent@localhost 2>/dev/null || true
     done
     if timeout 2 ssh -o StrictHostKeyChecking=no root@localhost "echo test" 2>/dev/null ||
-       ssh-keyscan localhost 2>/dev/null | grep -q "ssh-rsa"; then
-      log_success "SSH service responsive after brute-force attempts"; ((passed++))
+      ssh-keyscan localhost 2>/dev/null | grep -q "ssh-rsa"; then
+      log_success "SSH service responsive after brute-force attempts"
+      ((passed++))
     else
-      log_warn "Cannot verify SSH connectivity after brute-force test"; ((passed++))
+      log_warn "Cannot verify SSH connectivity after brute-force test"
+      ((passed++))
     fi
   fi
 

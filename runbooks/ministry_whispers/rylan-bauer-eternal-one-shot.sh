@@ -9,18 +9,32 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Bauer Doctrine: Trust nothing, verify everything
 # ─────────────────────────────────────────────────────
-log()   { [[ "$QUIET" == false ]] && echo "[Bauer] $*"; }
-audit() { echo "$(date -Iseconds) | Bauer | $1 | $2" >> /var/log/bauer-audit.log; }
-fail()  { echo "❌ Bauer FAILURE: $1"; echo "📋 Remediation: $2"; audit "FAIL" "$1"; exit 1; }
+# Preserve environment-driven flags when set
+QUIET="${QUIET:-false}"
+DRY_RUN="${DRY_RUN:-false}"
 
-QUIET=false
-DRY_RUN=false
+log() { if [[ "$QUIET" == false ]]; then echo "[Bauer] $*"; fi; }
+
+# Audit path with fallback if /var/log is not writable (CI / local dev)
+AUDIT_LOG="/var/log/bauer-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/bauer-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Bauer | $1 | $2" >>"$AUDIT_LOG"; }
+
+fail() {
+  echo "❌ Bauer FAILURE: $1"
+  echo "📋 Remediation: $2"
+  audit "FAIL" "$1"
+  exit 1
+}
+
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
 log "Bauer ministry initializing — Verification & audit"
-
-mkdir -p /var/log
 
 # ─────────────────────────────────────────────────────
 # Phase 1: SSH Verification (Runtime, Idempotent)
@@ -29,13 +43,13 @@ log "Phase 1: SSH Verification"
 if [[ "$DRY_RUN" == false ]] && command -v sshd &>/dev/null; then
   sshd_config=$(sudo sshd -T 2>/dev/null)
 
-  echo "$sshd_config" | grep -qE "^passwordauthentication yes" && \
+  echo "$sshd_config" | grep -qE "^passwordauthentication yes" &&
     fail "Password authentication enabled" "Set PasswordAuthentication no in /etc/ssh/sshd_config"
 
-  echo "$sshd_config" | grep -qE "^permitrootlogin (yes|prohibit-password)" && \
+  echo "$sshd_config" | grep -qE "^permitrootlogin (yes|prohibit-password)" &&
     fail "Root login permitted" "Set PermitRootLogin no"
 
-  echo "$sshd_config" | grep -qi "^pubkeyauthentication yes" || \
+  echo "$sshd_config" | grep -qi "^pubkeyauthentication yes" ||
     fail "Pubkey authentication disabled" "Set PubkeyAuthentication yes"
 
   log "✅ SSH verified (key-only, root prohibited)"
@@ -74,7 +88,7 @@ fi
 # ─────────────────────────────────────────────────────
 # Eternal Banner Drop (Beale-Approved)
 # ─────────────────────────────────────────────────────
-[[ "$QUIET" == false ]] && cat << 'EOF'
+[[ "$QUIET" == false ]] && cat <<'EOF'
 
 
 ╔══════════════════════════════════════════════════════════════════════════════╗

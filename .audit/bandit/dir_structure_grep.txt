@@ -1,0 +1,2 @@
+drwxr-xr-x  3 egx570 egx570  4096 Dec 16 14:58 .archive
+drwxr-xr-x  5 egx570 egx570  4096 Dec 13 21:20 .venv

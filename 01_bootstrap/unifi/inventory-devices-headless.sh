@@ -9,11 +9,21 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Carter Doctrine: Silent, auditable, file-based
 # ─────────────────────────────────────────────────────
-log()   { [[ "$QUIET" == false ]] && echo "[Headless Inventory] $*"; }
-audit() { echo "$(date -Iseconds) | HeadlessInventory | $1 | $2" >> /var/log/carter-audit.log; }
-fail()  { echo "❌ Headless inventory FAILURE: $1" >&2; audit "FAIL" "$1"; exit 1; }
+log() { if [[ "$QUIET" == false ]]; then echo "[Headless Inventory] $*"; fi; }
+AUDIT_LOG="/var/log/carter-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/carter-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
 
-QUIET=true  # Headless = silent by default
+audit() { echo "$(date -Iseconds) | HeadlessInventory | $1 | $2" >>"$AUDIT_LOG"; }
+fail() {
+  echo "❌ Headless inventory FAILURE: $1" >&2
+  audit "FAIL" "$1"
+  exit 1
+}
+
+QUIET=true # Headless = silent by default
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../" && pwd)"
@@ -27,7 +37,7 @@ source "$REPO_ROOT/lib/unifi/client.sh" || fail "Carter API client missing"
 mkdir -p /var/log
 
 {
-  cat << 'EOF'
+  cat <<'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                           RYLAN LABS • ETERNAL FORTRESS                      ║
 ║  Headless Device Inventory — $(date)                                         ║
@@ -51,7 +61,7 @@ EOF
   jq -r '.data[] | [.mac, .model, .name // "unnamed", .ip // "no-ip", (.state // 0 | if . == 1 then "connected" else "disconnected" end)] | @tsv' "$DEVICES_FILE" | column -t -s $'\t'
 
   echo ""
-  cat << 'EOF'
+  cat <<'EOF'
 ═══════════════════════════════════════════════════════════════════════════════
 Summary:
   Total devices: $device_count
@@ -65,7 +75,7 @@ EOF
 
   rm -f "$DEVICES_FILE"
 
-} > "$OUTPUT_FILE"
+} >"$OUTPUT_FILE"
 
 log "✅ Headless inventory complete — saved to $OUTPUT_FILE"
 audit "PASS" "devices=$device_count file=$OUTPUT_FILE"

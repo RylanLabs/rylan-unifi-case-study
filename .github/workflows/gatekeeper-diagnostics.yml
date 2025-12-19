@@ -1,0 +1,33 @@
+name: Gatekeeper Diagnostics
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch: {}
+
+jobs:
+  upload-gatekeeper-artifacts:
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: List gatekeeper dir
+        run: ls -la .audit/gatekeeper || true
+
+      - name: Upload gatekeeper metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatekeeper-latest
+          path: .audit/gatekeeper/gatekeeper-latest.json
+          retention-days: 30
+
+      - name: Upload gatekeeper log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatekeeper-log
+          path: .audit/gatekeeper/gatekeeper.log
+          retention-days: 30

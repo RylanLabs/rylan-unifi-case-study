@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""
+"""VoIP SIP Registration + QoS DSCP Validation tests.
+
 Leo's Sacred Glue — Conscious Level 2.6
 03_validation_ops/phone_reg_test.py
 VoIP SIP Registration + QoS DSCP Validation (Bauer → Whitaker offensive trinity)
@@ -20,7 +21,6 @@ Pre-Commit Validation:
 
 import subprocess
 import sys
-from typing import Tuple
 
 FREEPBX_HOST = "10.0.20.20"
 FREEPBX_SSH_USER = "root"  # SSH user for FreePBX access
@@ -35,15 +35,15 @@ def log(msg: str) -> None:
     print(f"[{datetime.now().isoformat()}] {msg}")
 
 
-def check_sip_registration(extension: str) -> Tuple[bool, str]:
-    """
-    Check if SIP extension is registered via asterisk CLI.
+def check_sip_registration(extension: str) -> tuple[bool, str]:
+    """Check if SIP extension is registered via asterisk CLI.
 
     Args:
         extension: Extension number to check (e.g., "101")
 
     Returns:
         Tuple of (is_registered, peer_ip)
+
     """
     try:
         cmd = [
@@ -58,7 +58,7 @@ def check_sip_registration(extension: str) -> Tuple[bool, str]:
 
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=10, check=False
-        )
+        )  # safe: controlled SSH command sent to lab controller
 
         if result.returncode == 0 and result.stdout.strip():
             # Parse output: "101/101  10.0.40.15  D  A  5060  OK (1 ms)"
@@ -75,29 +75,34 @@ def check_sip_registration(extension: str) -> Tuple[bool, str]:
         return (False, "")
 
 
-def check_dscp_marking(peer_ip: str) -> Tuple[bool, str]:
-    """
-    Verify DSCP EF (46) marking on RTP packets from peer.
+def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
+    """Verify DSCP EF (46) marking on RTP packets from peer.
 
     Args:
         peer_ip: IP address of registered SIP peer
 
     Returns:
         Tuple of (is_marked_correctly, actual_dscp)
+
     """
     try:
         # Use tcpdump to capture RTP packets and check DSCP
+        tcpdump_filter = f"src {peer_ip} and udp"
+        tcpdump_cmd = (
+            f"timeout 5 tcpdump -c 10 -nn -v '{tcpdump_filter}' " "2>/dev/null | grep -oP 'tos 0x[0-9a-f]+' | head -1"
+        )
+
         cmd = [
             "ssh",
             "-o",
             "StrictHostKeyChecking=no",
             f"{FREEPBX_SSH_USER}@{FREEPBX_HOST}",
-            f"timeout 5 tcpdump -c 10 -nn -v 'src {peer_ip} and udp' 2>/dev/null | grep -oP 'tos 0x[0-9a-f]+' | head -1",
+            tcpdump_cmd,
         ]
 
         result = subprocess.run(
             cmd, capture_output=True, text=True, timeout=10, check=False
-        )
+        )  # safe: remote tcpdump pipeline on lab controller
 
         if result.returncode == 0 and result.stdout.strip():
             # Parse: "tos 0xb8" (EF = 0xb8 = DSCP 46 << 2)
@@ -116,11 +121,11 @@ def check_dscp_marking(peer_ip: str) -> Tuple[bool, str]:
 
 
 def validate_voip_isolation() -> bool:
-    """
-    Verify VoIP VLAN (40) can only reach FreePBX + LDAP.
+    """Verify VoIP VLAN (40) can only reach FreePBX + LDAP.
 
     Returns:
         True if isolation is correct
+
     """
     forbidden_targets = [
         ("10.0.10.10", "22", "SSH to DC"),
@@ -133,17 +138,16 @@ def validate_voip_isolation() -> bool:
     for target_ip, port, description in forbidden_targets:
         try:
             # Simulate from VLAN 40 (would need docker network in production)
+            # safe: local network probe in controlled validation
             result = subprocess.run(
-                ["timeout", "2", "nc", "-zv", target_ip, port],
+                ["timeout", "2", "nc", "-zv", target_ip, port],  # safe: uses system "nc" on controlled lab host
                 capture_output=True,
                 text=True,
                 check=False,
-            )
+            )  # safe: local network probe in controlled validation
 
             if result.returncode == 0:
-                log(
-                    f"  ✗ FAIL: VoIP can reach {description} ({target_ip}:{port}) - ISOLATION BREACH"
-                )
+                log(f"  ✗ FAIL: VoIP can reach {description} ({target_ip}:{port}) - ISOLATION BREACH")
                 all_blocked = False
             else:
                 log(f"  ✓ PASS: {description} blocked (expected)")
@@ -178,9 +182,7 @@ def main() -> int:
                 log(f"    ✓ DSCP marking correct (DSCP={dscp})")
                 tests_passed += 1
             else:
-                log(
-                    f"    ✗ DSCP marking incorrect (expected {EXPECTED_DSCP}, got {dscp})"
-                )
+                log(f"    ✗ DSCP marking incorrect (expected {EXPECTED_DSCP}, got {dscp})")
                 tests_failed += 1
         else:
             log(f"  ✗ Extension {ext} NOT registered")

@@ -1,0 +1,12 @@
+--requirement requirements.txt
+# Dev + CI tooling (kept separate from runtime)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+ruff>=0.1.0
+mypy>=1.7.0
+pre-commit>=3.5.0
+
+# Type stubs for third-party libraries
+types-requests>=2.31.0
+types-PyYAML>=6.0.0
+types-setuptools>=68.0.0

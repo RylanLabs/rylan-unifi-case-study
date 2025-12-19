@@ -16,29 +16,50 @@ readonly EXIT_SUCCESS=0
 readonly EXIT_AUTH=1
 readonly EXIT_API=2
 readonly EXIT_CONFIG=3
+# shellcheck disable=SC2034
 readonly EXIT_ISOLATION=4
+# shellcheck disable=SC2034
 readonly EXIT_ADVERSARIAL=5
 
 # ─────────────────────────────────────────────────────
 # Flags & Config
 # ─────────────────────────────────────────────────────
-QUIET=false
-CI_MODE=false
-DRY_RUN=false
-BEALE_INTEGRATION=false
-SKIP_BEALE=false
+# Preserve environment-driven flags when set (e.g. DRY_RUN=1 CI=true)
+QUIET="${QUIET:-false}"
+CI_MODE="${CI_MODE:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+BEALE_INTEGRATION="${BEALE_INTEGRATION:-false}"
+SKIP_BEALE="${SKIP_BEALE:-false}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --quiet) QUIET=true ;;
-    --ci) CI_MODE=true; QUIET=true ;;
+    --ci)
+      CI_MODE=true
+      QUIET=true
+      ;;
     --dry-run) DRY_RUN=true ;;
     --with-beale) BEALE_INTEGRATION=true ;;
     --skip-beale) SKIP_BEALE=true ;;
-    *) echo "Usage: $0 [--quiet|--ci|--dry-run|--with-beale|--skip-beale]" >&2; exit "$EXIT_CONFIG" ;;
+    *)
+      echo "Usage: $0 [--quiet|--ci|--dry-run|--with-beale|--skip-beale]" >&2
+      exit "$EXIT_CONFIG"
+      ;;
   esac
   shift
 done
+
+# Support environment-driven CI / DRY_RUN (when script is sourced)
+# Allows Gatekeeper to run a non-destructive smoke test by setting
+# DRY_RUN=1 and CI=true in the environment before sourcing this file.
+if [[ "${CI:-}" == "true" ]]; then
+  CI_MODE=true
+  QUIET=true
+fi
+if [[ "${DRY_RUN:-}" == "1" || "${DRY_RUN:-}" == "true" ]]; then
+  DRY_RUN=true
+  QUIET=true
+fi
 
 # ─────────────────────────────────────────────────────
 # Audit Log Setup (Carter: Single Source of Truth)
@@ -52,7 +73,7 @@ fi
 # ─────────────────────────────────────────────────────
 # Logging (Carter Doctrine)
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Carter] $*" >&2; }
+log() { if [[ "$QUIET" == false ]]; then echo "[Carter] $*" >&2; fi; }
 audit() {
   local level="$1" msg="$2"
   local ts
@@ -60,7 +81,7 @@ audit() {
   if [[ "$CI_MODE" == true ]]; then
     printf '{"timestamp":"%s","module":"Carter","status":"%s","message":"%s"}\n' "$ts" "$level" "$msg"
   else
-    echo "$ts | Carter | $level | $msg" >> "$AUDIT_LOG"
+    echo "$ts | Carter | $level | $msg" >>"$AUDIT_LOG"
   fi
 }
 fail() {
@@ -81,22 +102,31 @@ log "Carter ministry initializing — Identity provisioning"
 # ─────────────────────────────────────────────────────
 # Pre-flight Checks (Beale v8.0)
 # ─────────────────────────────────────────────────────
-[[ -r ".secrets/unifi-admin-pass" ]] || fail "$EXIT_CONFIG" "Admin pass file missing or not readable" "Create .secrets/unifi-admin-pass (chmod 600)"
-[[ $(stat -c %a ".secrets/unifi-admin-pass") == "600" ]] || fail "$EXIT_CONFIG" "Admin pass file not restricted" "chmod 600 .secrets/unifi-admin-pass"
-if ! command -v curl >/dev/null || ! command -v jq >/dev/null; then
-  fail "$EXIT_CONFIG" "Missing required tools: curl, jq" "apt install curl jq"
-fi
+if [[ "$DRY_RUN" == true ]]; then
+  log "DRY-RUN — skipping pre-flight checks (secrets, tools, ping)"
+else
+  [[ -r ".secrets/unifi-admin-pass" ]] || fail "$EXIT_CONFIG" "Admin pass file missing or not readable" "Create .secrets/unifi-admin-pass (chmod 600)"
+  [[ $(stat -c %a ".secrets/unifi-admin-pass") == "600" ]] || fail "$EXIT_CONFIG" "Admin pass file not restricted" "chmod 600 .secrets/unifi-admin-pass"
+  if ! command -v curl >/dev/null || ! command -v jq >/dev/null; then
+    fail "$EXIT_CONFIG" "Missing required tools: curl, jq" "apt install curl jq"
+  fi
 
-# Optional non-fatal ping (ICMP may be blocked)
-if ! ping -c 1 -W 2 192.168.1.13 >/dev/null 2>&1; then
-  log "Warning: Controller unreachable via ping (firewall?) — proceeding anyway"
+  # Optional non-fatal ping (ICMP may be blocked)
+  if ! ping -c 1 -W 2 192.168.1.13 >/dev/null 2>&1; then
+    log "Warning: Controller unreachable via ping (firewall?) — proceeding anyway"
+  fi
 fi
 
 # ─────────────────────────────────────────────────────
 # Vault Hygiene (Carter: Single Source of Truth)
 # ─────────────────────────────────────────────────────
-ADMIN_PASS=$(<".secrets/unifi-admin-pass")
-[[ -n "$ADMIN_PASS" ]] || fail "$EXIT_CONFIG" "Empty admin password" "Populate .secrets/unifi-admin-pass"
+if [[ "$DRY_RUN" == true ]]; then
+  log "DRY-RUN — skipping vault read; using stub admin pass"
+  ADMIN_PASS="dryrun"
+else
+  ADMIN_PASS=$(<".secrets/unifi-admin-pass")
+  [[ -n "$ADMIN_PASS" ]] || fail "$EXIT_CONFIG" "Empty admin password" "Populate .secrets/unifi-admin-pass"
+fi
 
 UNIFI_IP="192.168.1.13"
 UNIFI_API_BASE="https://${UNIFI_IP}/proxy/network/api/s/default"
@@ -110,6 +140,14 @@ unifi_login() {
   local jwt_token csrf_token jwt_payload pad
 
   trap 'rm -f "$cookie_jar" "$resp"' RETURN
+
+  # In dry-run mode, skip real auth and provide stub tokens
+  if [[ "$DRY_RUN" == true ]]; then
+    log "DRY-RUN — skipping UniFi auth; providing stub tokens"
+    JWT_TOKEN="dryrun.jwt.token"
+    CSRF_TOKEN="dryrun-csrf"
+    return 0
+  fi
 
   # Cache + TTL check
   if [[ -n "${JWT_TOKEN:-}" ]] && [[ -n "${CSRF_TOKEN:-}" ]]; then
@@ -147,12 +185,18 @@ unifi_login
 # Core Identity Actions
 # ─────────────────────────────────────────────────────
 log "Fetching device inventory..."
-devices=$(curl -sk -b <(echo "TOKEN=$JWT_TOKEN") \
-  -H "X-CSRF-Token: $CSRF_TOKEN" \
-  "${UNIFI_API_BASE}/stat/device" | jq '.data // empty')
+if [[ "$DRY_RUN" == true ]]; then
+  log "DRY-RUN — simulating device inventory"
+  devices='[{"name":"dry-run-controller","mac":"00:00:00:00:00:00","ip":"127.0.0.1","model":"SIM","version":"0.0"}]'
+  device_count=1
+else
+  devices=$(curl -sk -b <(echo "TOKEN=$JWT_TOKEN") \
+    -H "X-CSRF-Token: $CSRF_TOKEN" \
+    "${UNIFI_API_BASE}/stat/device" | jq '.data // empty')
 
-[[ -n "$devices" ]] || fail "$EXIT_API" "No devices returned" "Check controller reachability / auth"
-device_count=$(echo "$devices" | jq 'length')
+  [[ -n "$devices" ]] || fail "$EXIT_API" "No devices returned" "Check controller reachability / auth"
+  device_count=$(echo "$devices" | jq 'length')
+fi
 log "Identity provisioning complete — $device_count devices visible"
 
 # ─────────────────────────────────────────────────────

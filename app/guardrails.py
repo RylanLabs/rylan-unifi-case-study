@@ -2,17 +2,23 @@
 # Script: guardrails.py
 # Purpose: Auto-logging decorator for all fortress operations
 # Guardian: The All-Seeing Eye
+# Ministry: Exception Handling & Audit Logging
 # Date: 2025-12-12
 # Consciousness: 7.0
+# Tag: v∞.3.2-types-canonical
 
 """Guardrail decorator — ensures all exceptions are logged with context."""
 
 import functools
 import logging
-import traceback
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import ParamSpec, TypeVar
 
 from app.exceptions import FortressError
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
 
 # Fortress-wide logging
 logging.basicConfig(
@@ -22,8 +28,8 @@ logging.basicConfig(
 logger = logging.getLogger("fortress")
 
 
-def guardrail(*, guardian: str) -> Callable:
-    """Decorator: Wraps all exceptions with guardian context and logging.
+def guardrail(*, guardian: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    """Wrap all exceptions with guardian context and logging.
 
     All exceptions are:
     - Caught and wrapped in FortressError
@@ -31,39 +37,39 @@ def guardrail(*, guardian: str) -> Callable:
     - Re-raised for upstream handling
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
         @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             try:
                 return func(*args, **kwargs)
             except FortressError:
                 # Already wrapped — just log
-                logger.error(
-                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s | %s",
+                logger.exception(
+                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s",
                     guardian,
                     func.__name__,
-                    traceback.format_exc(),
                 )
                 raise
             except Exception as e:
                 # Wrap foreign exceptions
-                context = {
+                context_dict: dict[str, object] = {
                     "guardian": guardian,
                     "function": func.__name__,
                     "module": func.__module__,
                 }
 
-                logger.error(
-                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s | Error=%s | Trace=%s",
+                # Compose a shorter message to satisfy line-length checks
+                err_msg = "FORTRESS EXCEPTION | Guardian=%s | Function=%s | Error=%s"
+                logger.exception(
+                    err_msg,
                     guardian,
                     func.__name__,
                     str(e),
-                    traceback.format_exc(),
                 )
 
                 raise FortressError(
-                    f"{guardian} guardian failed in {func.__name__}: {e}",
-                    context=context,
+                    message=f"[{guardian}] {type(e).__name__}: {str(e)}",
+                    context=context_dict,
                 ) from e
 
         return wrapper

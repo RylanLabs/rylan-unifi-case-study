@@ -20,9 +20,12 @@ import logging
 import os
 import sys
 import time
+from http.cookiejar import MozillaCookieJar
+from pathlib import Path
+from typing import Any, NoReturn, cast
 
 import requests
-import urllib3  # type: ignore[import-untyped]
+import urllib3
 
 urllib3.disable_warnings()  # self-signed certs
 
@@ -35,7 +38,7 @@ HTTP_OK = 200
 DEVICE_STATE_ADOPTED = 1
 
 
-def fail(msg: str) -> None:
+def fail(msg: str) -> NoReturn:
     """Log error and exit."""
     logger.error(msg)
     sys.exit(1)
@@ -53,13 +56,23 @@ def login(url: str, username: str, password: str) -> None:
     logger.info("Authenticated")
 
 
-def list_devices(url: str, site: str) -> list[dict]:
-    """Retrieve all devices from controller."""
+def list_devices(url: str, site: str) -> list[dict[str, Any]]:
+    """Retrieve all devices from controller.
+
+    This validates the controller response at runtime and returns a
+    `list[dict[str, Any]]` so callers can rely on the element shape.
+    """
     endpoint = f"{url}/proxy/network/api/s/{site}/stat/device"
     resp = SESSION.get(endpoint, verify=False)
     if resp.status_code != HTTP_OK:
         fail(f"Device list failed ({resp.status_code})")
-    return resp.json().get("data", [])
+
+    data = resp.json().get("data", [])
+    if not isinstance(data, list):
+        return []
+
+    # Convert to the expected shape while filtering non-dict items
+    return [cast("dict[str, Any]", item) for item in data if isinstance(item, dict)]
 
 
 def adopt(url: str, site: str, mac: str) -> None:
@@ -96,9 +109,7 @@ def main() -> None:
     logger.info("Controller: %s (site=%s)", url, args.site)
 
     # Auth precedence: cookie file (session) -> API key -> username/password login
-    if cookie_file and os.path.exists(cookie_file):
-        from http.cookiejar import MozillaCookieJar
-
+    if cookie_file and Path(cookie_file).exists():
         jar = MozillaCookieJar(cookie_file)
         jar.load(ignore_discard=True, ignore_expires=True)
         SESSION.cookies = jar
@@ -121,6 +132,23 @@ def main() -> None:
     pending = [d for d in devices if d.get("state") != DEVICE_STATE_ADOPTED]
     logger.info("Found %d devices; %d pending adoption", len(devices), len(pending))
 
+    print_device_summary(devices)
+
+    if args.dry_run:
+        logger.info("Dry-run complete; no adoption performed.")
+        return
+
+    for d in pending:
+        mac = d.get("mac")
+        if isinstance(mac, str):
+            adopt(url, args.site, mac)
+        time.sleep(2)
+
+    logger.info("Pass complete. Re-run with --dry-run to verify final state.")
+
+
+def print_device_summary(devices: list[dict[str, Any]]) -> None:
+    """Print a concise listing of discovered devices."""
     for d in devices:
         status = "ADOPTED" if d.get("state") == DEVICE_STATE_ADOPTED else "PENDING"
         logger.info(
@@ -131,18 +159,6 @@ def main() -> None:
             d.get("ip", "-"),
             d.get("name", "(unnamed)"),
         )
-
-    if args.dry_run:
-        logger.info("Dry-run complete; no adoption performed.")
-        return
-
-    for d in pending:
-        mac = d.get("mac")
-        if mac:
-            adopt(url, args.site, mac)
-        time.sleep(2)
-
-    logger.info("Pass complete. Re-run with --dry-run to verify final state.")
 
 
 if __name__ == "__main__":

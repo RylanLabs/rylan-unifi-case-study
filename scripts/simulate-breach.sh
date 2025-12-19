@@ -9,33 +9,46 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Whitaker Doctrine: Think like the attacker — then prove defenses work
 # ─────────────────────────────────────────────────────
-log()   { [[ "$QUIET" == false ]] && echo "[Whitaker] $*"; }
-audit() { echo "$(date -Iseconds) | Whitaker | $1 | $2" >> /var/log/whitaker-audit.log; }
-fail()  { echo "🚨 SIMULATED BREACH SUCCESS: $1"; echo "📋 Defense failed — immediate remediation required"; audit "BREACH" "$1"; exit 1; }
+# Logging & Audit with /var/log fallback
+QUIET="${QUIET:-false}"
+DRY_RUN="${DRY_RUN:-false}"
 
-QUIET=false
-DRY_RUN=false
+log() { if [[ "$QUIET" == false ]]; then echo "[Whitaker] $*"; fi; }
+AUDIT_LOG="/var/log/whitaker-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/whitaker-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Whitaker | $1 | $2" >>"$AUDIT_LOG"; }
+
+fail() {
+  echo "🚨 SIMULATED BREACH SUCCESS: $1"
+  echo "📋 Defense failed — immediate remediation required"
+  audit "BREACH" "$1"
+  exit 1
+}
+
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
 log "Whitaker offensive simulation — Ethical breach attempt"
 
-mkdir -p /var/log
-
 # Source Carter for potential API targets (if needed)
-[[ -f runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh ]] && \
-  # shellcheck source=./runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
-  source runbooks/ministry-secrets/rylan-carter-eternal-one-shot.sh
+if [[ -f runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh ]]; then
+  # shellcheck source=./runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
+  source runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh
+fi
 
 # ─────────────────────────────────────────────────────
 # Phase 1: Recon — Controller Enumeration
 # ─────────────────────────────────────────────────────
 log "Phase 1: Controller reconnaissance"
-CONTROLLER_IP="192.168.1.13"  # Canonical controller
+CONTROLLER_IP="192.168.1.13" # Canonical controller
 
 if [[ "$DRY_RUN" == false ]]; then
   controller_ports=$(sudo timeout 30 nmap -sV -p 80,443,8080,8443,3478 "$CONTROLLER_IP" 2>/dev/null | grep -c "open" || echo 0)
-  if [[ $controller_ports -gt 4 ]]; then  # Expect HTTPS, inform, STUN
+  if [[ $controller_ports -gt 4 ]]; then # Expect HTTPS, inform, STUN
     proof=$(sudo nmap -sV -p 80,443,8080,8443,3478 "$CONTROLLER_IP" | grep open)
     fail "Unexpected ports open on controller ($controller_ports)" "$proof"
   fi
@@ -50,7 +63,7 @@ log "✅ Controller exposure minimal"
 log "Phase 2: Lateral movement probe across VLANs"
 if [[ "$DRY_RUN" == false ]] && command -v nmap &>/dev/null; then
   cross_vlan=$(sudo timeout 60 nmap -sn 10.0.{10,30,40,90}.0/24 2>/dev/null | grep -c "Host is up" || echo 0)
-  if [[ $cross_vlan -gt 20 ]]; then  # Adjust based on known device count
+  if [[ $cross_vlan -gt 20 ]]; then # Adjust based on known device count
     proof=$(sudo nmap -sn 10.0.{10,30,40,90}.0/24 | grep "Nmap scan report" | head -10)
     fail "Excessive cross-VLAN visibility ($cross_vlan hosts)" "$proof"
   fi
@@ -73,7 +86,7 @@ fi
 # ─────────────────────────────────────────────────────
 # Eternal Banner Drop
 # ─────────────────────────────────────────────────────
-[[ "$QUIET" == false ]] && cat << 'EOF'
+[[ "$QUIET" == false ]] && cat <<'EOF'
 
 
 ╔══════════════════════════════════════════════════════════════════════════════╗

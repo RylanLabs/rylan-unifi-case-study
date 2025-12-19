@@ -43,7 +43,7 @@ acquire_lock() {
     return 0
   fi
 
-  echo $$ > "$LOCK_FILE" 2>/dev/null || {
+  echo $$ >"$LOCK_FILE" 2>/dev/null || {
     if [[ "${DRY_RUN:-false}" == true ]]; then
       log warn "Unable to write lock file $LOCK_FILE; continuing dry-run without lock"
       SKIP_LOCK=true
@@ -70,12 +70,12 @@ release_lock() {
 run_phase() {
   local phase_name=$1
   local phase_script=$2
-  local timeout_secs=1800  # 30 minutes
+  local timeout_secs=1800 # 30 minutes
   local phase_output
 
   phase_output=$(mktemp)
 
-  if timeout "$timeout_secs" bash "$phase_script" > "$phase_output" 2>&1; then
+  if timeout "$timeout_secs" bash "$phase_script" >"$phase_output" 2>&1; then
     rm -f "$phase_output"
     return 0
   else
@@ -124,12 +124,22 @@ create_system_backup() {
 
   log step "Creating pre-deployment system backup: $backup_dir"
 
-  # Backup critical configs (suppress SC2015: A && B || C is intentional; ignore if mkdir fails)
-  # shellcheck disable=SC2015
-  [[ -d /etc/samba ]] && cp -r /etc/samba "$backup_dir/" 2>/dev/null || true
-  [[ -d /etc/nftables ]] && cp -r /etc/nftables "$backup_dir/" 2>/dev/null || true
-  [[ -f /etc/sysctl.conf ]] && cp /etc/sysctl.conf "$backup_dir/" 2>/dev/null || true
-  [[ -d /etc/ssh ]] && cp -r /etc/ssh "$backup_dir/" 2>/dev/null || true
+  # Backup critical configs (use explicit if/then for clarity and to satisfy shellcheck)
+  if [[ -d /etc/samba ]]; then
+    cp -r /etc/samba "$backup_dir/" 2>/dev/null || true
+  fi
+
+  if [[ -d /etc/nftables ]]; then
+    cp -r /etc/nftables "$backup_dir/" 2>/dev/null || true
+  fi
+
+  if [[ -f /etc/sysctl.conf ]]; then
+    cp /etc/sysctl.conf "$backup_dir/" 2>/dev/null || true
+  fi
+
+  if [[ -d /etc/ssh ]]; then
+    cp -r /etc/ssh "$backup_dir/" 2>/dev/null || true
+  fi
 
   log step "Backup created at: $backup_dir"
   echo "$backup_dir"
@@ -168,7 +178,7 @@ validate_env_variables() {
 
 # generate_execution_report: create summary of deployment execution
 generate_execution_report() {
-  local total_duration;
+  local total_duration
   total_duration=$(($(date +%s) - START_TIME))
   {
     echo "================================================================================"

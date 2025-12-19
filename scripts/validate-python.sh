@@ -27,9 +27,15 @@ DRY_RUN=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --quiet) QUIET=true ;;
-    --ci) CI_MODE=true; QUIET=true ;;
+    --ci)
+      CI_MODE=true
+      QUIET=true
+      ;;
     --dry-run) DRY_RUN=true ;;
-    *) echo "Usage: $0 [--quiet|--ci|--dry-run]" >&2; exit "$EXIT_CONFIG" ;;
+    *)
+      echo "Usage: $0 [--quiet|--ci|--dry-run]" >&2
+      exit "$EXIT_CONFIG"
+      ;;
   esac
   shift
 done
@@ -54,7 +60,7 @@ audit() {
   if [[ "$CI_MODE" == true ]]; then
     printf '{"timestamp":"%s","module":"PythonValidation","status":"%s","message":"%s"}\n' "$ts" "$level" "$msg"
   else
-    echo "$ts | PythonValidation | $level | $msg" >> "$AUDIT_LOG"
+    echo "$ts | PythonValidation | $level | $msg" >>"$AUDIT_LOG"
   fi
 }
 fail() {
@@ -78,11 +84,11 @@ log "Python canon validation initializing — ruff + mypy + bandit + pytest (>=9
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-command -v ruff >/dev/null    || fail "$EXIT_CONFIG" "ruff not installed" "pip install ruff"
-command -v mypy >/dev/null    || fail "$EXIT_CONFIG" "mypy not installed" "pip install mypy"
-command -v bandit >/dev/null  || fail "$EXIT_CONFIG" "bandit not installed" "pip install bandit"
-command -v pytest >/dev/null  || fail "$EXIT_CONFIG" "pytest not installed" "pip install pytest pytest-cov"
-command -v jq >/dev/null      || fail "$EXIT_CONFIG" "jq not installed" "apt install jq"
+command -v ruff >/dev/null || fail "$EXIT_CONFIG" "ruff not installed" "pip install ruff"
+command -v mypy >/dev/null || fail "$EXIT_CONFIG" "mypy not installed" "pip install mypy"
+command -v bandit >/dev/null || fail "$EXIT_CONFIG" "bandit not installed" "pip install bandit"
+command -v pytest >/dev/null || fail "$EXIT_CONFIG" "pytest not installed" "pip install pytest pytest-cov"
+command -v jq >/dev/null || fail "$EXIT_CONFIG" "jq not installed" "apt install jq"
 
 # ─────────────────────────────────────────────────────
 # Phase 1: Ruff (Style + Quality + Security)
@@ -125,8 +131,8 @@ log "Phase 3: bandit security audit"
 bandit_status="failed"
 if [[ "$DRY_RUN" == false ]]; then
   bandit_tmp="/tmp/bandit-python-validation-$$.json"
-  if bandit -r . -f json -o "$bandit_tmp" && \
-     ! jq -e '.results[] | select(.issue_severity == "HIGH" or .issue_severity == "MEDIUM")' "$bandit_tmp" >/dev/null; then
+  if bandit -r . -f json -o "$bandit_tmp" &&
+    ! jq -e '.results[] | select(.issue_severity == "HIGH" or .issue_severity == "MEDIUM")' "$bandit_tmp" >/dev/null; then
     bandit_status="passed"
     log "bandit: No high/medium issues"
     rm -f "$bandit_tmp"

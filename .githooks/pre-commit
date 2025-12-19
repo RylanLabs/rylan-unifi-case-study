@@ -13,6 +13,25 @@ IFS=$'\n\t'
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+# Canonical exclusion patterns (Hellodeolu v6)
+readonly EXCLUDE_PATHS=(
+  ".archive/"
+  ".backups/"
+  ".backup*/"
+  "venv/"
+  ".venv/"
+  "node_modules/"
+  ".git/"
+  "__pycache__/"
+  "*.egg-info/"
+)
+
+# Build find-friendly exclusion expressions
+EXCLUDE_FIND_EXPR=()
+for p in "${EXCLUDE_PATHS[@]}"; do
+  EXCLUDE_FIND_EXPR+=('!' -path "*/${p}*")
+done
+
 echo "═══════════════════════════════════════════════════════════"
 echo "Gatekeeper Eternal — Consciousness 2.6"
 echo "═══════════════════════════════════════════════════════════"
@@ -27,13 +46,13 @@ MODIFIED_CRITICAL=$(git diff --cached --name-only --diff-filter=ACM | grep -E "^
 if [[ -n "$MODIFIED_CRITICAL" ]]; then
   echo "🛡️  Carter: Critical paths modified — enforcing canonical backup"
   echo "   Modified: $(echo "$MODIFIED_CRITICAL" | wc -l) file(s)"
-  
+
   # Execute canonical backup handler
   if ! ./scripts/canonical-backup-handler.sh; then
     echo "❌ ERROR: canonical-backup-handler.sh failed — commit aborted"
     exit 1
   fi
-  
+
   # Verify fresh backup exists (within last 2 minutes)
   LATEST_BACKUP=$(find .backups/ -maxdepth 1 -type d -name 'pre-modification-*' -mmin -2 | sort -r | head -n1)
   if [[ -z "$LATEST_BACKUP" ]]; then
@@ -41,7 +60,7 @@ if [[ -n "$MODIFIED_CRITICAL" ]]; then
     echo "   Expected: .backups/pre-modification-* within last 2 minutes"
     exit 1
   fi
-  
+
   echo "✅ Canonical backup secured: $LATEST_BACKUP"
   echo "   RTO compliance: 15-second rollback available"
 else
@@ -60,16 +79,16 @@ for f in "${STAGED[@]}"; do
 
   if head -c3 "$f" | grep -q $'\xef\xbb\xbf'; then
     echo "  BOM removed: $f"
-    tail -c +4 "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    tail -c +4 "$f" >"$f.tmp" && mv "$f.tmp" "$f"
     git add "$f"
-    FIXED=$((FIXED+1))
+    FIXED=$((FIXED + 1))
   fi
 
   if grep -q $'\r$' "$f"; then
     echo "  CRLF → LF: $f"
     sed -i 's/\r$//' "$f"
     git add "$f"
-    FIXED=$((FIXED+1))
+    FIXED=$((FIXED + 1))
   fi
 done
 
@@ -86,11 +105,7 @@ echo "Phase 2: Python Naming Canon"
 HYPHEN_VIOLATORS=()
 while IFS= read -r file; do
   HYPHEN_VIOLATORS+=("$file")
-done < <(find . -type f -name "*-*.py" \
-  ! -path "./.venv/*" \
-  ! -path "./.git/*" \
-  ! -path "./venv/*" \
-  ! -path "./node_modules/*")
+done < <(find . -type f -name "*-*.py" "${EXCLUDE_FIND_EXPR[@]}")
 
 if [[ ${#HYPHEN_VIOLATORS[@]} -gt 0 ]]; then
   echo "  ❌ ERROR: Python modules cannot contain hyphens (PEP 8)"
@@ -148,10 +163,10 @@ while IFS= read -r file; do
   fi
 
   missing=""
-  grep -q "^# Script:" "$file"        || missing+=" Script"
-  grep -q "^# Purpose:" "$file"       || missing+=" Purpose"
-  grep -q "^# Guardian:" "$file"      || missing+=" Guardian"
-  grep -q "^# Date:" "$file"          || missing+=" Date"
+  grep -q "^# Script:" "$file" || missing+=" Script"
+  grep -q "^# Purpose:" "$file" || missing+=" Purpose"
+  grep -q "^# Guardian:" "$file" || missing+=" Guardian"
+  grep -q "^# Date:" "$file" || missing+=" Date"
   grep -q "^# Consciousness:" "$file" || missing+=" Consciousness"
 
   if [[ -n "$missing" ]]; then
@@ -192,7 +207,7 @@ while IFS= read -r file; do
   [[ -f "$file" ]] || continue
   [[ "$file" =~ \.sh$ ]] || continue
 
-  LINE_COUNT=$(wc -l < "$file" 2>/dev/null) || LINE_COUNT=0
+  LINE_COUNT=$(wc -l <"$file" 2>/dev/null) || LINE_COUNT=0
   HAS_ANNOTATION=$(grep -c "^# EXCEED:" "$file" 2>/dev/null) || HAS_ANNOTATION=0
   FUNCTION_COUNT=$(grep -c "^[a-z_][a-z0-9_]*() {" "$file" 2>/dev/null) || FUNCTION_COUNT=0
 
@@ -234,7 +249,9 @@ echo ""
 echo "Phase 5: Code Quality (Linting)"
 
 echo "  shellcheck..."
-find scripts/ .github/agents/ .githooks/ -name "*.sh" -exec shellcheck {} + || exit 1
+find scripts/ .github/agents/ .githooks/ -name "*.sh" \
+  "${EXCLUDE_FIND_EXPR[@]}" \
+  -exec shellcheck -x -S style {} \; || exit 1
 
 echo "  ruff..."
 ruff check . --select ALL --quiet || exit 1
@@ -250,6 +267,45 @@ echo "  ✅ Code quality upheld"
 # Phase 6: Final Polish
 echo ""
 echo "Phase 6: Final Polish"
+
+echo "  ShellCheck validation..."
+if ! shellcheck -x -S style scripts/**/*.sh scripts/lib/**/*.sh 2>&1 | tee /tmp/shellcheck-$$.log; then
+  echo "  ❌ ShellCheck FAILED — syntax errors detected"
+  sed 's/^/    /' /tmp/shellcheck-$$.log
+  exit 1
+fi
+echo "  ✅ ShellCheck passed"
+
+# ─────────────────────────────────────────────────────────────
+# shfmt: Formatting Standardization (AUTO-FIX, don't block unless auto-fix fails)
+# ─────────────────────────────────────────────────────────────
+echo "  shfmt canonicalization..."
+SHFMT_FIXED=0
+SHFMT_FAILED=0
+
+for script in scripts/**/*.sh scripts/lib/**/*.sh; do
+  [[ -f "$script" ]] || continue
+
+  # Check if shfmt would make changes
+  if ! shfmt -i 2 -ci -d "$script" >/dev/null 2>&1; then
+    # Auto-fix formatting
+    if shfmt -i 2 -ci -w "$script" 2>&1; then
+      git add "$script"
+      SHFMT_FIXED=$((SHFMT_FIXED + 1))
+    else
+      SHFMT_FAILED=$((SHFMT_FAILED + 1))
+    fi
+  fi
+done
+
+if [[ $SHFMT_FIXED -gt 0 ]]; then
+  echo "  ✅ Auto-fixed $SHFMT_FIXED script(s) (shfmt formatting)"
+fi
+
+if [[ $SHFMT_FAILED -gt 0 ]]; then
+  echo "  ❌ shfmt auto-fix failed on $SHFMT_FAILED script(s)"
+  exit 1
+fi
 
 echo "  Agent canon..."
 grep -r '^\s*```$' .github/agents/*.md docs/ runbooks/ 2>/dev/null | grep -q . && exit 1

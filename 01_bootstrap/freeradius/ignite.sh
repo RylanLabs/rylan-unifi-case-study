@@ -20,9 +20,8 @@ readonly LOG_DIR
 LOG_FILE="${LOG_DIR}/freeradius-ignite-$(date +%Y%m%d-%H%M%S).log"
 readonly LOG_FILE
 
-# shellcheck disable=SC1091
 source "${SCRIPT_DIR}/lib/ignite-utils.sh"
-# shellcheck disable=SC1091
+
 source "${SCRIPT_DIR}/lib/ignite-orchestration.sh"
 
 # Configuration
@@ -252,7 +251,7 @@ rollback() {
 generate_report() {
   local end_time
   end_time=$(date +%s)
-  local elapsed;
+  local elapsed
   elapsed=$((end_time - START_TIME))
 
   cat <<REPORT

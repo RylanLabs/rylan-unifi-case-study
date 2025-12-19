@@ -28,7 +28,7 @@ fi
 
 # Bare URLs — must be wrapped
 if grep -r "https://" .github/agents/*.md docs/ runbooks/ 2>/dev/null |
-   grep -v -E "(<https?://|\\[.*\\]\\(https?://" | grep -q .; then
+  grep -v -E "(<https?://|\\[.*\\]\\(https?://" | grep -q .; then
   echo "ERROR: Bare HTTPS URLs found in sacred docs:"
   grep -r "https://" .github/agents/*.md docs/ runbooks/ |
     grep -v -E "(<https?://|\\[.*\\]\\(https?://)"

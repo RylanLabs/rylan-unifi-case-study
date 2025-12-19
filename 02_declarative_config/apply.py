@@ -7,6 +7,7 @@ v5.0 locked — eternal green edition.
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import logging
 import sys
@@ -16,14 +17,15 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, Field, ValidationError
 
-try:
-    from deepdiff import DeepDiff
-except ImportError:
-    DeepDiff = None  # type: ignore[assignment]
-
-# Import from parent directory
+# Import from parent directory for local `shared` package
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared.unifi_client import UniFiClient
+
+DeepDiff: Any | None = None
+try:
+    DeepDiff = importlib.import_module("deepdiff").DeepDiff
+except (ImportError, ModuleNotFoundError):
+    DeepDiff = None
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 logger = logging.getLogger("fortress")
@@ -72,7 +74,7 @@ class VLANState(BaseModel):
     vlans: list[VLAN]
 
     @classmethod
-    def from_yaml_structure(cls, data: dict) -> VLANState:
+    def from_yaml_structure(cls, data: dict[str, Any]) -> VLANState:
         """Parse nested YAML structure into flat VLAN list."""
         all_vlans: list[dict[str, Any]] = []
         for item in data.get("vlans", []):
@@ -134,7 +136,7 @@ def build_payload(vlan: VLAN) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 
 
-def reconcile(  # noqa: C901, PLR0912
+def reconcile(
     desired: VLANState,
     client: UniFiClient | None,
     *,
@@ -147,9 +149,7 @@ def reconcile(  # noqa: C901, PLR0912
         return 0
 
     existing_networks = client.list_networks()
-    existing_by_vlan = {
-        net.get("vlan"): net for net in existing_networks if "vlan" in net
-    }
+    existing_by_vlan = {net.get("vlan"): net for net in existing_networks if "vlan" in net}
 
     to_create: list[VLAN] = []
     to_update: list[VLAN] = []
@@ -192,15 +192,20 @@ def reconcile(  # noqa: C901, PLR0912
         try:
             client.create_network(build_payload(vlan))
             logger.info("Created VLAN %d (%s)", vlan.id, vlan.name)
-        except Exception:  # noqa: PERF203
+        except Exception:
             logger.exception("Failed to create VLAN %d", vlan.id)
             errors.append(vlan.id)
 
     # Apply updates
     for vlan in to_update:
         existing = existing_by_vlan[vlan.id]
+        nid = existing.get("_id")
+        if not isinstance(nid, str):
+            logger.error("Unexpected '_id' type for VLAN %d: %r", vlan.id, nid)
+            errors.append(vlan.id)
+            continue
         try:
-            client.update_network(existing["_id"], build_payload(vlan))
+            client.update_network(nid, build_payload(vlan))
             logger.info("Updated VLAN %d (%s)", vlan.id, vlan.name)
         except Exception:
             logger.exception("Failed to update VLAN %d", vlan.id)
@@ -214,7 +219,7 @@ def reconcile(  # noqa: C901, PLR0912
 # --------------------------------------------------------------------------- #
 
 
-def apply_policy_table(client: UniFiClient | None, *, dry_run: bool) -> int:  # noqa: ARG001
+def apply_policy_table(client: UniFiClient | None, *, _dry_run: bool) -> int:
     """Apply firewall policy table."""
     path = BASE_DIR / "02_declarative_config" / "policy-table.yaml"
     if not path.exists():
@@ -256,16 +261,15 @@ def main() -> None:
         client = None
         logger.info("Dry-run mode enabled: validation only")
     else:
-        client = UniFiClient.from_env()
+        client = UniFiClient.from_env_or_inventory()
         if not client:
             logger.error(
-                "Authentication failed: Missing UniFi credentials "
-                "(env or inventory.yaml)",
+                "Authentication failed: Missing UniFi credentials (env or inventory.yaml)",
             )
             sys.exit(1)
 
     vlan_rc = reconcile(load_state(Path("vlans.yaml")), client, dry_run=args.dry_run)
-    policy_rc = apply_policy_table(client, dry_run=args.dry_run)
+    policy_rc = apply_policy_table(client, _dry_run=args.dry_run)
 
     if vlan_rc or policy_rc:
         sys.exit(vlan_rc or policy_rc)

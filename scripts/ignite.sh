@@ -37,9 +37,9 @@ exec 1> >(tee -a "$LOG_FILE")
 exec 2>&1
 
 # Source logging utilities and orchestration helpers
-# shellcheck disable=SC1091
+
 source "${SCRIPT_DIR}/lib/ignite-utils.sh"
-# shellcheck disable=SC1091
+
 source "${SCRIPT_DIR}/lib/ignite-orchestration.sh"
 
 log step "Execution log: $LOG_FILE"
@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do
       SKIP_PHASE="${1#*=}"
       shift
       ;;
-    -h|--help)
+    -h | --help)
       cat <<'USAGE'
 Usage: $0 [OPTIONS]
 
@@ -131,7 +131,7 @@ if [[ "$DRY_RUN" == true ]]; then
   log step "DRY-RUN mode: Loading environment..."
 
   if [[ -f "$REPO_ROOT/.env" ]]; then
-    # shellcheck disable=SC1091
+
     source "$REPO_ROOT/.env"
     log step "✓ .env loaded (dry-run with real config)"
     # Validate only to inform (do not fail dry-run)
@@ -140,7 +140,7 @@ if [[ "$DRY_RUN" == true ]]; then
     fi
 
   elif [[ -f "$REPO_ROOT/.env.example" ]]; then
-    # shellcheck disable=SC1091
+
     source "$REPO_ROOT/.env.example"
     log step "✓ .env.example loaded (dry-run with example config)"
 
@@ -158,7 +158,6 @@ else
     exit 1
   fi
 
-  # shellcheck disable=SC1091
   source "$REPO_ROOT/.env"
   log step ".env loaded"
 

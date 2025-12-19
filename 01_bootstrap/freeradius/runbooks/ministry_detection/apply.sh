@@ -13,7 +13,6 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 
-# shellcheck disable=SC1091
 source "${REPO_ROOT}/lib/ignite-utils.sh"
 
 # State tracking
@@ -174,8 +173,8 @@ verify_certs() {
     expiry_epoch=$(date -d "$expiry_date" +%s 2>/dev/null || echo 0)
     local now_epoch
     now_epoch=$(date +%s)
-    local days_left;
-    days_left=$(( (expiry_epoch - now_epoch) / 86400 ))
+    local days_left
+    days_left=$(((expiry_epoch - now_epoch) / 86400))
 
     if [[ $days_left -gt 0 ]]; then
       log success "✓ Certificate valid for $days_left days"
@@ -241,7 +240,7 @@ check_resources() {
   local mem_usage
   mem_usage=$(free 2>/dev/null | grep Mem | awk '{printf "%.1f", $3/$2 * 100}' || echo 0)
 
-  if (( $(echo "$cpu_usage < 80" | bc -l 2>/dev/null) )); then
+  if (($(echo "$cpu_usage < 80" | bc -l 2>/dev/null))); then
     log success "✓ CPU usage: ${cpu_usage}%"
     ((CHECKS_PASSED++)) || true
   else
@@ -249,7 +248,7 @@ check_resources() {
     ((WARNINGS++)) || true
   fi
 
-  if (( $(echo "$mem_usage < 80" | bc -l 2>/dev/null) )); then
+  if (($(echo "$mem_usage < 80" | bc -l 2>/dev/null))); then
     log success "✓ Memory usage: ${mem_usage}%"
     ((CHECKS_PASSED++)) || true
   else

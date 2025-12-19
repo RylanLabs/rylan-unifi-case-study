@@ -37,7 +37,7 @@ exit_handler() {
   local exit_code=$?
   local end_time
   end_time=$(date +%s)
-  local duration;
+  local duration
   duration=$((end_time - START_TIME))
 
   if [[ $exit_code -eq 0 ]]; then

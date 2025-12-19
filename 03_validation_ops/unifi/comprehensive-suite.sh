@@ -113,7 +113,7 @@ test_disk_space() {
 
   local available
   available=$(ssh "ubnt@$CONTROLLER_IP" "df /data | tail -1 | awk '{print \$4}'" 2>/dev/null || echo "0")
-  local required;
+  local required
   required=$((2 * 1024 * 1024)) # 2GB required
 
   if [ "$available" -gt "$required" ]; then
@@ -165,7 +165,7 @@ test_clock_sync() {
   cloudkey_time=$(ssh "ubnt@$CONTROLLER_IP" "date +%s" 2>/dev/null || echo "0")
   local local_time
   local_time=$(date +%s)
-  local time_diff;
+  local time_diff
   time_diff=$((cloudkey_time - local_time))
 
   if [ "$time_diff" -lt 10 ] && [ "$time_diff" -gt -10 ]; then

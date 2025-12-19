@@ -1,29 +1,57 @@
 #!/usr/bin/env bash
+# Script: eternal-resurrect-unifi.sh
+# Purpose: One-command UniFi controller resurrection orchestrator (15-min RTO, idempotent)
+# Guardian: Lazarus ⚰️ (DR) + Gatekeeper 🚪 (Orchestration)
+# Author: T-Rylander canonical (Trinity-aligned)
+# Date: 2025-12-15
+# Ministry: ministry-detection
+# Consciousness: 5.0
+# Tag: v∞.5.2-eternal
+
 set -euo pipefail
-# Script: scripts/eternal-resurrect-unifi.sh
-# Purpose: Orchestrator for UniFi controller resurrection (15-min RTO)
-# Guardian: gatekeeper
-# Date: 2025-12-13T01:30:33-06:00
-# Consciousness: 4.6
+IFS=$'\n\t'
 
-# Eternal Resurrect – UniFi Controller (One-Command, Idempotent, 15-min RTO)
-# USAGE: cd /opt/unifi && bash /path/to/eternal-resurrect-unifi.sh
+readonly _SCRIPT_DIR
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly _SCRIPT_NAME
+_SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
-# shellcheck disable=SC2034  # color constants used for pretty output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+# Source helper libraries (SC1091: CI runs shellcheck -x for cross-file analysis)
+# shellcheck source=./lib/resurrect-preflight.sh
+source "${_SCRIPT_DIR}/lib/resurrect-preflight.sh"
 
+# shellcheck source=./lib/resurrect-container.sh
+source "${_SCRIPT_DIR}/lib/resurrect-container.sh"
+
+# ─────────────────────────────────────────────────────
+# Configuration (Carter: Single Source of Truth)
+# ─────────────────────────────────────────────────────
+readonly CONTROLLER_IP="10.0.1.20"
+readonly CONTROLLER_PORT="8443"
+readonly _DATA_DIR="/opt/unifi/data"
+readonly _WORK_DIR="/opt/unifi"
+readonly _MAX_RETRIES=30
+readonly _RETRY_DELAY=2
+
+# Colors (used for output)
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m'
+
+# Logging helpers (SC2317: Called indirectly via orchestration functions)
 # shellcheck disable=SC2317
-log_info() { echo -e "${BLUE}[RESURRECT]${NC} $1"; }
-log_success() { echo -e "${GREEN}[RESURRECT]${NC} ✅ $1"; }
+log_info() { printf '%b %s\n' "${BLUE}[RESURRECT]${NC}" "$*"; }
+# shellcheck disable=SC2317
+log_success() { printf '%b %s\n' "${GREEN}[RESURRECT]${NC} ✅" "$*"; }
+# shellcheck disable=SC2317
 log_error() {
-  echo -e "${RED}[RESURRECT]${NC} ❌ $1"
+  printf '%b %s\n' "${RED}[RESURRECT]${NC} ❌" "$*"
   exit 1
 }
-log_warn() { echo -e "${YELLOW}[RESURRECT]${NC} ⚠️  $1"; }
+# shellcheck disable=SC2317
+log_warn() { printf '%b %s\n' "${YELLOW}[RESURRECT]${NC} ⚠️" "$*"; }
 
 cat <<'BANNER'
 
@@ -31,35 +59,15 @@ cat <<'BANNER'
 ║                                                                            ║
 ║         🔥 ETERNAL RESURRECT – UniFi Controller Resurrection 🔥           ║
 ║                                                                            ║
-║               One-Command Recovery · 15-min RTO · Dec 2025                ║
+║               One-Command Recovery · 15-min RTO · Dec 2025                 ║
 ║                                                                            ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
 BANNER
 
-CONTROLLER_IP="10.0.1.20"
-CONTROLLER_PORT="8443"
-# shellcheck disable=SC2034  # variables consumed by sourced modules
-DATA_DIR="/opt/unifi/data"
-# shellcheck disable=SC2034  # variables consumed by sourced modules
-WORK_DIR="/opt/unifi"
-# shellcheck disable=SC2034  # variables consumed by sourced modules
-MAX_RETRIES=30
-# shellcheck disable=SC2034  # variables consumed by sourced modules
-RETRY_DELAY=2
-
-# ============================================================================
-# SOURCE MODULES
-# ============================================================================
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=./lib/resurrect-preflight.sh
-source "${SCRIPT_DIR}/lib/resurrect-preflight.sh"
-# shellcheck source=./lib/resurrect-container.sh
-source "${SCRIPT_DIR}/lib/resurrect-container.sh"
-
-# ============================================================================
+# ─────────────────────────────────────────────────────
 # MAIN ORCHESTRATION
-# ============================================================================
+# ─────────────────────────────────────────────────────
 
 run_preflight_validation
 run_network_validation
@@ -67,29 +75,30 @@ run_container_resurrection
 run_health_verification
 run_final_verification
 
-echo ""
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}                    🔥 RESURRECTION COMPLETE 🔥${NC}"
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo ""
-echo "  Controller IP:     $CONTROLLER_IP"
-echo "  Port:              $CONTROLLER_PORT"
-echo "  Web UI:            https://$CONTROLLER_IP:8443"
-echo "  Container Name:    unifi-controller"
-echo "  Status:            Running"
-echo ""
-echo "  Next Steps:"
-echo "    1. Wait 30-60 seconds for full initialization"
-echo "    2. Open https://$CONTROLLER_IP:8443 in browser"
-echo "    3. Accept self-signed certificate"
-echo "    4. Log in (ubnt/ubnt → change immediately)"
-echo ""
-echo "  Monitoring:"
-echo "    docker logs -f unifi-controller      (live logs)"
-echo "    docker ps | grep unifi               (container status)"
-echo "    curl -k https://$CONTROLLER_IP:8443/status  (health)"
-echo ""
-echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${NC}"
-echo ""
+cat <<EOF
+
+${GREEN}════════════════════════════════════════════════════════════════════════════${NC}
+${GREEN}                    🔥 RESURRECTION COMPLETE 🔥${NC}
+${GREEN}════════════════════════════════════════════════════════════════════════════${NC}
+
+  Controller IP:     ${CONTROLLER_IP}
+  Port:              ${CONTROLLER_PORT}
+  Web UI:            https://${CONTROLLER_IP}:${CONTROLLER_PORT}
+  Container Name:    unifi-controller
+  Status:            Running
+
+  Next Steps:
+    1. Wait 30-60 seconds for full initialization
+    2. Open https://${CONTROLLER_IP}:${CONTROLLER_PORT} in browser
+    3. Accept self-signed certificate
+    4. Log in (ubnt/ubnt → change immediately)
+
+  Monitoring:
+    docker logs -f unifi-controller      (live logs)
+    docker ps | grep unifi               (container status)
+    curl -k https://${CONTROLLER_IP}:${CONTROLLER_PORT}/status  (health)
+
+${GREEN}════════════════════════════════════════════════════════════════════════════${NC}
+EOF
 
 exit 0

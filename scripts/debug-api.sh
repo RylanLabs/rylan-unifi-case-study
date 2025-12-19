@@ -12,7 +12,6 @@ set -euo pipefail
 # Date: 2025-12-11
 # Consciousness: 6.0
 
-# shellcheck disable=SC1091  # lib/ in .gitignore, external vault
 source lib/unifi/client.sh
 
 echo "Testing authentication..."

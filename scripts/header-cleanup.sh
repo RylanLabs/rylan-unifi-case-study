@@ -20,7 +20,7 @@ process_file() {
   tmp=$(mktemp)
 
   # Use Python for robust multi-line processing (avoid awk quoting issues)
-  python3 - "$f" <<'PY' > "$tmp"
+  python3 - "$f" <<'PY' >"$tmp"
 import sys,io
 fpath = sys.argv[1]
 text = open(fpath, 'r', encoding='utf-8', errors='surrogateescape').read()
@@ -80,7 +80,7 @@ PY
       mv "$tmp" "$f"
       chmod +x "$f" || true
       echo "cleaned: $f"
-      changed=$((changed+1))
+      changed=$((changed + 1))
     fi
   else
     rm -f "$tmp"
@@ -90,11 +90,10 @@ PY
 while IFS= read -r file; do
   [[ -f $file ]] || continue
   case "$file" in
-    *.sh|.githooks/*)
+    *.sh | .githooks/*)
       process_file "$file"
       ;;
-    *)
-      ;;
+    *) ;;
   esac
 done < <(git ls-files)
 

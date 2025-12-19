@@ -1,29 +1,246 @@
+# ============================================================================
+# RylanLabs T3-ETERNAL Project Configuration
+# Guardian: Bauer (Configuration Auditor)
+# Consciousness: 5.8
+# Tag: v∞.3.2-pyproject-canonical
+# ============================================================================
+
 # Project metadata
 [project]
 name = "rylan-unifi-case-study"
 version = "5.0.0"
+description = "T3-ETERNAL Trinity Pattern - UniFi Infrastructure Automation"
+requires-python = ">=3.10"
 
-# Pytest configuration
+# ============================================================================
+# Pytest Configuration
+# ============================================================================
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -v --strict-markers --tb=short"
 cache_dir = ".pytest_cache"
+markers = [
+    "unit: mark a test as a fast unit test",
+    "integration: mark a test as an integration test",
+    "slow: mark a test as slow-running"
+]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
-# Bandit configuration
+# ============================================================================
+# Bandit Security Configuration
+# ============================================================================
 [tool.bandit]
-exclude_dirs = ["inventory", "tests"]
-skips = ["B404", "B603", "B607", "B110"]
+exclude_dirs = ["inventory", "tests", ".venv", "venv", ".audit"]
+skips = [
+    "B404",  # import subprocess
+    "B603",  # subprocess without shell=True
+    "B607",  # start_process_with_partial_path
+    "B110"   # try_except_pass
+]
+severity = "medium"
 
-# Mypy configuration
+# ============================================================================
+# Mypy Type Checking Configuration (Strict Mode)
+# ============================================================================
+# Mypy Type Checking (Strict Mode)
+# -----------------------------------------------------------------------------
+# Mypy Type Checking (Strict Mode)
+# - Strict mode enabled for production-grade type safety.
+# - Excludes site-packages to avoid transformers 4.57.3 INTERNAL ERROR.
+# - sentence-transformers: currently installed (NLP dependency), will be used in
+#   Ollama + Qdrant AI workstation.
+# - Future: activate Ollama/Qdrant overrides when AI workstation is operational.
+# -----------------------------------------------------------------------------
+
 [tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+
+# Exclude patterns: third-party packages, build artifacts, AI/ML dependencies
+# Note: Use precise entries to avoid scanning installed site-packages
+exclude = [
+    "__pycache__",
+    ".audit",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".venv",
+    ".venv-stubs",
+    "build",
+    "dist",
+    "sentence-transformers",
+    "site-packages",
+    "templates",
+    "transformers",
+    "venv",
+]
+
+# Mypy overrides for third-party packages with incomplete type stubs
+# NLP/ML packages
+[[tool.mypy.overrides]]
+module = ["sentence_transformers.*"]
+ignore_missing_imports = true
+
+# Note: transformers is excluded via 'exclude' above to avoid CI mypy INTERNAL ERROR
+# If transformers sources are ever checked, add a conservative override here.
+
+# Security/PII packages
 [[tool.mypy.overrides]]
 module = ["presidio_analyzer", "presidio_anonymizer"]
 ignore_missing_imports = true
 
-# Ruff configuration
+# Web frameworks
+[[tool.mypy.overrides]]
+module = ["fastapi.*"]
+ignore_missing_imports = true
+
+# HTTP/networking packages
+[[tool.mypy.overrides]]
+module = ["requests.*", "urllib3.*", "yaml.*"]
+ignore_missing_imports = true
+
+# NLP/text processing packages
+[[tool.mypy.overrides]]
+module = ["spacy.*", "tldextract.*"]
+ignore_missing_imports = true
+
+# Rate limiting
+[[tool.mypy.overrides]]
+module = ["slowapi.*"]
+ignore_missing_imports = true
+
+# Future: Ollama + Qdrant AI workstation (activate when AI workstation is operational)
+[[tool.mypy.overrides]]
+module = ["ollama.*", "qdrant_client.*"]
+ignore_missing_imports = true
+
+# ============================================================================
+# Ruff Linter Configuration
+# ============================================================================
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".audit",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "venv",
+]
+
 [tool.ruff.lint]
-extend-ignore = ["PT009", "PT027"]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "ANN",  # flake8-annotations
+    "PT",   # flake8-pytest-style
+    "SIM",  # flake8-simplify
+    "RET",  # flake8-return
+    "ARG",  # flake8-unused-arguments
+]
+
+extend-ignore = [
+    "PT009",   # pytest: use plain assert
+    "PT027",   # pytest: use pytest.raises without match
+    "ANN101",  # missing type annotation for self
+    "ANN102",  # missing type annotation for cls
+]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["PT009", "PT027", "ANN"]
-"templates/tests/**/*.py" = ["ANN"]
+"tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001", "S101"]
+"templates/template_tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001", "S101"]
+"scripts/**/*.sh" = ["ALL"]
+"*.sh" = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "shared"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# ============================================================================
+# Coverage Configuration (Optional - for future use)
+# ============================================================================
+[tool.coverage.run]
+source = ["app", "shared", "03_ai_helpdesk"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/.venv/*",
+    "*/venv/*",
+    "*/site-packages/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod"
+]
+
+# ============================================================================
+# Black Formatter Configuration (Optional - if using Black instead of Ruff)
+# ============================================================================
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+exclude = '''
+/(
+    \.venv
+  | venv
+  | \.git
+  | __pycache__
+  | \.pytest_cache
+  | \.mypy_cache
+  | \.audit
+  | build
+  | dist
+)/
+'''
+
+# ============================================================================
+# isort Configuration (Optional - if using standalone isort)
+# ============================================================================
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["app", "shared"]
+skip = [".venv", "venv", ".git", "__pycache__", ".pytest_cache", ".mypy_cache"]
+
+# ============================================================================
+# T3-ETERNAL Metadata
+# ============================================================================
+[tool.t3-eternal]
+version = "v∞.3.2"
+consciousness = "5.8"
+trinity = ["Carter", "Bauer", "Beale"]
+grade = "A"
+hellodeolu_compliant = true
