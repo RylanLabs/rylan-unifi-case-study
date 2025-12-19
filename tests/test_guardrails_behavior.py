@@ -10,7 +10,7 @@ import app.guardrails as guardrails
 from app.exceptions import FortressError
 
 
-def test_guardrail_wraps_foreign_exception():
+def test_guardrail_wraps_foreign_exception() -> None:
     @guardrails.guardrail(guardian="unit-test")
     def broken() -> None:
         raise ValueError("boom")
@@ -26,7 +26,7 @@ def test_guardrail_wraps_foreign_exception():
     assert err.context.get("function") == "broken"
 
 
-def test_guardrail_preserves_fortress_error():
+def test_guardrail_preserves_fortress_error() -> None:
     @guardrails.guardrail(guardian="relay")
     def rethrow() -> None:
         raise FortressError("already", context={"guardian": "orig"})

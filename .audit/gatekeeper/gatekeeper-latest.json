@@ -1,15 +1,33 @@
 {
-  "timestamp": "2025-12-18T22:36:49Z",
+  "timestamp": "2025-12-19T17:14:27Z",
   "branch": "fix/test-unifi-client-prodify",
-  "commit_hash": "2c61aa2",
-  "commit_message": "test(pytest): restrict testpaths to repo tests to avoid collecting template tests in CI",
+  "commit_hash": "2678054",
+  "commit_message": "fix(structure): add tests/unifi/__init__.py for explicit namespace package",
   "push_result": "PASS",
   "validators": {
-    "mypy": {"status": "PASS", "duration_ms": 32000},
-    "pip": {"status": "PASS", "duration_ms": 1455},
-    "bandit_parse": {"status": "PASS", "duration_ms": 188},
-    "pytest": {"status": "PASS", "duration_ms": 6400},
-    "ruff": {"status": "PASS", "duration_ms": 54},
-    "bandit": {"status": "PASS", "duration_ms": 787}
+    "mypy": {
+      "status": "PASS",
+      "duration_ms": 32848
+    },
+    "pip": {
+      "status": "PASS",
+      "duration_ms": 1450
+    },
+    "bandit_parse": {
+      "status": "PASS",
+      "duration_ms": 180
+    },
+    "pytest": {
+      "status": "PASS",
+      "duration_ms": 8651
+    },
+    "ruff": {
+      "status": "PASS",
+      "duration_ms": 22
+    },
+    "bandit": {
+      "status": "PASS",
+      "duration_ms": 474
+    }
   }
 }
