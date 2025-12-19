@@ -9,20 +9,25 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Beale Doctrine: Detect the breach, harden the host
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Beale] $*"; }
-audit() { echo "$(date -Iseconds) | Beale | $1 | $2" >>/var/log/beale-audit.log; }
+# Logging & Audit with /var/log fallback
+QUIET="${QUIET:-false}"
+log() { if [[ "$QUIET" == false ]]; then echo "[Beale] $*"; fi; }
+AUDIT_LOG="/var/log/beale-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/beale-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Beale | $1 | $2" >>"$AUDIT_LOG"; }
 fail() {
   echo "❌ Beale FAILURE: $1"
   audit "FAIL" "$1"
   exit 1
 }
 
-QUIET=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
 
 log "Beale ministry initializing — Hardening & detection"
-
-mkdir -p /var/log
 
 # ─────────────────────────────────────────────────────
 # Phase 1: Proactive Hardening Validation

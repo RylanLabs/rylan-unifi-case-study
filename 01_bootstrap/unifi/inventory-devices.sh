@@ -9,8 +9,16 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Carter Doctrine: Use resurrected ministry for auth
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Inventory] $*"; }
-audit() { echo "$(date -Iseconds) | Inventory | $1 | $2" >>/var/log/carter-audit.log; }
+# Logging & Audit (with /var/log fallback)
+log() { if [[ "$QUIET" == false ]]; then echo "[Inventory] $*"; fi; }
+AUDIT_LOG="/var/log/carter-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/carter-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Inventory | $1 | $2" >>"$AUDIT_LOG"; }
+
 fail() {
   echo "❌ Inventory FAILURE: $1"
   audit "FAIL" "$1"

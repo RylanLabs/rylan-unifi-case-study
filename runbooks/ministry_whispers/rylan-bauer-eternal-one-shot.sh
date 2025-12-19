@@ -9,8 +9,21 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Bauer Doctrine: Trust nothing, verify everything
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Bauer] $*"; }
-audit() { echo "$(date -Iseconds) | Bauer | $1 | $2" >>/var/log/bauer-audit.log; }
+# Preserve environment-driven flags when set
+QUIET="${QUIET:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+
+log() { if [[ "$QUIET" == false ]]; then echo "[Bauer] $*"; fi; }
+
+# Audit path with fallback if /var/log is not writable (CI / local dev)
+AUDIT_LOG="/var/log/bauer-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/bauer-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Bauer | $1 | $2" >>"$AUDIT_LOG"; }
+
 fail() {
   echo "❌ Bauer FAILURE: $1"
   echo "📋 Remediation: $2"
@@ -18,14 +31,10 @@ fail() {
   exit 1
 }
 
-QUIET=false
-DRY_RUN=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
 log "Bauer ministry initializing — Verification & audit"
-
-mkdir -p /var/log
 
 # ─────────────────────────────────────────────────────
 # Phase 1: SSH Verification (Runtime, Idempotent)

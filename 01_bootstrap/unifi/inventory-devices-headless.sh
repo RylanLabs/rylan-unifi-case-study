@@ -9,8 +9,14 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Carter Doctrine: Silent, auditable, file-based
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Headless Inventory] $*"; }
-audit() { echo "$(date -Iseconds) | HeadlessInventory | $1 | $2" >>/var/log/carter-audit.log; }
+log() { if [[ "$QUIET" == false ]]; then echo "[Headless Inventory] $*"; fi; }
+AUDIT_LOG="/var/log/carter-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/carter-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | HeadlessInventory | $1 | $2" >>"$AUDIT_LOG"; }
 fail() {
   echo "❌ Headless inventory FAILURE: $1" >&2
   audit "FAIL" "$1"

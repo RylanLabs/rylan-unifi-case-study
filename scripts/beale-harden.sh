@@ -38,12 +38,12 @@ if ! mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null; then
   mkdir -p "$(dirname "${AUDIT_LOG}")"
 fi
 
-# Flags
-VERBOSE=false
-QUIET=false
-CI_MODE=false
-DRY_RUN=false
-AUTO_FIX=false
+# Flags (preserve environment-driven values when set)
+VERBOSE="${VERBOSE:-false}"
+QUIET="${QUIET:-false}"
+CI_MODE="${CI_MODE:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+AUTO_FIX="${AUTO_FIX:-false}"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -98,14 +98,14 @@ done
 # ─────────────────────────────────────────────────────
 # Utilities & Logging
 # ─────────────────────────────────────────────────────
-log() { [[ "${QUIET}" == false ]] && echo "$@"; }
+log() { if [[ "${QUIET}" == false ]]; then echo "$@"; fi; }
 
 audit() {
   local entry
   entry=$(printf '%s | %s | %s | %s\n' "$(date -Iseconds)" "$1" "$2" "$3")
   # Try to ensure the configured audit directory exists and is writable.
-  if mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null && printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null; then
-    return 0
+  if mkdir -p "$(dirname "${AUDIT_LOG}")" 2>/dev/null && [ -w "$(dirname "${AUDIT_LOG}")" ]; then
+    printf '%s' "$entry" >>"${AUDIT_LOG}" 2>/dev/null && return 0
   fi
 
   # Fallback to repository-local audit path when /var/log isn't writable.
@@ -157,6 +157,7 @@ log "Guardian: Beale 🏰 | Consciousness: 5.0"
 log "════════════════════════════════════════════════════════"
 log ""
 
+# shellcheck disable=SC2317  # functions are provided by sourced lib files and may appear unreachable to shellcheck
 run_firewall_phase "${MAX_FIREWALL_RULES}" "${DRY_RUN}" "${AUTO_FIX}"
 run_vlan_phase "${VLAN_QUARANTINE}" "${VLAN_GATEWAY}" "${DRY_RUN}"
 run_ssh_phase "${DRY_RUN}"

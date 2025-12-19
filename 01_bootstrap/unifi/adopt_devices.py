@@ -20,6 +20,8 @@ import logging
 import os
 import sys
 import time
+from http.cookiejar import MozillaCookieJar
+from pathlib import Path
 from typing import Any, NoReturn, cast
 
 import requests
@@ -69,11 +71,8 @@ def list_devices(url: str, site: str) -> list[dict[str, Any]]:
     if not isinstance(data, list):
         return []
 
-    out: list[dict[str, Any]] = []
-    for item in data:
-        if isinstance(item, dict):
-            out.append(cast(dict[str, Any], item))
-    return out
+    # Convert to the expected shape while filtering non-dict items
+    return [cast("dict[str, Any]", item) for item in data if isinstance(item, dict)]
 
 
 def adopt(url: str, site: str, mac: str) -> None:
@@ -110,9 +109,7 @@ def main() -> None:
     logger.info("Controller: %s (site=%s)", url, args.site)
 
     # Auth precedence: cookie file (session) -> API key -> username/password login
-    if cookie_file and os.path.exists(cookie_file):
-        from http.cookiejar import MozillaCookieJar
-
+    if cookie_file and Path(cookie_file).exists():
         jar = MozillaCookieJar(cookie_file)
         jar.load(ignore_discard=True, ignore_expires=True)
         SESSION.cookies = jar
@@ -135,16 +132,7 @@ def main() -> None:
     pending = [d for d in devices if d.get("state") != DEVICE_STATE_ADOPTED]
     logger.info("Found %d devices; %d pending adoption", len(devices), len(pending))
 
-    for d in devices:
-        status = "ADOPTED" if d.get("state") == DEVICE_STATE_ADOPTED else "PENDING"
-        logger.info(
-            "  %s %s %s %s %s",
-            status.ljust(7),
-            d.get("model", "?").ljust(12),
-            d.get("mac"),
-            d.get("ip", "-"),
-            d.get("name", "(unnamed)"),
-        )
+    print_device_summary(devices)
 
     if args.dry_run:
         logger.info("Dry-run complete; no adoption performed.")
@@ -157,6 +145,20 @@ def main() -> None:
         time.sleep(2)
 
     logger.info("Pass complete. Re-run with --dry-run to verify final state.")
+
+
+def print_device_summary(devices: list[dict[str, Any]]) -> None:
+    """Print a concise listing of discovered devices."""
+    for d in devices:
+        status = "ADOPTED" if d.get("state") == DEVICE_STATE_ADOPTED else "PENDING"
+        logger.info(
+            "  %s %s %s %s %s",
+            status.ljust(7),
+            d.get("model", "?").ljust(12),
+            d.get("mac"),
+            d.get("ip", "-"),
+            d.get("name", "(unnamed)"),
+        )
 
 
 if __name__ == "__main__":

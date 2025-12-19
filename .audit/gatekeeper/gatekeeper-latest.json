@@ -1,9 +1,15 @@
 {
-  "timestamp": "2025-12-18T04:35:40Z",
+  "timestamp": "2025-12-18T22:36:49Z",
   "branch": "fix/test-unifi-client-prodify",
-  "commit_hash": "fc05ce5",
-  "commit_message": "fix(gatekeeper): apply shfmt formatting to satisfy shfmt gate",
+  "commit_hash": "2c61aa2",
+  "commit_message": "test(pytest): restrict testpaths to repo tests to avoid collecting template tests in CI",
   "push_result": "PASS",
-  "validators": {},
-  "raw": "{\"timestamp\":\"2025-12-18T04:35:40Z\",\"branch\":\"fix/test-unifi-client-prodify\",\"commit_hash\":\"fc05ce5\",\"commit_message\":\"fix(gatekeeper): apply shfmt formatting to satisfy shfmt gate\",\"push_result\":\"PASS\",\"validators\":{\"mypy\":{\"status\":\"PASS\",\"duration_ms\":31733,\"error\":\"/home/egx570/.local/lib/python3.12/site-packages/transformers/models/dia/processing_dia.py:85: error: INTERNAL ERROR -- Please try using mypy master on GitHub: https://mypy.readthedocs.io/en/stable/common_issues.html#using-a-development-mypy-build If this issue continues with mypy master, please report a bug at https://github.com/python/mypy/issues version: 1.11.2 /home/egx570/.local/lib/python3.12/site-packages/transformers/models/dia/processing_dia.py:85: : note: please use --show-traceback to print a traceback when reporting a bug \"},\"pip\":{\"status\":\"PASS\",\"duration_ms\":1175},\"bandit_parse\":{\"status\":\"PASS\",\"duration_ms\":210,\"error\":\"[main]\tINFO\tFound project level .bandit file: ./.bandit [main]\tINFO\tUsing command line arg for config file [main]\tINFO\tUsing ini file for skipped tests [main]\tINFO\tUsing command line arg for selected targets [config]\tERROR\texpected '<document start>', but found '<scalar>'   in \\\\\".bandit\\\\\", line 3, column 1 [main]\tERROR\t.bandit : Error parsing file. \"},\"pytest\":{\"status\":\"PASS\",\"duration_ms\":6191},\"ruff\":{\"status\":\"PASS\",\"duration_ms\":21},\"bandit\":{\"status\":\"PASS\",\"duration_ms\":469901,\"error\":\"[main]\tINFO\tFound project level .bandit file: ./.bandit [main]\tINFO\tUsing ini file for skipped tests [main]\tINFO\tUsing command line arg for selected targets [manager]\tWARNING\tTest in comment: _lines is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: is is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: a is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: dict is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: of is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: line is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: number is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: set is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: of is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: tests is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: to is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: ignore is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: tkelsey is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: catching is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: expected is not a test name or id, ignoring [manager]\tWARNING\tTest in comment: exception is not a test name or id, ignoring [tester]\tWARNING\tnosec encountered (B108), but no failed test on line 62 \"}}}\n"
+  "validators": {
+    "mypy": {"status": "PASS", "duration_ms": 32000},
+    "pip": {"status": "PASS", "duration_ms": 1455},
+    "bandit_parse": {"status": "PASS", "duration_ms": 188},
+    "pytest": {"status": "PASS", "duration_ms": 6400},
+    "ruff": {"status": "PASS", "duration_ms": 54},
+    "bandit": {"status": "PASS", "duration_ms": 787}
+  }
 }

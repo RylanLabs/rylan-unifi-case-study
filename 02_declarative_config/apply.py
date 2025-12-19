@@ -24,7 +24,7 @@ from shared.unifi_client import UniFiClient
 DeepDiff: Any | None = None
 try:
     DeepDiff = importlib.import_module("deepdiff").DeepDiff
-except Exception:
+except (ImportError, ModuleNotFoundError):
     DeepDiff = None
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
@@ -192,7 +192,7 @@ def reconcile(  # noqa: C901, PLR0912
         try:
             client.create_network(build_payload(vlan))
             logger.info("Created VLAN %d (%s)", vlan.id, vlan.name)
-        except Exception:  # noqa: PERF203
+        except Exception:
             logger.exception("Failed to create VLAN %d", vlan.id)
             errors.append(vlan.id)
 
@@ -264,7 +264,7 @@ def main() -> None:
         client = UniFiClient.from_env_or_inventory()
         if not client:
             logger.error(
-                "Authentication failed: Missing UniFi credentials " "(env or inventory.yaml)",
+                "Authentication failed: Missing UniFi credentials (env or inventory.yaml)",
             )
             sys.exit(1)
 

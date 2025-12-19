@@ -9,8 +9,19 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Whitaker Doctrine: Think like the attacker — then prove defenses work
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Whitaker] $*"; }
-audit() { echo "$(date -Iseconds) | Whitaker | $1 | $2" >>/var/log/whitaker-audit.log; }
+# Logging & Audit with /var/log fallback
+QUIET="${QUIET:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+
+log() { if [[ "$QUIET" == false ]]; then echo "[Whitaker] $*"; fi; }
+AUDIT_LOG="/var/log/whitaker-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/whitaker-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Whitaker | $1 | $2" >>"$AUDIT_LOG"; }
+
 fail() {
   echo "🚨 SIMULATED BREACH SUCCESS: $1"
   echo "📋 Defense failed — immediate remediation required"
@@ -18,14 +29,10 @@ fail() {
   exit 1
 }
 
-QUIET=false
-DRY_RUN=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
 log "Whitaker offensive simulation — Ethical breach attempt"
-
-mkdir -p /var/log
 
 # Source Carter for potential API targets (if needed)
 if [[ -f runbooks/ministry_secrets/rylan-carter-eternal-one-shot.sh ]]; then

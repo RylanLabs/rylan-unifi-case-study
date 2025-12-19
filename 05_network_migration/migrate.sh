@@ -9,18 +9,26 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────
 # Beale Doctrine: Fail loud, silence on success
 # ─────────────────────────────────────────────────────
-log() { [[ "$QUIET" == false ]] && echo "[Migration] $*"; }
-audit() { echo "$(date -Iseconds) | Migration | $1 | $2" >>/var/log/migration-audit.log; }
+# Flags & Logging (preserve environment vars when set)
+QUIET="${QUIET:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+AUTO_APPROVE="${AUTO_APPROVE:-false}"
+
+log() { if [[ "$QUIET" == false ]]; then echo "[Migration] $*"; fi; }
+AUDIT_LOG="/var/log/migration-audit.log"
+if [[ ! -w "$(dirname "$AUDIT_LOG")" ]]; then
+  AUDIT_LOG="$(pwd)/.fortress/audit/migration-audit.log"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+fi
+
+audit() { echo "$(date -Iseconds) | Migration | $1 | $2" >>"$AUDIT_LOG"; }
+
 fail() {
   echo "❌ MIGRATION FAILURE: $1"
   echo "📋 Remediation: $2"
   audit "FAIL" "$1"
   exit 1
 }
-
-QUIET=false
-DRY_RUN=false
-AUTO_APPROVE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
