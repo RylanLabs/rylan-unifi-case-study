@@ -17,7 +17,6 @@ from urllib3.util import Retry
 
 def get_authenticated_session() -> requests.Session:
     """Create and return a `requests.Session` configured with retries.
-
     Returns:
         requests.Session: Session with mounted HTTP(S) adapters that retry
             transient 5xx errors.
@@ -34,7 +33,6 @@ def get_authenticated_session() -> requests.Session:
 
 def load_credentials() -> dict[str, str]:
     """Load credentials from `shared/inventory.yaml`.
-
     The function uses `pathlib.Path` for file handling and preserves
     YAML-specific exceptions. Non-YAML exceptions raised during parsing are
     converted into `yaml.YAMLError` to keep caller semantics stable.

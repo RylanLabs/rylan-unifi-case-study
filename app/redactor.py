@@ -47,7 +47,6 @@ PATTERNS = {
 
 def redact_pii(text: str, method: str = "auto") -> str:
     """Redact PII from ``text``.
-
     Args:
         text: Input text to redact.
         method: ``presidio`` (requires library), ``regex``, or ``auto``.
@@ -67,7 +66,6 @@ def redact_pii(text: str, method: str = "auto") -> str:
 
 def _redact_presidio(text: str) -> str:
     """Redact using Presidio Analyzer + Anonymizer (preferred method).
-
     Falls back to regex on failure.
     """
 
@@ -99,7 +97,6 @@ def _redact_presidio(text: str) -> str:
 
 def _redact_regex(text: str) -> str:
     """Redact using regex patterns (fallback method)."""
-
     redacted = text
 
     # Apply all patterns using values() for clarity and performance
@@ -111,7 +108,6 @@ def _redact_regex(text: str) -> str:
 
 def redact_file(filepath: str, output_filepath: str | None = None) -> str:
     """Redact PII from a file.
-
     Args:
         filepath: Path to file to redact.
         output_filepath: Optional path to write redacted content.

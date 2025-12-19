@@ -119,8 +119,7 @@ def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
 
 
 def validate_voip_isolation() -> bool:
-    """
-    Verify VoIP VLAN (40) can only reach FreePBX + LDAP.
+    """Verify VoIP VLAN (40) can only reach FreePBX + LDAP.
 
     Returns:
         True if isolation is correct

@@ -27,7 +27,6 @@ AUDIT_LOG = Path("guardian/audit.log")
 
 def audit_log(message: str) -> None:
     """Append an ISO8601 timestamped entry to the audit log and emit info.
-
     The audit log file and its parent directory are created if missing to
     ensure idempotent execution in CI and local runs.
     """
@@ -43,7 +42,6 @@ def audit_log(message: str) -> None:
 
 def validate_policy_table() -> None:
     """Enforce policy table rules count and fail-fast on violations."""
-
     if not POLICY_TABLE.exists():
         audit_log("FAIL: policy-table.yaml missing")
         sys.exit(1)
@@ -65,7 +63,6 @@ def validate_policy_table() -> None:
 
 def validate_json_configs() -> None:
     """Validate all JSON files under the `unifi/` directory."""
-
     json_files = list(Path("unifi").rglob("*.json"))
     for jf in json_files:
         try:
@@ -79,7 +76,6 @@ def validate_json_configs() -> None:
 
 def main() -> None:
     """Run all guardian checks and emit audit entries."""
-
     audit_log("Guardian audit started")
     validate_policy_table()
     validate_json_configs()
