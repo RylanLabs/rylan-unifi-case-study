@@ -49,9 +49,9 @@ run_and_log() {
   shift 2 || true
   local start end dur rc err
   start=$(date +%s%3N)
-  if ! "$@" 2>.audit/gatekeeper/${name}.stderr.log; then
+  if ! "$@" 2>.audit/gatekeeper/"${name}".stderr.log; then
     rc=$?
-    err=$(sed -n '1,200p' .audit/gatekeeper/${name}.stderr.log | sed 's/"/\\"/g' | tr '\n' ' ')
+    err=$(sed -n '1,200p' .audit/gatekeeper/"${name}".stderr.log | sed 's/"/\\"/g' | tr '\n' ' ')
   else
     rc=0
     err=""
