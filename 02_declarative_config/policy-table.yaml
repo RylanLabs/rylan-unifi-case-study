@@ -1,101 +1,104 @@
 metadata:
-  author: Trinity Ministries (Suehring)
-  version: v5.1
+  author: Trinity Ministries (Beale)
+  version: v∞.3.2
   rule_budget: 10
   hardware: USG-3P
-  notes: 'Immutable perimeter: guest isolation, VLAN QoS, DHCP detection'
+  notes: Immutable perimeter — VLAN 99 dropped (Traeger to VLAN 40). Guest isolation preserved.
+  date: 19/12/2025
+  consciousness: 9.9
 rules:
-- id: 1
-  name: guest-to-internet
-  description: Guest/IoT (VLAN 90) to WAN only
-  source:
-    vlan: 90
-  destination:
-    type: wan
-  action: accept
-- id: 2
-  name: guest-to-local-drop
-  description: Block guest/IoT to internal VLANs 10/30/40
-  source:
-    vlan: 90
-  destination:
-    vlans:
-    - 10
-    - 30
-    - 40
-  action: drop
-- name: consolidated-servers-nfs-voip-rtp
-  action: accept
-  destination:
-    ports:
-    - 2049
-    vlan: 10
-  source:
-    vlans:
-    - 1
-    - 10
-    - 30
-    - 40
-  protocols:
-  - tcp
-  - udp
-  id: 11
-- name: consolidated-dns-dhcp-mgmt-rogue-dhcp-detect
-  action: accept
-  destination:
-    ports:
-    - 53
-    - 67
-    - 68
-    vlan: 1
-  source:
-    vlans:
-    - 10
-    - 30
-    - 40
-    - 90
-  protocol: udp
-  id: 12
-- id: 7
-  name: trusted-services
-  description: Trusted (30) to Services (10/40)
-  source:
-    vlan: 30
-  destination:
-    vlans:
-    - 10
-    - 40
-    ports:
-    - 443
-    - 3000
-    - 5000
-  protocol: tcp
-  action: accept
-- id: 10
-  name: default-drop
-  description: Default drop (implicit deny, hardware offload)
-  source:
-    any: true
-  destination:
-    any: true
-  action: drop
-- rule: '1'
-  action: drop
-  src: 10.0.30.0/24
-  dst: 10.0.40.0/24
-  id: 13
-- rule: '2'
-  action: drop
-  src: 10.0.90.0/24
-  dst: any
-  id: 14
-- rule: '3'
-  action: allow
-  src: 10.0.10.0/24
-  dst: any
-  id: 15
-- rule: '4'
-  action: drop
-  src: any
-  dst: 10.0.10.13:80
-  id: 16
+  - id: 1
+    name: guest-to-internet
+    description: Guest/IoT (VLAN 90) to WAN only
+    source:
+      vlan: 90
+    destination:
+      type: wan
+    action: accept
+  - id: 2
+    name: guest-to-local-drop
+    description: Block guest/IoT to internal VLANs 10/30/40
+    source:
+      vlan: 90
+    destination:
+      vlans:
+        - 10
+        - 30
+        - 40
+    action: drop
+  - id: 11
+    name: consolidated-servers-nfs-voip-rtp
+    action: accept
+    source:
+      vlans:
+        - 1
+        - 10
+        - 30
+        - 40
+    destination:
+      vlan: 10
+      ports:
+        - 2049
+    protocols:
+      - tcp
+      - udp
+  - id: 12
+    name: consolidated-dns-dhcp-mgmt-rogue-dhcp-detect
+    action: accept
+    source:
+      vlans:
+        - 10
+        - 30
+        - 40
+        - 90
+    destination:
+      vlan: 1
+      ports:
+        - 53
+        - 67
+        - 68
+    protocol: udp
+  - id: 7
+    name: trusted-services
+    description: Trusted (30) to Services (10/40)
+    source:
+      vlan: 30
+    destination:
+      vlans:
+        - 10
+        - 40
+      ports:
+        - 443
+        - 3000
+        - 5000
+    protocol: tcp
+    action: accept
+  - id: 10
+    name: default-drop
+    description: Default drop (implicit deny, hardware offload)
+    source:
+      any: true
+    destination:
+      any: true
+    action: drop
+  # Legacy firewall rules (post-merge cleanup pending Phase 7)
+  - id: 13
+    rule: '1'
+    action: drop
+    src: 10.0.30.0/24
+    dst: 10.0.40.0/24
+  - id: 14
+    rule: '2'
+    action: drop
+    src: 10.0.90.0/24
+    dst: any
+  - id: 15
+    rule: '3'
+    action: allow
+    src: 10.0.10.0/24
+    dst: any
+  - id: 16
+    rule: '4'
+    action: drop
+    src: any
+    dst: 10.0.10.13:80
