@@ -168,8 +168,8 @@ extend-ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001"]
-"templates/template_tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001"]
+"tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001", "S101"]
+"templates/template_tests/**/*.py" = ["PT009", "PT027", "ANN", "ARG001", "S101"]
 "scripts/**/*.sh" = ["ALL"]
 "*.sh" = ["ALL"]
 
