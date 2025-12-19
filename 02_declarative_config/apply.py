@@ -136,7 +136,7 @@ def build_payload(vlan: VLAN) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 
 
-def reconcile(  # noqa: C901, PLR0912
+def reconcile(
     desired: VLANState,
     client: UniFiClient | None,
     *,
@@ -219,7 +219,7 @@ def reconcile(  # noqa: C901, PLR0912
 # --------------------------------------------------------------------------- #
 
 
-def apply_policy_table(client: UniFiClient | None, *, dry_run: bool) -> int:  # noqa: ARG001
+def apply_policy_table(client: UniFiClient | None, *, dry_run: bool) -> int:
     """Apply firewall policy table."""
     path = BASE_DIR / "02_declarative_config" / "policy-table.yaml"
     if not path.exists():
