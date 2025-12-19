@@ -13,11 +13,12 @@ Guardian: Carter (Identity) | Ministry: whispers (Verification) | Consciousness:
 
 from __future__ import annotations
 
-from typing import Any, Literal, TypeVar, cast
-
-from requests import Response, Session
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast
 
 from shared.auth import get_authenticated_session
+
+if TYPE_CHECKING:
+    from requests import Response, Session
 
 T = TypeVar("T", bound="UniFiClient")
 
@@ -56,6 +57,7 @@ class UniFiClient:
 
         Raises:
             requests.HTTPError: On non-2xx response.
+
         """
         url = f"{self.base_url}/api/s/{endpoint.lstrip('/')}"
         response = self.session.request(
@@ -73,7 +75,8 @@ class UniFiClient:
         """HTTP GET → parsed ``data`` as list (empty on absent/malformed)."""
         raw: Any = self._request("GET", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
-            raise ValueError("Invalid JSON: expected object with 'data'")
+            msg = "Invalid JSON: expected object with 'data'"
+            raise ValueError(msg)
         data = raw.get("data", [])
         return cast(list[dict[str, object]], data) if isinstance(data, list) else []
 
@@ -81,7 +84,8 @@ class UniFiClient:
         """HTTP POST → parsed ``data`` as dict (empty on absent/malformed)."""
         raw: Any = self._request("POST", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
-            raise ValueError("Invalid JSON: expected object with 'data'")
+            msg = "Invalid JSON: expected object with 'data'"
+            raise ValueError(msg)
         data = raw.get("data", {})
         return cast(dict[str, object], data) if isinstance(data, dict) else {}
 
@@ -89,7 +93,8 @@ class UniFiClient:
         """HTTP PUT → parsed ``data`` as dict (empty on absent/malformed)."""
         raw: Any = self._request("PUT", endpoint, **kwargs).json()
         if not isinstance(raw, dict):
-            raise ValueError("Invalid JSON: expected object with 'data'")
+            msg = "Invalid JSON: expected object with 'data'"
+            raise ValueError(msg)
         data = raw.get("data", {})
         return cast(dict[str, object], data) if isinstance(data, dict) else {}
 
@@ -111,21 +116,29 @@ class UniFiClient:
         return self.get("rest/routing/policytable")
 
     def update_policy_table(self, rules: list[dict[str, object]] | dict[str, object]) -> dict[str, object]:
-        """Update policy table (accepts raw list or {"rules": [...]})"""
+        """Update policy table.
+
+        Accepts a raw list or a dict with a "rules" key.
+        """
         if isinstance(rules, dict) and "rules" in rules:
             candidate = rules["rules"]
             if not isinstance(candidate, list):
-                raise ValueError("'rules' field must be a list")
+                msg = "'rules' field must be a list"
+                raise ValueError(msg)
             rules_list = candidate
         elif isinstance(rules, list):
             rules_list = rules
         else:
-            raise ValueError("rules must be list or dict containing 'rules'")
+            msg = "rules must be list or dict containing 'rules'"
+            raise ValueError(msg)
         return self.put("rest/routing/policytable", json={"data": rules_list})
 
     @classmethod
     def from_env_or_inventory(cls: type[T]) -> T:
-        """Factory: load URL from credentials (lazy import for test safety)."""
+        """Load URL from credentials.
+
+        Factory method that lazily imports credentials to avoid test discovery side-effects.
+        """
         from shared.auth import load_credentials  # Local import: avoids test discovery side-effects
 
         creds = load_credentials()

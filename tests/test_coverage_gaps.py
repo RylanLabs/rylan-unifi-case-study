@@ -5,26 +5,27 @@ module lines. They are intentionally simple to unblock Gatekeeper while more
 thorough tests are added in follow-ups.
 """
 
+import app.exceptions as exc
+import app.guardrails as g
+import shared.auth as sa
+import shared.unifi_client as uc
+
 
 def test_import_exceptions() -> None:
-    import app.exceptions as exc
-
+    """Verify exceptions module is importable."""
     assert exc is not None
 
 
 def test_import_guardrails() -> None:
-    import app.guardrails as g
-
+    """Verify guardrails module is importable."""
     assert g is not None
 
 
 def test_import_shared_auth() -> None:
-    import shared.auth as sa
-
+    """Verify shared.auth module is importable."""
     assert sa is not None
 
 
 def test_import_unifi_client() -> None:
-    import shared.unifi_client as uc
-
+    """Verify UniFi client module is importable."""
     assert uc is not None

@@ -43,6 +43,7 @@ def check_sip_registration(extension: str) -> tuple[bool, str]:
 
     Returns:
         Tuple of (is_registered, peer_ip)
+
     """
     try:
         cmd = [
@@ -82,6 +83,7 @@ def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
 
     Returns:
         Tuple of (is_marked_correctly, actual_dscp)
+
     """
     try:
         # Use tcpdump to capture RTP packets and check DSCP
@@ -123,6 +125,7 @@ def validate_voip_isolation() -> bool:
 
     Returns:
         True if isolation is correct
+
     """
     forbidden_targets = [
         ("10.0.10.10", "22", "SSH to DC"),

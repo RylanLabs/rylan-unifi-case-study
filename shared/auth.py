@@ -21,6 +21,7 @@ def get_authenticated_session() -> requests.Session:
     Returns:
         requests.Session: Session with mounted HTTP(S) adapters that retry
             transient 5xx errors.
+
     """
     session = requests.Session()
     retry = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504])
@@ -50,9 +51,9 @@ def load_credentials() -> dict[str, str]:
 
     path = Path("shared") / "inventory.yaml"
 
-    # Open the file directly so tests that patch builtins.open are exercised.
+    # Open via Path.open so tests can patch pathlib.Path.open when needed.
     try:
-        with open(str(path), encoding="utf-8") as f:
+        with path.open(encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
                 return data or {}
@@ -61,7 +62,8 @@ def load_credentials() -> dict[str, str]:
             except (TypeError, AttributeError) as e:
                 # Convert type/attribute errors to YAML errors for consistent handling
                 # (e.g., if yaml.safe_load receives invalid input type such as None or an int)
-                raise yaml.YAMLError(f"Invalid input for YAML parsing: {e}") from e
+                msg = f"Invalid input for YAML parsing: {e}"
+                raise yaml.YAMLError(msg) from e
     except FileNotFoundError:
         # Preserve FileNotFoundError semantics for callers/tests
         raise

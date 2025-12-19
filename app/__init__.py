@@ -1,4 +1,4 @@
-"""Rylan Eternal Fortress Application Package
+"""Rylan Eternal Fortress Application Package.
 
 Core modules for PII redaction, triage engine, and infrastructure validation.
 """

@@ -18,6 +18,13 @@ class FortressError(Exception):
     """
 
     def __init__(self, message: str, *, context: dict[str, object] | None = None) -> None:
+        """Initialize the FortressError with a message and optional context.
+
+        Args:
+            message: Human-readable error message.
+            context: Optional mapping with additional context (e.g., 'guardian').
+
+        """
         super().__init__(message)
         self.context = context or {}
         self.guardian = context.get("guardian", "Unknown") if context else "Unknown"

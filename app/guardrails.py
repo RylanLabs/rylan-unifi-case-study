@@ -30,7 +30,7 @@ logger = logging.getLogger("fortress")
 
 
 def guardrail(*, guardian: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    """Decorator: Wraps all exceptions with guardian context and logging.
+    """Wrap all exceptions with guardian context and logging.
 
     All exceptions are:
     - Caught and wrapped in FortressError

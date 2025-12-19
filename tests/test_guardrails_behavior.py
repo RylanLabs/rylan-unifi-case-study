@@ -11,9 +11,12 @@ from app.exceptions import FortressError
 
 
 def test_guardrail_wraps_foreign_exception() -> None:
+    """Verify guardrail wraps non-FortressError exceptions and preserves context."""
+
     @guardrails.guardrail(guardian="unit-test")
     def broken() -> None:
-        raise ValueError("boom")
+        msg = "boom"
+        raise ValueError(msg)
 
     with pytest.raises(FortressError) as excinfo:
         broken()
@@ -27,9 +30,12 @@ def test_guardrail_wraps_foreign_exception() -> None:
 
 
 def test_guardrail_preserves_fortress_error() -> None:
+    """Verify that an already-wrapped FortressError is re-raised unchanged."""
+
     @guardrails.guardrail(guardian="relay")
     def rethrow() -> None:
-        raise FortressError("already", context={"guardian": "orig"})
+        msg = "already"
+        raise FortressError(msg, context={"guardian": "orig"})
 
     with pytest.raises(FortressError) as excinfo:
         rethrow()

@@ -89,8 +89,8 @@ class TestPresidioFallbackPath(unittest.TestCase):
 class TestRedactFileIntegration(unittest.TestCase):
     """Test file-based redaction (line 117-141)."""
 
-    @patch("builtins.open", create=True)
-    @patch("os.path.exists")
+    @patch("pathlib.Path.open", create=True)
+    @patch("pathlib.Path.exists")
     def test_redact_file_read_and_write(self, mock_exists: Any, mock_open_fn: Any) -> None:
         """Test file reading and writing."""
         mock_exists.return_value = True
@@ -112,7 +112,7 @@ class TestRedactFileIntegration(unittest.TestCase):
             # Result should be redacted text
             self.assertIn("[REDACTED]", result)
 
-    @patch("os.path.exists")
+    @patch("pathlib.Path.exists")
     def test_redact_file_nonexistent(self, mock_exists: Any) -> None:
         """Test handling of nonexistent file."""
         mock_exists.return_value = False

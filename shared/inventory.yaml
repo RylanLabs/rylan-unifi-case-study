@@ -1,6 +1,6 @@
 # Inventory for rylan-unifi-case-study
 unifi_user: "admin"
-unifi_pass: "secret123"
+unifi_pass: "changeme"
 osticket_key: "your-osticket-api-key-here"
 
 # IoT Devices - v∞.1.2-iot-ready (Dec 2025)

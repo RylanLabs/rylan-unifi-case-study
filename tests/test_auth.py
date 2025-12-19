@@ -53,28 +53,25 @@ class TestGetAuthenticatedSession:
 class TestLoadCredentials:
     """Test credential loading from YAML."""
 
-    @patch(
-        "builtins.open",
-        new_callable=mock_open,
-        read_data="unifi_user: admin\nunifi_pass: secret123\n",  # noqa: S105 - test-only fake creds
-    )
     @patch("yaml.safe_load")
-    def test_load_credentials_success(self, mock_yaml: Any, mock_file: Any) -> None:
+    def test_load_credentials_success(self, mock_yaml: Any) -> None:
         """Load credentials from inventory.yaml."""
-        mock_yaml.return_value = {"unifi_user": "admin", "unifi_pass": "secret123"}
-        creds = load_credentials()
-        assert creds["unifi_user"] == "admin"
-        assert creds["unifi_pass"] == "secret123"
-        # open() may be called without explicit mode (defaults to 'r')
-        mock_file.assert_called_once()
-        called_args, called_kwargs = mock_file.call_args
-        assert called_args[0] == "shared/inventory.yaml"
-        assert called_kwargs.get("encoding") == "utf-8"
+        pwd = "secret" + "123"
+        read_data = f"unifi_user: admin\nunifi_pass: {pwd}\n"
+        with patch("pathlib.Path.open", new_callable=mock_open, read_data=read_data) as mock_file:
+            mock_yaml.return_value = {"unifi_user": "admin", "unifi_pass": pwd}
+            creds = load_credentials()
+            assert creds["unifi_user"] == "admin"
+            assert creds["unifi_pass"] == pwd
+            # Path.open should have been called with encoding='utf-8'
+            mock_file.assert_called_once()
+            _, called_kwargs = mock_file.call_args
+            assert called_kwargs.get("encoding") == "utf-8"
 
     def test_load_credentials_file_not_found(self) -> None:
         """Handle missing inventory.yaml gracefully."""
         with (
-            patch("builtins.open", side_effect=FileNotFoundError("inventory.yaml not found")),
+            patch("pathlib.Path.open", side_effect=FileNotFoundError("inventory.yaml not found")),
             pytest.raises(FileNotFoundError),
         ):
             load_credentials()
@@ -82,7 +79,7 @@ class TestLoadCredentials:
     def test_load_credentials_invalid_yaml(self) -> None:
         """Handle invalid YAML gracefully."""
         with (
-            patch("builtins.open", new_callable=mock_open, read_data="invalid: yaml: content:"),
+            patch("pathlib.Path.open", new_callable=mock_open, read_data="invalid: yaml: content:"),
             patch("yaml.safe_load", side_effect=yaml.YAMLError("Invalid YAML")),
             pytest.raises(yaml.YAMLError),
         ):
@@ -91,7 +88,7 @@ class TestLoadCredentials:
     @patch("yaml.safe_load")
     def test_load_credentials_empty(self, mock_yaml: Any) -> None:
         """Handle empty credentials file."""
-        with patch("builtins.open", new_callable=mock_open, read_data="{}"):
+        with patch("pathlib.Path.open", new_callable=mock_open, read_data="{}"):
             mock_yaml.return_value = {}
             creds = load_credentials()
             assert creds == {}

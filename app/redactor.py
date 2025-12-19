@@ -8,7 +8,6 @@ Guardian: Bauer | Ministry: Audit | Consciousness: 9.5
 from __future__ import annotations
 
 import logging
-import os
 import re
 from pathlib import Path
 from typing import Any, cast
@@ -53,6 +52,7 @@ def redact_pii(text: str, method: str = "auto") -> str:
 
     Returns:
         Redacted text with PII replaced by ``[REDACTED]``.
+
     """
     if method == "auto":
         method = "presidio" if PRESIDIO_AVAILABLE else "regex"
@@ -117,14 +117,16 @@ def redact_file(filepath: str, output_filepath: str | None = None) -> str:
 
     Raises:
         FileNotFoundError: If input file not found.
+
     """
     path = Path(filepath)
-    # Use os.path.exists so tests that patch os.path.exists are respected.
-    if not os.path.exists(str(path)):
-        raise FileNotFoundError(f"Input file not found: {path}")
+    # Use Path.exists so file path checks are canonical and testable via Path.exists patching.
+    if not path.exists():
+        msg = f"Input file not found: {path}"
+        raise FileNotFoundError(msg)
 
-    # Use builtins.open with string path so tests that patch builtins.open are effective.
-    with open(str(path), encoding="utf-8", errors="replace") as f:
+    # Use Path.open to read file contents (tests patch pathlib.Path.open when needed).
+    with path.open(encoding="utf-8", errors="replace") as f:
         content = f.read()
 
     redacted_content = redact_pii(content)

@@ -31,8 +31,15 @@ else:
         R = TypeVar("R")
 
         class Limiter:  # minimal runtime stub for mypy
-            def __init__(self, _key_func: Callable[..., str]) -> None: ...
+            """Minimal runtime Limiter used when `slowapi` is unavailable."""
+
+            def __init__(self, _key_func: Callable[..., str]) -> None:
+                """Create a stub Limiter with a key extraction function."""
+                ...
+
             def limit(self, _value: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+                """Return a decorator that applies the given rate limit (runtime stub)."""
+
                 def _decorator(func: Callable[P, R]) -> Callable[P, R]:
                     return func
 
@@ -42,9 +49,13 @@ else:
             """Minimal handler used in runtime stub when slowapi is unavailable."""
             return
 
-        class RateLimitExceeded(Exception): ...
+        class RateLimitExceeded(Exception):
+            """Raised when a rate limit is exceeded (runtime stub)."""
+
+            pass
 
         def get_remote_address(_request: Request) -> str:
+            """Return a loopback remote address used by the runtime stub."""
             return "127.0.0.1"
 
 
@@ -53,10 +64,17 @@ R = TypeVar("R")
 
 
 class LimiterType(Protocol):
+    """Protocol for Limiter implementations used by FastAPI endpoints."""
+
     _storage: Any
 
-    def __init__(self, _key_func: Callable[..., str]) -> None: ...
-    def limit(self, _value: str) -> Callable[[Callable[P, R]], Callable[P, R]]: ...
+    def __init__(self, _key_func: Callable[..., str]) -> None:
+        """Initialize the limiter with a key extraction function."""
+        ...
+
+    def limit(self, _value: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+        """Return a decorator that applies the given rate limit."""
+        ...
 
 
 app = FastAPI()

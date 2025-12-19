@@ -194,7 +194,6 @@ def test_credentials_not_logged(mock_unifi_session: MagicMock, caplog: pytest.Lo
 @pytest.mark.unit
 def test_url_construction_safe(mock_unifi_session: MagicMock) -> None:
     """Validate URL construction does not allow directory traversal outside base URL."""
-
     c = UniFiClient(TEST_CONTROLLER_URL)
     c.get("../../etc/passwd")
 
