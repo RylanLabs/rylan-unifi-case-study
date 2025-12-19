@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Fix MD031 violations by ensuring exactly one blank line before/after fences."""
+"""Fix MD031 violations by ensuring exactly one blank line before/after fences.
 
+This tool is quiet on success (no prints) to follow the "silence is golden" doctrine.
+"""
+
+import logging
 import re
 import sys
 from pathlib import Path
@@ -57,14 +61,16 @@ def fix_fences(content: str) -> str:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.WARNING)
+
     if len(sys.argv) < 2:
-        print("Usage: fix_fences.py <file1.md> [file2.md ...]")
+        logging.error("Usage: fix_fences.py <file1.md> [file2.md ...]")
         sys.exit(1)
 
     for filepath in sys.argv[1:]:
         path = Path(filepath)
         if not path.exists():
-            print(f"Skip {filepath}: not found")
+            logging.warning("Skip %s: not found", filepath)
             continue
 
         content = path.read_text()
@@ -72,9 +78,6 @@ def main() -> None:
 
         if fixed != content:
             path.write_text(fixed)
-            print(f"Fixed {filepath}")
-        else:
-            print(f"No changes for {filepath}")
 
 
 if __name__ == "__main__":
