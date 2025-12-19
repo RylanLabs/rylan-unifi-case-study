@@ -9,6 +9,11 @@ import re
 import sys
 from pathlib import Path
 
+# Constants to avoid magic numbers
+MIN_ARG_COUNT = 2
+MIN_BLANKS = 2
+logger = logging.getLogger(__name__)
+
 
 def fix_fences(content: str) -> str:
     """Add blank lines before/after fenced code blocks, removing excess blanks."""
@@ -29,7 +34,7 @@ def fix_fences(content: str) -> str:
             # Ensure exactly 1 blank before fence (if not at start)
             if result and result[-1].strip() != "":
                 result.append("")
-            elif result and len(result) >= 2 and result[-1] == "" and result[-2] == "":
+            elif result and len(result) >= MIN_BLANKS and result[-1] == "" and result[-2] == "":
                 # Remove extra blank
                 result.pop()
 
@@ -61,16 +66,17 @@ def fix_fences(content: str) -> str:
 
 
 def main() -> None:
+    """CLI entrypoint: run fence fixer on files passed on the command line."""
     logging.basicConfig(level=logging.WARNING)
 
-    if len(sys.argv) < 2:
-        logging.error("Usage: fix_fences.py <file1.md> [file2.md ...]")
+    if len(sys.argv) < MIN_ARG_COUNT:
+        logger.error("Usage: fix_fences.py <file1.md> [file2.md ...]")
         sys.exit(1)
 
     for filepath in sys.argv[1:]:
         path = Path(filepath)
         if not path.exists():
-            logging.warning("Skip %s: not found", filepath)
+            logger.warning("Skip %s: not found", filepath)
             continue
 
         content = path.read_text()

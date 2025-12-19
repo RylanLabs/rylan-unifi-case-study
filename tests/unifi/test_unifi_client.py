@@ -122,7 +122,6 @@ def test_timeout_raised(mock_unifi_session: MagicMock) -> None:
 @pytest.mark.unit
 def test_empty_data_returns_empty_list(mock_unifi_session: MagicMock) -> None:
     """Validate empty `data` returns an empty list instead of None."""
-
     mock_response = MagicMock()
     mock_response.json.return_value = {"data": []}
     mock_unifi_session.request.return_value = mock_response
@@ -136,7 +135,6 @@ def test_empty_data_returns_empty_list(mock_unifi_session: MagicMock) -> None:
 @pytest.mark.unit
 def test_http_error_propagates(mock_unifi_session: MagicMock) -> None:
     """Validate HTTP error (500) is propagated to the caller."""
-
     mock_unifi_session.request.side_effect = requests.HTTPError("500 Server Error")
     c = UniFiClient(TEST_CONTROLLER_URL)
     with pytest.raises(requests.HTTPError):
@@ -146,7 +144,6 @@ def test_http_error_propagates(mock_unifi_session: MagicMock) -> None:
 @pytest.mark.unit
 def test_malformed_json_handled(mock_unifi_session: MagicMock) -> None:
     """Validate non-JSON responses surface decoding errors."""
-
     mock_response = MagicMock()
     mock_response.json.side_effect = ValueError("Invalid JSON")
     mock_unifi_session.request.return_value = mock_response
@@ -159,7 +156,6 @@ def test_malformed_json_handled(mock_unifi_session: MagicMock) -> None:
 @pytest.mark.unit
 def test_default_ssl_verification_enabled() -> None:
     """Validate SSL verification is enabled by default."""
-
     c = UniFiClient(TEST_CONTROLLER_URL)
     assert getattr(c, "verify_ssl", True) is True
 
@@ -167,7 +163,6 @@ def test_default_ssl_verification_enabled() -> None:
 @pytest.mark.unit
 def test_ssl_verification_can_disable() -> None:
     """Validate SSL verification can be disabled for lab environments."""
-
     c = UniFiClient(TEST_CONTROLLER_URL, verify_ssl=False)
     assert getattr(c, "verify_ssl", False) is False
 
@@ -175,7 +170,6 @@ def test_ssl_verification_can_disable() -> None:
 @pytest.mark.unit
 def test_request_logged_debug(mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     """Validate that requests trigger debug-level audit logs (implementation dependent)."""
-
     with caplog.at_level(logging.DEBUG):
         c = UniFiClient(TEST_CONTROLLER_URL)
         c.get("rest/networkconf")
@@ -189,7 +183,6 @@ def test_request_logged_debug(mock_unifi_session: MagicMock, caplog: pytest.LogC
 @pytest.mark.unit
 def test_credentials_not_logged(mock_unifi_session: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     """Ensure sensitive payload fields (password) are not written to logs."""
-
     pwd = "secret" + "123"
     with caplog.at_level(logging.DEBUG):
         c = UniFiClient(TEST_CONTROLLER_URL)

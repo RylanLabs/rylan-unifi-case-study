@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """UniFi Controller API client.
 
 Provides a small, typed wrapper around the UniFi controller HTTP API.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """PII Redactor: Presidio-first, regex fallback (Bauer paranoia).
 
 Redacts sensitive information from logs, configs, and audit trails.
