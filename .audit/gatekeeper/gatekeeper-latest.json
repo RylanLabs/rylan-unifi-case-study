@@ -1,15 +1,8 @@
 {
-  "timestamp": "2025-12-19T20:10:42Z",
+  "timestamp": "2025-12-19T00:00:00Z",
   "branch": "fix/test-unifi-client-prodify",
-  "commit_hash": "8c4d552",
-  "commit_message": "style: D202 docstring blank lines; LOG015 & PLR2004 fixes in fix_fences; remove shebangs from library modules",
+  "commit_hash": "b138a54",
+  "commit_message": "[repair] normalized gatekeeper-latest.json",
   "push_result": "PASS",
-  "validators": {
-    "mypy": { "status": "PASS", "duration_ms": 40441 },
-    "pip": { "status": "PASS", "duration_ms": 1224 },
-    "bandit_parse": { "status": "PASS", "duration_ms": 181 },
-    "pytest": { "status": "PASS", "duration_ms": 6342 },
-    "ruff": { "status": "PASS", "duration_ms": 21 },
-    "bandit": { "status": "PASS", "duration_ms": 442 }
-  }
+  "validators": {}
 }
