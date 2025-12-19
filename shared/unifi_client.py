@@ -128,7 +128,6 @@ class UniFiClient:
         Returns a configured `UniFiClient` instance. Keeps import local to avoid
         import-time side effects during test discovery.
         """
-
         from shared.auth import load_credentials
 
         creds = load_credentials()
