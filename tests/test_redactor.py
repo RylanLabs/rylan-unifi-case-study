@@ -8,6 +8,9 @@ import pytest
 
 from app.redactor import redact_pii
 
+# Expected number of redaction occurrences for combined IP+MAC in a single string
+EXPECTED_REDACTIONS = 2
+
 
 class TestRedactorPatterns:
     """Test regex pattern matching for common PII."""
@@ -122,7 +125,7 @@ class TestRedactorEdgeCases:
         text = "Admin at 192.168.1.1 (MAC: 00:11:22:33:44:55) email: admin@local"
         result = redact_pii(text, method="regex")
         # Count redacted instances (IP + MAC are redacted)
-        assert result.count("[REDACTED]") >= 2
+        assert result.count("[REDACTED]") >= EXPECTED_REDACTIONS
 
     def test_redact_preserves_non_pii_content(self) -> None:
         """Non-PII content survives redaction."""

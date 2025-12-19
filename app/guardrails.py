@@ -11,7 +11,6 @@
 
 import functools
 import logging
-import traceback
 from collections.abc import Callable
 from typing import ParamSpec, TypeVar
 
@@ -45,11 +44,10 @@ def guardrail(*, guardian: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
                 return func(*args, **kwargs)
             except FortressError:
                 # Already wrapped — just log
-                logger.error(
-                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s | %s",
+                logger.exception(
+                    "FORTRESS EXCEPTION | Guardian=%s | Function=%s",
                     guardian,
                     func.__name__,
-                    traceback.format_exc(),
                 )
                 raise
             except Exception as e:
@@ -61,13 +59,12 @@ def guardrail(*, guardian: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
                 }
 
                 # Compose a shorter message to satisfy line-length checks
-                err_msg = "FORTRESS EXCEPTION | Guardian=%s | Function=%s | " "Error=%s | Trace=%s"
-                logger.error(
+                err_msg = "FORTRESS EXCEPTION | Guardian=%s | Function=%s | Error=%s"
+                logger.exception(
                     err_msg,
                     guardian,
                     func.__name__,
                     str(e),
-                    traceback.format_exc(),
                 )
 
                 raise FortressError(
