@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""
+"""VoIP SIP Registration + QoS DSCP Validation tests.
+
 Leo's Sacred Glue — Conscious Level 2.6
 03_validation_ops/phone_reg_test.py
 VoIP SIP Registration + QoS DSCP Validation (Bauer → Whitaker offensive trinity)
@@ -35,8 +36,7 @@ def log(msg: str) -> None:
 
 
 def check_sip_registration(extension: str) -> tuple[bool, str]:
-    """
-    Check if SIP extension is registered via asterisk CLI.
+    """Check if SIP extension is registered via asterisk CLI.
 
     Args:
         extension: Extension number to check (e.g., "101")
@@ -55,7 +55,9 @@ def check_sip_registration(extension: str) -> tuple[bool, str]:
             f"asterisk -rx 'sip show peers' | grep -E '^{extension}\\s'",
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)  # noqa: S603  # safe: controlled SSH command sent to lab controller
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=10, check=False
+        )  # safe: controlled SSH command sent to lab controller
 
         if result.returncode == 0 and result.stdout.strip():
             # Parse output: "101/101  10.0.40.15  D  A  5060  OK (1 ms)"
@@ -73,8 +75,7 @@ def check_sip_registration(extension: str) -> tuple[bool, str]:
 
 
 def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
-    """
-    Verify DSCP EF (46) marking on RTP packets from peer.
+    """Verify DSCP EF (46) marking on RTP packets from peer.
 
     Args:
         peer_ip: IP address of registered SIP peer
@@ -97,7 +98,9 @@ def check_dscp_marking(peer_ip: str) -> tuple[bool, str]:
             tcpdump_cmd,
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)  # noqa: S603,S607  # safe: remote tcpdump pipeline on lab controller
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=10, check=False
+        )  # safe: remote tcpdump pipeline on lab controller
 
         if result.returncode == 0 and result.stdout.strip():
             # Parse: "tos 0xb8" (EF = 0xb8 = DSCP 46 << 2)
@@ -133,12 +136,13 @@ def validate_voip_isolation() -> bool:
     for target_ip, port, description in forbidden_targets:
         try:
             # Simulate from VLAN 40 (would need docker network in production)
-            result = subprocess.run(  # noqa: S603,S607  # safe: local network probe in controlled validation
-                ["timeout", "2", "nc", "-zv", target_ip, port],  # noqa: S607  # safe: uses system 'nc' on controlled lab host
+            # safe: local network probe in controlled validation
+            result = subprocess.run(
+                ["timeout", "2", "nc", "-zv", target_ip, port],  # safe: uses system "nc" on controlled lab host
                 capture_output=True,
                 text=True,
                 check=False,
-            )  # noqa: S603,S607  # safe: local network probe in controlled validation
+            )  # safe: local network probe in controlled validation
 
             if result.returncode == 0:
                 log(f"  ✗ FAIL: VoIP can reach {description} ({target_ip}:{port}) - ISOLATION BREACH")
