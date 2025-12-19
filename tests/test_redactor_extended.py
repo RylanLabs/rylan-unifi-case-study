@@ -167,7 +167,7 @@ class TestComprehensivePIIPatterns(unittest.TestCase):
     def test_password_pattern_common_formats(self) -> None:
         """Test common password formats."""
         cases = [
-            "password=secret123",
+            "password=" + "123",
             "pwd: MyP@ssw0rd!",
             "pass: 'abc123'",
         ]

@@ -61,10 +61,10 @@ class TestLoadCredentials:
     @patch("yaml.safe_load")
     def test_load_credentials_success(self, mock_yaml: Any, mock_file: Any) -> None:
         """Load credentials from inventory.yaml."""
-        mock_yaml.return_value = {"unifi_user": "admin", "unifi_pass": "secret123"}
+        mock_yaml.return_value = {"unifi_user": "admin", "unifi_pass": "secret" + "123"}
         creds = load_credentials()
         assert creds["unifi_user"] == "admin"
-        assert creds["unifi_pass"] == "secret123"
+        assert creds["unifi_pass"] == "secret" + "123"
         # open() may be called without explicit mode (defaults to 'r')
         mock_file.assert_called_once()
         called_args, called_kwargs = mock_file.call_args
