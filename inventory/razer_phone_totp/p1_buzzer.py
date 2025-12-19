@@ -35,7 +35,7 @@ def main() -> None:
                 # Safe invocation: prefer explicit binary paths validated at startup
                 if TERMUX_VIBRATE:
                     try:
-                        subprocess.run([TERMUX_VIBRATE, "-d", "1500"], check=True)
+                        subprocess.run([TERMUX_VIBRATE, "-d", "1500"], check=True)  # noqa: S603  # explicit path validated at startup
                     except subprocess.CalledProcessError:
                         logger.exception("termux-vibrate failed")
                 else:
@@ -43,7 +43,7 @@ def main() -> None:
 
                 if TERMUX_NOTIFY:
                     try:
-                        subprocess.run(
+                        subprocess.run(  # noqa: S603  # explicit path validated at startup
                             [
                                 TERMUX_NOTIFY,
                                 "--title",
