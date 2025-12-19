@@ -1,4 +1,4 @@
-"""Tests for shared/unifi_client.py – UniFi Controller API client.
+"""Tests for shared/unifi_client.py - UniFi Controller API client.
 
 Validates HTTP request formatting, endpoint handling, and response parsing.
 """

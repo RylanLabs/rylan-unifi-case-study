@@ -1,4 +1,4 @@
-"""Tests for app/redactor.py – PII redaction (Bauer paranoia).
+"""Tests for app/redactor.py - PII redaction (Bauer paranoia).
 
 Validates Presidio integration and regex fallback for sensitive data:
 - IP addresses, MAC addresses, email, phone, serial, UUID, API key, password

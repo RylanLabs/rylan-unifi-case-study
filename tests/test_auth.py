@@ -1,4 +1,4 @@
-"""Tests for shared/auth.py – Session and credential management.
+"""Tests for shared/auth.py - Session and credential management.
 
 Validates HTTP session setup and credential loading.
 """
@@ -56,7 +56,7 @@ class TestLoadCredentials:
     @patch(
         "builtins.open",
         new_callable=mock_open,
-        read_data="unifi_user: admin\nunifi_pass: secret123\n",
+        read_data="unifi_user: admin\nunifi_pass: secret123\n",  # noqa: S105 - test-only fake creds
     )
     @patch("yaml.safe_load")
     def test_load_credentials_success(self, mock_yaml: Any, mock_file: Any) -> None:

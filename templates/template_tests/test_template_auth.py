@@ -1,4 +1,4 @@
-"""Tests for shared/auth.py – Session and credential management.
+"""Tests for shared/auth.py - Session and credential management.
 
 Validates HTTP session setup and credential loading.
 """
