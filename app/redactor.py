@@ -47,6 +47,7 @@ PATTERNS = {
 
 def redact_pii(text: str, method: str = "auto") -> str:
     """Redact PII from ``text``.
+
     Args:
         text: Input text to redact.
         method: ``presidio`` (requires library), ``regex``, or ``auto``.
@@ -54,7 +55,6 @@ def redact_pii(text: str, method: str = "auto") -> str:
     Returns:
         Redacted text with PII replaced by ``[REDACTED]``.
     """
-
     if method == "auto":
         method = "presidio" if PRESIDIO_AVAILABLE else "regex"
 
@@ -66,6 +66,7 @@ def redact_pii(text: str, method: str = "auto") -> str:
 
 def _redact_presidio(text: str) -> str:
     """Redact using Presidio Analyzer + Anonymizer (preferred method).
+
     Falls back to regex on failure.
     """
 
@@ -108,6 +109,7 @@ def _redact_regex(text: str) -> str:
 
 def redact_file(filepath: str, output_filepath: str | None = None) -> str:
     """Redact PII from a file.
+
     Args:
         filepath: Path to file to redact.
         output_filepath: Optional path to write redacted content.
@@ -118,7 +120,6 @@ def redact_file(filepath: str, output_filepath: str | None = None) -> str:
     Raises:
         FileNotFoundError: If input file not found.
     """
-
     path = Path(filepath)
     # Use os.path.exists so tests that patch os.path.exists are respected.
     if not os.path.exists(str(path)):
@@ -141,7 +142,6 @@ def redact_file(filepath: str, output_filepath: str | None = None) -> str:
 
 def is_pii_present(text: str) -> bool:
     """Return True if ``text`` contains potential PII."""
-
     return any(re.search(pattern, text, flags=re.IGNORECASE) for pattern in PATTERNS.values())
 
 

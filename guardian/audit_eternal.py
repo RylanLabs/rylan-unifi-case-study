@@ -27,10 +27,10 @@ AUDIT_LOG = Path("guardian/audit.log")
 
 def audit_log(message: str) -> None:
     """Append an ISO8601 timestamped entry to the audit log and emit info.
+
     The audit log file and its parent directory are created if missing to
     ensure idempotent execution in CI and local runs.
     """
-
     AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(UTC).isoformat()
     entry = f"[{timestamp}] {message}\n"

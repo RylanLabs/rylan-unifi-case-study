@@ -17,11 +17,11 @@ from urllib3.util import Retry
 
 def get_authenticated_session() -> requests.Session:
     """Create and return a `requests.Session` configured with retries.
+
     Returns:
         requests.Session: Session with mounted HTTP(S) adapters that retry
             transient 5xx errors.
     """
-
     session = requests.Session()
     retry = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504])
     adapter = HTTPAdapter(max_retries=retry)
@@ -33,6 +33,7 @@ def get_authenticated_session() -> requests.Session:
 
 def load_credentials() -> dict[str, str]:
     """Load credentials from `shared/inventory.yaml`.
+
     The function uses `pathlib.Path` for file handling and preserves
     YAML-specific exceptions. Non-YAML exceptions raised during parsing are
     converted into `yaml.YAMLError` to keep caller semantics stable.
@@ -45,7 +46,6 @@ def load_credentials() -> dict[str, str]:
         yaml.YAMLError: If YAML parsing fails.
 
     """
-
     import yaml
 
     path = Path("shared") / "inventory.yaml"
